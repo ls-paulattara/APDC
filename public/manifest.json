@@ -1,0 +1,32 @@
+{
+  "short_name": "React/Firebase/Semantic UI",
+  "name": "Miles BD - React/Firebase/Semantic UI Template Site",
+  "theme_color": "#ABC8D3",
+  "background_color": "#2c1424",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": ".",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "Logo_500-512_x_512.webp",
+      "type": "image/webp",
+      "sizes": "192x192"
+    },
+    {
+      "src": "Logo_500-512_x_512.webp",
+      "type": "image/webp",
+      "sizes": "512x512"
+    },
+    {
+      "src": "Logo_500-512_x_512.webp",
+      "type": "image/webp",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }  
+  ]
+}

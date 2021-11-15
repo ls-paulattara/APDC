@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "users": {
+      ".write": "auth.token.email.contains('@lightspeedhq.com')",
+      ".read": "auth.token.email.contains('@lightspeedhq.com')",
+      "$uid": {
+        ".write": "$uid === auth.uid || auth.token.email.contains('@lightspeedhq.com')",
+        ".read": "$uid === auth.uid || auth.token.email.contains('@lightspeedhq.com')"
+      }
+    }
+  }
+}
