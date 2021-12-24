@@ -28,7 +28,7 @@ const SignInPage = (props) => {
       <Segment basic inverted={props.dark} fluid="true">
         <Grid
           textAlign="center"
-          style={{ height: "100vh" }}
+          style={{ height: "-100vh" }}
           verticalAlign="middle"
         >
           <Grid.Column style={{ maxWidth: 450 }}>

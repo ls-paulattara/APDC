@@ -16,7 +16,7 @@ import {
   Sidebar,
   Visibility,
 } from "semantic-ui-react";
-import Logo from "../../media/Logo_500.webp";
+import Logo from "../../media/logo.png";
 import TRANSLATIONS from "../../constants/translation";
 
 const DarkButton = (props) => {
@@ -26,7 +26,7 @@ const DarkButton = (props) => {
     <Button
       basic
       circular
-      icon={dark ? "sun outline" : "moon outline"}
+      icon={dark ? "moon" : "moon outline"}
       onClick={toggleDark}
       inverted={!fixed}
       aria-label={GLOBAL.ariaDark}
@@ -53,7 +53,7 @@ const HomepageHeading = () => {
   return (
     <Image
       src={Logo}
-      size="small"
+      size="massive"
       centered
       alt={NAVIGATION.imageAlt}
       width="150"
@@ -118,6 +118,16 @@ const DesktopContainer = (props) => {
                       content={NAVIGATION.home}
                       style={{ marginLeft: "1em" }}
                     />
+                  {!!authUser && (
+                    <Menu.Item
+                      as={NavLink}
+                      to={ROUTES.REPORTS}
+                      name={NAVIGATION.reports}
+                      exact
+                      content={NAVIGATION.reports}
+                      style={{ marginLeft: "1em" }}
+                    />
+                  )}
                     {!!authUser && (
                       <Menu.Item
                         as={NavLink}
@@ -229,6 +239,16 @@ const MobileContainer = (props) => {
                   content={NAVIGATION.home}
                   onClick={handleSidebarHide}
                 />
+                {!!authUser && (
+                <Menu.Item
+                  as={NavLink}
+                  to={ROUTES.REPORTS}
+                  name={NAVIGATION.reports}
+                  exact
+                  icon="chart line"
+                  content={NAVIGATION.reports}
+                  onClick={handleSidebarHide}
+                />)}
                 {!!authUser && (
                 <Menu.Item
                   as={NavLink}

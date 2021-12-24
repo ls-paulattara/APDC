@@ -4,13 +4,15 @@ import {
   Segment,
   Grid,
   Container,
-  Icon,
+  Icon
 } from "semantic-ui-react";
 import TRANSLATIONS from "../../constants/translation";
 
 const Home = (props) => {
+ 
   const { dark, language } = props;
   const { HOME } = TRANSLATIONS[`${language}`];
+  
   return (
     <Segment
       basic
@@ -18,6 +20,8 @@ const Home = (props) => {
       inverted={dark}
       style={{ marginTop: 0, marginBottom: 0 }}
     >
+    
+
       <Container fluid>
         <Segment
           basic
@@ -44,5 +48,5 @@ const Home = (props) => {
   );
 };
 
-
 export default React.memo(Home);
+// export default withAuthorization(condition)(withFirebase(Home))

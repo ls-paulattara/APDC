@@ -16,6 +16,8 @@ const AdminPage = lazy(() => import("../Admin"));
 const Unauthorized = lazy(() => import("../Unauthorized"));
 const NoMatch = lazy(() => import("../NoMatch"));
 const Home = lazy(()=> import("../Home"));
+const GenerateReport = lazy(()=> import("../Reports/GenerateReport"));
+const Reports = lazy(()=> import("../Reports"));
 const AccountPage = lazy(() => import("../Account"));
 const SignUpPage = lazy(() => import("../SignUp"));
 const Footer = lazy(()=>import("../Footer"));
@@ -58,6 +60,8 @@ class Routes extends Component {
 
   render() {
     const { dark, language } = this.state;
+    const { firebase } = this.props;
+
     return (
       <Suspense fallback={renderLoader()}>
         <Router>
@@ -71,6 +75,20 @@ class Routes extends Component {
             <Switch>
               <Route exact path={ROUTES.HOME}>
                 <Home
+                  dark={dark}
+                  toggleDark={this.toggleDark}
+                  language={language}
+                />
+              </Route>
+              <Route exact path={ROUTES.REPORTS}>
+                <Reports
+                  dark={dark}
+                  toggleDark={this.toggleDark}
+                  language={language}
+                />
+              </Route>
+              <Route exact path={ROUTES.GENERATE_REPORT}>
+                <GenerateReport
                   dark={dark}
                   toggleDark={this.toggleDark}
                   language={language}

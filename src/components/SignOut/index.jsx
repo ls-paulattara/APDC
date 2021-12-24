@@ -9,7 +9,7 @@ const SignOutMenuItemBase = (props) => {
   return (
   <Menu.Item
     name={NAVIGATION.signOut}
-    exact
+    // exact
     icon="sign-out"
     content={NAVIGATION.signOut}
     onClick={firebase.doSignOut}

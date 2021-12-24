@@ -1,35 +1,23 @@
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-import app from "firebase/app";
-import "firebase/auth";
-import "firebase/database";
-import "firebase/analytics";
-import "firebase/performance";
-
-// require('dotenv').config();
-
+import app from "firebase/compat/app";
+import "firebase/compat/auth";
+import "firebase/compat/storage";
+import "firebase/compat/database";
+import "firebase/compat/analytics";
+import "firebase/compat/performance";
+import "firebase/compat/firestore";
+import moment from 'moment';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyArRHFXmzZQ0XEaqYozeotIH286G0QCAxU",
-  authDomain: "react-firebase-site-template.firebaseapp.com",
-  databaseURL: "https://react-firebase-site-template-default-rtdb.firebaseio.com",
-  projectId: "react-firebase-site-template",
-  storageBucket: "react-firebase-site-template.appspot.com",
-  messagingSenderId: "62247076443",
-  appId: "1:62247076443:web:9ded6d00800f7a68adf57e",
-  measurementId: "G-5876511K6S"
+  apiKey: "AIzaSyDBjcCwGxtYKqX6Q0-Uffd5kk5MM8Jzq8s",
+  authDomain: "ls-strategic-apis.firebaseapp.com",
+  databaseURL: "https://ls-strategic-apis.firebaseio.com",
+  // databaseURL: 'http://localhost:9000/?ns=ls-strategic-apis',
+  projectId: "ls-strategic-apis",
+  storageBucket: "ls-strategic-apis.appspot.com",
+  messagingSenderId: "929241011807",
+  appId: "1:929241011807:web:d654a13721d7632d0b2dea"
 };
-// const firebaseConfig = {
-//   apiKey: process.env.REACT_APP_API_KEY,
-//   authDomain: process.env.REACT_APP_AUTH_DOMAIN,
-//   databaseURL: process.env.REACT_APP_DATABASE_URL,
-//   projectId: process.env.REACT_APP_PROJECT_ID,
-//   storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
-//   messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
-//   appId: process.env.REACT_APP_APP_ID,
-//   measurementId: process.env.REACT_APP_MEASUREMENT_ID
-// };
-
 class Firebase {
   constructor() {
     app.initializeApp(firebaseConfig);
@@ -37,6 +25,8 @@ class Firebase {
     this.emailAuthProvider = app.auth.EmailAuthProvider;
     this.auth = app.auth();
     this.db = app.database();
+    this.firestore = app.firestore();
+    this.storage = app.storage();
     this.googleProvider = new app.auth.GoogleAuthProvider();
     this.analytics = app.analytics();
     this.performance = app.performance();
@@ -86,7 +76,7 @@ class Firebase {
         
         const userRef = this.user(authUser.uid);
         await timeout(1000);
-        console.log('i waited')
+        // console.log('i waited')
         const userGet = await userRef.get();
         const dbUser = await userGet.val();
         if (dbUser === null) {
@@ -116,6 +106,101 @@ class Firebase {
   // *** User API - all Users ***
   users = () => this.db.ref("users");
 
+  // ORDERS
+  orders = () => this.db.ref("orders");
+
+  storageRef = () => this.storage.ref();
+
+  // *** Storage API - Reference File ***
+  fileRef = (path) => this.storage.ref(path);
+
+  saveReportToFirebase = (file) => {
+    var metadata = {
+      'contentType': file.type
+    };
+    this.storage.ref().child('reports/' + file.name).put(file, metadata).then(function(snapshot) {
+    console.log('Uploaded', snapshot.totalBytes, 'bytes.');
+    console.log('File metadata:', snapshot.metadata);
+    snapshot.ref.getDownloadURL().then(function(url) {
+      console.log('File available at', url);
+      // document.getElementById('linkbox').innerHTML = '<a href="' +  url + '">Click For File</a>';
+    });
+  }).catch(function(error) {
+    console.error('Upload failed:', error);
+  });
+}
+
+
+  getAllUsers = () => {
+    return this.db.ref("users").once("value", (snapshot) => {
+      const usersObject = snapshot.val();
+      const usersList = Object.keys(usersObject).map((key) => ({
+        ...usersObject[key],
+        uid: key,
+      }));
+      console.log(usersList)
+    });
+  }
+
+  getAllOrders = () => {
+    return this.db.ref("orders").once("value", (snapshot) => {
+      const usersObject = snapshot.val();
+      const usersList = Object.keys(usersObject).map((key) => ({
+        ...usersObject[key],
+        uid: key,
+      }));
+      console.log(usersList)
+    });
+  }
+  getAllFirebaseOrdersByDateAndStatus = async (start, end, status, orderType, location) => {
+
+    var myTimestamp = app.firestore.Timestamp.fromDate(new Date());
+    console.log(myTimestamp)
+
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate()
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate()
+    var jsonvalue = []
+
+    return this.firestore.collection('orders')
+      .where('status', '==', status) 
+      .where('type', '==', orderType)
+      .where('locationName', '==', location)
+      .where('startTime', '>=', start2)
+      .where('startTime', '<=', end2)
+      .get()  
+      .then(snapshot => {              
+        snapshot.forEach(docs => {
+          jsonvalue.push(docs.data())
+        })
+        console.log(jsonvalue);
+        return jsonvalue;
+      }).catch(error => {
+        console.log(error)
+      })
+  }
+  getAllFirebaseOrdersByDate = async (start, end) => {
+
+    var myTimestamp = app.firestore.Timestamp.fromDate(new Date());
+    console.log(myTimestamp)
+
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate()
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate()
+    var jsonvalue = []
+
+    return this.firestore.collection('orders')
+      .where('startTime', '>=', start2)
+      .where('startTime', '<=', end2)
+      .get()  
+      .then(snapshot => {              
+        snapshot.forEach(docs => {
+          jsonvalue.push(docs.data())
+        })
+        // console.log(jsonvalue);
+        return jsonvalue;
+      }).catch(error => {
+        console.log(error)
+      })
+  }
 }
 
 export default Firebase;
