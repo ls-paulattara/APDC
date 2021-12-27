@@ -130,7 +130,6 @@ class Firebase {
   });
 }
 
-
   getAllUsers = () => {
     return this.db.ref("users").once("value", (snapshot) => {
       const usersObject = snapshot.val();
@@ -152,19 +151,27 @@ class Firebase {
       console.log(usersList)
     });
   }
+
   getAllFirebaseOrdersByDateAndStatus = async (start, end, status, orderType, location) => {
 
     var myTimestamp = app.firestore.Timestamp.fromDate(new Date());
-    console.log(myTimestamp)
 
     let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate()
     let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate()
     var jsonvalue = []
+    
+    let query = this.firestore.collection('orders');
+    if(orderType != 'all'){
+      query = query.where('type', '==', orderType)
+    }
+    if(status != 'any'){
+      query = query.where('status', '==', status);
+    }
+    if(location != 'any'){
+      query = query.where('locationName', '==', location);
+    }
 
-    return this.firestore.collection('orders')
-      .where('status', '==', status) 
-      .where('type', '==', orderType)
-      .where('locationName', '==', location)
+    return query = query
       .where('startTime', '>=', start2)
       .where('startTime', '<=', end2)
       .get()  
@@ -178,6 +185,33 @@ class Firebase {
         console.log(error)
       })
   }
+
+  getAllFirebaseOrdersByDateAndCategoryAndStatus = async (start, end, status, category) => {
+
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate()
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate()
+    var jsonvalue = []
+    
+    let query = this.firestore.collection('orders');
+    if(status != 'any'){
+      query = query.where('status', '==', status);
+    }
+
+    return query = query
+      .where('startTime', '>=', start2)
+      .where('startTime', '<=', end2)
+      .get()  
+      .then(snapshot => {              
+        snapshot.forEach(docs => {
+          jsonvalue.push(docs.data())
+        })
+        // console.log(jsonvalue);
+        return jsonvalue;
+      }).catch(error => {
+        console.log(error)
+      })
+  }
+
   getAllFirebaseOrdersByDate = async (start, end) => {
 
     var myTimestamp = app.firestore.Timestamp.fromDate(new Date());

@@ -8,27 +8,36 @@ import {
   Grid,
   Divider,
   Button,
-  Input
+  Input,
+  Dropdown
 } from "semantic-ui-react";
+
+const { getReport7File } = require('../../Util/CreateReportFile');
 
 function Report7(props) {
     const { dark, language } = props;
-    const { HOME } = TRANSLATIONS[`${language}`];
+    const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
 
     const [report7Values, setreport7Values] = useState({
         orderStatus: "",
         category: "",
-        startDate: null,
-        endDate: null
+        startDate: "null",
+        endDate: "null"
     })
     function onChange(event, data) {  
         const { name, value } = data;
         setreport7Values(prevState => ({ ...prevState, [name]: (value) }));
       }
 
-    const onSubmit = () => {
-        console.log(report7Values)
-        // generateReport(1, report7Values)
+    const onSubmit = async () => {
+      console.log(report7Values);
+
+      const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatus(report7Values.startDate, report7Values.endDate, report7Values.orderStatus, "all")
+      console.log(orderData)
+      if(orderData.length){
+        const file = await getReport7File(orderData, '2');
+        // props.firebase.saveReportToFirebase(file);
+      }
     }
 
     useEffect(() => {
@@ -40,19 +49,23 @@ function Report7(props) {
 
     useEffect(() => {
         localStorage.setItem('report7Values', JSON.stringify(report7Values));
+        console.log(report7Values);
       }, [report7Values]);
     
   return (
     <>
-        <Header as="h2">Report 7</Header>
+        <Header as="h2">{HOME.report7}</Header>
         <Divider/>
         <Header as="h3">Order Status</Header>
-        <Input
-          name="orderStatus"
-          value={report7Values.orderStatus}
-          size="large"
+        <Dropdown          
           placeholder='Order Status'
-          icon="clipboard outline"
+          name="orderStatus"
+          label="Order Status"
+          selection
+          size="large"
+          options={REPORTS.orderStatus}
+          // icon="clipboard outline"
+          value={report7Values.orderStatus}
           onChange={onChange}
         />
         <Header as="h3">Category</Header>
@@ -91,10 +104,14 @@ function Report7(props) {
               <Grid.Column width={8}>
                 <Button 
                   positive
-                  disabled={!report7Values.category
-                  || !report7Values.orderStatus 
-                  || report7Values.startDate==null 
-                  || report7Values.endDate==null } 
+                  disabled={
+                    !report7Values.category
+                    || !report7Values.orderStatus 
+                    || report7Values.startDate=="null" 
+                    || report7Values.endDate=="null" 
+                    || report7Values.startDate==null 
+                    || report7Values.endDate==null 
+                  } 
                   onClick={() => onSubmit()}
                   >Submit
                 </Button>

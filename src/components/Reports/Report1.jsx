@@ -132,10 +132,14 @@ function Report1(props) {
             <Grid.Column width={8}>
               <Button 
                 positive
-                disabled={!report1Values.deliveryZone 
-                || !report1Values.orderStatus 
-                || report1Values.startDate==null 
-                || report1Values.endDate==null } 
+                disabled={
+                  !report1Values.deliveryZone 
+                  || !report1Values.orderStatus 
+                  || report1Values.startDate=="null"
+                  || report1Values.endDate=="null" 
+                  || report1Values.startDate==null 
+                  || report1Values.endDate==null 
+                } 
                 onClick={() => onSubmit()}
                 >Generate
               </Button>

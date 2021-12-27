@@ -12,7 +12,7 @@ import {
   Dropdown
 } from "semantic-ui-react";
 
-const {getReport1or2File} = require('../../Util/CreateReportFile');
+const { getReport1or2File } = require('../../Util/CreateReportFile');
 
 
 function Report2(props) {
@@ -59,7 +59,7 @@ function Report2(props) {
         <Header as="h2">{HOME.report2}</Header>
         <Divider/>
         <Header as="h3">Order Status</Header>
-        <Dropdown          
+        <Dropdown       
           placeholder='Order Status'
           name="orderStatus"
           label="Order Status"
@@ -109,10 +109,14 @@ function Report2(props) {
               <Grid.Column width={8}>
                 <Button 
                   positive
-                  disabled={!report2Values.pickupPoint 
-                  || !report2Values.orderStatus 
-                  || report2Values.startDate==null 
-                  || report2Values.endDate==null } 
+                  disabled={
+                    !report2Values.pickupPoint 
+                    || !report2Values.orderStatus 
+                    || report2Values.startDate=="null"
+                    || report2Values.endDate=="null" 
+                    || report2Values.startDate==null 
+                    || report2Values.endDate==null 
+                  } 
                   onClick={() => onSubmit()}
                   >Submit
                 </Button>

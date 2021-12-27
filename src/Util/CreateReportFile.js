@@ -339,3 +339,7 @@ exports.getReport3File = async(data) => {
   blob.name = exportedFilename;
   return blob;
 }
+
+exports.getReport7File = async(data) => {
+  
+}

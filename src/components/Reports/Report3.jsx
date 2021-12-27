@@ -78,9 +78,13 @@ function Report3(props) {
               <Grid.Column width={8}>
                 <Button 
                   positive
-                  disabled={
-                  report3Values.startDate==null
-                  || report3Values.endDate==null } 
+                  disabled=
+                  {
+                    report3Values.startDate=="null"
+                    || report3Values.endDate=="null" 
+                    || report3Values.startDate==null
+                    || report3Values.endDate==null
+                  } 
                   onClick={() => onSubmit()}
                   >Submit
                 </Button>
