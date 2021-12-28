@@ -53,6 +53,8 @@ function ReportsTable(props) {
        setLoading(false);        
     //    if (sorted === null) {
         setSorted(documentArray);
+        // setColumn("timeCreated")
+        // setDirection("descending")
     //   }
       });
     };

@@ -3,7 +3,6 @@ const jspdfautotable = require('jspdf-autotable');
 const Papa = require('papaparse');
 const { compose } = require("recompose");
 
-
 const deliveryZoneList = [ 
   "Zone 1: Montréal-Centre",
   "Zone 2: Rive-Sud",
@@ -125,7 +124,7 @@ exports.getReport3File = async(data) => {
     "Mail": []
   };
   // ["Total", totalPrice, count]
-  let deliverytTotal = ["Total", 0,0];
+  let deliveryTotal = ["Total", 0,0];
   let pickupTotal = ["Total", 0,0];
   let mailTotal = ["Total", 0,0];
   let grandTotal = ["Grand Total", 0,0];
@@ -172,6 +171,10 @@ exports.getReport3File = async(data) => {
     }
   })
 
+  const round = (num) => {
+    return parseFloat(num.toFixed(2));
+  }
+
   const getPrices = (value, type) => {
     Object.keys(value).forEach(function(key) {
      let prices = 0;
@@ -182,9 +185,8 @@ exports.getReport3File = async(data) => {
        count += 1;
        switch(type){
          case "delivery":
-           deliverytTotal[1] += totalPrice;
-           deliverytTotal[2] += 1;
-           
+           deliveryTotal[1] += totalPrice;
+           deliveryTotal[2] += 1;
            break;
         case "pickup":
           pickupTotal[1] += totalPrice;
@@ -225,7 +227,10 @@ exports.getReport3File = async(data) => {
   const pickupTable = Object.entries(dict["Pickup"]).map(item => [item[0], item[1][0], item[1][1]])
   const mailTable = Object.entries(dict["Mail"]).map(item => [item[0], item[1][0], item[1][1]])
   console.log(deliveryTable)
-  deliveryTable.push(deliverytTotal);
+  // deliveryTotal = deliveryTotal[1].toFixed(2);
+  // pickupTotal = pickupTotal[1].toFixed(2);
+  // mailTotal = mailTotal[1].toFixed(2);
+  deliveryTable.push(deliveryTotal);
   pickupTable.push(pickupTotal);
   mailTable.push(mailTotal);
 
@@ -298,7 +303,6 @@ exports.getReport3File = async(data) => {
       }
     }
   });
-  console.log(grandTotal)
   doc.text('Grand Total', 14, doc.lastAutoTable.finalY + 10);
   doc.autoTable({
     head: [['Total', 'Total Price', 'Number of Orders']],
@@ -318,9 +322,13 @@ exports.getReport3File = async(data) => {
     }
   });
 
-
-  doc.save('table.pdf');
   var blob = doc.output('blob');
+  
+  const fileName = getFilenameByDate('3', 'pdf');
+  doc.save(fileName);
+  blob.name = fileName;
+
+  return blob;
 
   // ------------- TO OPEN THE FILE IN NEW WINDOW --------------------------
   // var string = doc.output('datauristring');
@@ -329,17 +337,210 @@ exports.getReport3File = async(data) => {
   // x.document.open();
   // x.document.write(embed);
   // x.document.close();
+}
 
+const getFilenameByDate = (report, type) => {
   let date = new Date();
   let current = date
     .toLocaleDateString()
     .concat("_", date.toLocaleTimeString("en-GB").replaceAll(":", "-")).replaceAll("/", "-");
-  const exportedFilename = `Report3_${current}.pdf`;
-  
-  blob.name = exportedFilename;
-  return blob;
+  return `Report${report}_${current}.${type}`;
+}
+
+  // function to initialize an array of any dimension
+function createArray(length) {
+    var arr = new Array(length || 0),
+        i = length;
+
+    if (arguments.length > 1) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        while(i--) arr[length-1 - i] = createArray.apply(this, args);
+    }
+    return arr;
 }
 
 exports.getReport7File = async(data) => {
+
+  let outer = []
+  data.forEach((order) => {
+    order.products.forEach((product) => {
+      const { quantityOrdered, productTitle } = product
+      outer.push({
+        "title": productTitle,
+        "qty": quantityOrdered,
+        "date": order.startTime.toDate().toLocaleDateString('en-US', { day: 'numeric', month: 'numeric' }).replaceAll('/', '-')
+      })
+    })
+  });  
+
+  console.log(outer);
+
+  let header = [];
+  let dict = {};
+
+  let dates = [];
+  let items = [];
+
+  outer.forEach((item) => {
+    dates.push(item.date);
+    items.push(item.title);
+  })
+
+  dates = [...new Set(dates)];
+  items = [...new Set(items)];
+  header.push("Product", ...dates, "Total");
+
+  outer.forEach((item) => {
+    if(!dict[item.title]){
+      dict[item.title] = [item];
+    }
+    else{
+      dict[item.title].push(item);
+    }
+  })
+
+  console.log(dict)
+
+  // count the items for that day
+  const getCellCount = (i, j) => {
+    let count = 0;
+    dict[items[i]].forEach((item) => {
+      if(item.date == dates[j]){
+        count += item.qty;
+      }
+    })
+    return count;
+  }
+
+  // build 2D array
+  let full = createArray(items.length, dates.length + 1)
+
+  // populate the array with the counts for the items
+  for(let i = 0; i < full.length; i++){
+    for(let j = 0; j < full[i].length; j++){
+      if(j == 0){
+        full[i][j] = items[i];
+      }
+      else{
+        full[i][j] = getCellCount(i, j - 1);
+      }
+    }
+  }
+
+  // add totals per row
+  for(let i = 0; i < full.length; i++){
+    let count = 0;
+    for(let j = 1; j < full[i].length; j++){
+      count += full[i][j];
+    }
+    full[i].push(count);
+  }
+  let totalLastRow = ["Total"];
+
+  console.log(full);
+
+  // add totals per column
+  for(let i = 1; i < full[0].length; i++){ //error here
+    let count = 0;
+    for(let j = 0; j < full.length; j++){
+      count += full[j][i];
+    }
+    totalLastRow.push(count);
+  }
+
+  full.push(totalLastRow);
+
+  const doc = new jsPDF();
+  var width = doc.internal.pageSize.getWidth() - 28.0222222;
   
+  doc.text('Global Production', 14, 10);
+
+  doc.autoTable({
+    head: [header],
+    body: full,
+    didParseCell: function (data) {
+      var rows = data.table.body;
+      if (data.row.index === rows.length - 1 && rows.length > 1) {
+          // data.cell.styles.fillColor = [211, 211, 211];
+          data.cell.styles.fontStyle = 'bold';
+      }
+    }
+  });
+  
+  var blob = doc.output('blob');
+  
+  const fileName = getFilenameByDate('7', 'pdf');
+  doc.save(fileName);
+  blob.name = fileName;
+
+  return blob;
+}
+
+exports.getReport8File = async(data) => {
+
+  let outer = []
+  data.forEach((order) => {
+    order.products.forEach((product) => {
+      const { quantityOrdered, productTitle } = product
+      outer.push({
+        "title": productTitle,
+        "qty": quantityOrdered,
+      })
+    })
+  });  
+
+  console.log(outer);
+
+  let header = [];
+  let dict = {};
+
+  let items = [];
+  let total = 0;
+
+  // outer.forEach((item) => {
+  //   items.push(item.title);
+  // })
+
+  // items = [...new Set(items)];
+  header.push("Product", "Total");
+
+  outer.forEach((item) => {
+    if(!dict[item.title]){
+      dict[item.title] = item.qty;
+    }
+    else{
+      dict[item.title] += item.qty;
+    }
+    total += item.qty
+  })
+
+  dict = Object.entries(dict)
+
+  console.log(dict)
+
+  dict.push(["Total", total]);
+
+  const doc = new jsPDF();
+  
+  doc.text('Total Production', 14, 10);
+
+  doc.autoTable({
+    head: [header],
+    body: dict,
+    didParseCell: function (data) {
+      var rows = data.table.body;
+      if (data.row.index === rows.length - 1 && rows.length > 1) {
+          // data.cell.styles.fillColor = [211, 211, 211];
+          data.cell.styles.fontStyle = 'bold';
+      }
+    }
+  });
+  
+  var blob = doc.output('blob');
+  
+  const fileName = getFilenameByDate('8', 'pdf');
+  doc.save(fileName);
+  blob.name = fileName;
+
+  return blob;
 }

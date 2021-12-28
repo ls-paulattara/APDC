@@ -35,8 +35,8 @@ function Report7(props) {
       const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatus(report7Values.startDate, report7Values.endDate, report7Values.orderStatus, "all")
       console.log(orderData)
       if(orderData.length){
-        const file = await getReport7File(orderData, '2');
-        // props.firebase.saveReportToFirebase(file);
+        const file = await getReport7File(orderData);
+        props.firebase.saveReportToFirebase(file);
       }
     }
 

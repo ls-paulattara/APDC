@@ -110,12 +110,12 @@ function Report2(props) {
                 <Button 
                   positive
                   disabled={
-                    !report2Values.pickupPoint 
-                    || !report2Values.orderStatus 
-                    || report2Values.startDate=="null"
-                    || report2Values.endDate=="null" 
-                    || report2Values.startDate==null 
-                    || report2Values.endDate==null 
+                    !report2Values.pickupPoint  ||
+                    !report2Values.orderStatus  ||
+                    report2Values.startDate=="null"||
+                    report2Values.endDate=="null" ||
+                    report2Values.startDate==null ||
+                    report2Values.endDate==null
                   } 
                   onClick={() => onSubmit()}
                   >Submit

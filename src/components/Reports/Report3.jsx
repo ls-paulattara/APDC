@@ -32,7 +32,7 @@ function Report3(props) {
         console.log(orderData)
         if(orderData.length){
           const file = await getReport3File(orderData);
-          // props.firebase.saveReportToFirebase(file);
+          props.firebase.saveReportToFirebase(file);
         }
     }
 
@@ -80,10 +80,10 @@ function Report3(props) {
                   positive
                   disabled=
                   {
-                    report3Values.startDate=="null"
-                    || report3Values.endDate=="null" 
-                    || report3Values.startDate==null
-                    || report3Values.endDate==null
+                    report3Values.startDate=="null" || 
+                    report3Values.endDate=="null"  || 
+                    report3Values.startDate==null ||
+                    report3Values.endDate==null
                   } 
                   onClick={() => onSubmit()}
                   >Submit

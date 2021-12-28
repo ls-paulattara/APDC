@@ -8,12 +8,15 @@ import {
   Grid,
   Divider,
   Button,
-  Input
+  Input,
+  Dropdown
 } from "semantic-ui-react";
+
+const { getReport8File } = require('../../Util/CreateReportFile');
 
 function Report8(props) {
     const { dark, language } = props;
-    const { HOME } = TRANSLATIONS[`${language}`];
+    const { REPORTS,HOME } = TRANSLATIONS[`${language}`];
 
     const [report8Values, setreport8Values] = useState({
         orderStatus: "",
@@ -26,10 +29,15 @@ function Report8(props) {
         setreport8Values(prevState => ({ ...prevState, [name]: (value) }));
       }
 
-    const onSubmit = () => {
-        console.log(report8Values)
-        // props.prevStep()
-        // generateReport(1, report8Values)
+    const onSubmit = async () => {
+      console.log(report8Values);
+
+      const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatus(report8Values.startDate, report8Values.endDate, report8Values.orderStatus, "all")
+      console.log(orderData)
+      if(orderData.length){
+        const file = await getReport8File(orderData);
+        props.firebase.saveReportToFirebase(file);
+      }
     }
 
     useEffect(() => {
@@ -45,15 +53,18 @@ function Report8(props) {
     
   return (
     <>
-        <Header as="h2">Report 8</Header>
+        <Header as="h2">{HOME.report8}</Header>
         <Divider/>
         <Header as="h3">Order Status</Header>
-        <Input
-          name="orderStatus"
-          value={report8Values.orderStatus}
-          size="large"
+        <Dropdown          
           placeholder='Order Status'
-          icon="clipboard outline"
+          name="orderStatus"
+          label="Order Status"
+          selection
+          size="large"
+          options={REPORTS.orderStatus}
+          // icon="clipboard outline"
+          value={report8Values.orderStatus}
           onChange={onChange}
         />
         <Header as="h3">Category</Header>
@@ -92,10 +103,15 @@ function Report8(props) {
               <Grid.Column width={8}>
                 <Button 
                   positive
-                  disabled={!report8Values.category
-                  || !report8Values.orderStatus 
-                  || report8Values.startDate==null 
-                  || report8Values.endDate==null } 
+                  disabled=
+                  {
+                    !report8Values.category ||
+                    !report8Values.orderStatus ||
+                    report8Values.startDate==null ||
+                    report8Values.endDate==null ||
+                    report8Values.startDate=="null" ||
+                    report8Values.endDate=="null" 
+                } 
                   onClick={() => onSubmit()}
                   >Submit
                 </Button>
