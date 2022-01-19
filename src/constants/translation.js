@@ -18,6 +18,7 @@ const TRANSLATIONS = {
       report11: "Report 11: Order Accounting",
       report12: "Report 12: Delivery Zones Tickets",
       report13: "Report 13: Pickup Point Tickets",
+
       report1Description: `Shows all the orders in delivery along a period of time, in a given delivery zone in CSV format.`,
       report2Description: `Shows all the orders in pickup along on a period of time, at a given pickup point in CSV format.`,
       report3Description: `Shows the number of orders and total revenue by carrier in CSV format.`,
@@ -121,17 +122,17 @@ const TRANSLATIONS = {
       deliveryZone: [
         { key: "1", text: "Any", value: "any" },
         { key: "2", text: "Zone 1: Montréal-Centre", value: "Zone 1 Montreal-Centre" },
-        { key: "3", text: "Zone 2: Rive-Sud", value: "Rive-Sud" },
+        { key: "3", text: "Zone 2: Rive-Sud", value: "Zone 2 Rive-Sud" },
         { key: "4", text: "Zone 3: Montréal Est", value: "Montréal Est" },
         { key: "5", text: "Zone 4: Couronne-Nord", value: "Couronne-Nord" },
         { key: "6", text: "Zone 5: Montréal Ouest", value: "Montréal Ouest" }
       ],
       pickupPoint: [
         { key: "1", text: "Any", value: "any" },
-        { key: "2", text: "Montreal", value: "Montréal-Cenre" },
+        { key: "2", text: "Montreal", value: "Montréal Pickup Location" },
         { key: "3", text: "Mirabel", value: "Montréy l-Centre" },
         { key: "4", text: "Québec Centre", value: "onytréal-Centre" },
-        { key: "5", text: "Victoriaville", value: "Montrjéal-Centre" },
+        { key: "5", text: "Victoriaville", value: "Victoriaville Pickup Location" },
         { key: "6", text: "Drummondville", value: "Moyntréal-jCentre" },
         { key: "7", text: "Gatineau", value: "Montréal-Centtre" },
         { key: "8", text: "Granby", value: "Montréalty-Centre" },
@@ -142,6 +143,23 @@ const TRANSLATIONS = {
         { key: "13", text: "Shawinigan", value: "Montréal-tCentkkre" },
         { key: "14", text: "Mont-Tremblant", value: "Monytréal-Centre" },
         { key: "15", text: "Québec Marché", value: "Montréal-Ceuntre" },
+      ],
+      carrierType: [
+        { key: "1", text: "Any", value: "any" },
+        { key: "2", text: "Delivery", value: "delivery" },
+        { key: "3", text: "Pickup", value: "pickup" },
+        { key: "4", text: "Mail", value: "mail" },
+      ],
+      category: [
+        { key: "1", text: "Any", value: "any" },
+        { key: "2", text: "Ciders", value: "Ciders" },
+        { key: "3", text: "Apparel", value: "Apparel" },
+        { key: "4", text: "Pantry", value: "Pantry" },
+        { key: "5", text: "Maple Products", value: "Maple Products" },
+        { key: "6", text: "Frozen Products", value: "Frozen Products" },
+        { key: "7", text: "Library", value: "Library" },
+        { key: "8", text: "Gift Ideas", value: "Gift Ideas" },        
+        { key: "9", text: "Spirits", value: "Spirits" }
       ]
     }
   },
@@ -164,6 +182,7 @@ const TRANSLATIONS = {
       report11: "Rapport 11",
       report12: "Rapport 12",
       report13: "Rapport 13",
+
       report1Description: `Shows all the orders in delivery along a period of time, in a given delivery zone in CSV format.`,
       report2Description: `Shows all the orders in pickup along on a period of time, at a given pickup point in CSV format.`,
       report3Description: `Shows the number of orders and total revenue by carrier in CSV format.`,

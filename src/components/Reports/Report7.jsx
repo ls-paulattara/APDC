@@ -12,7 +12,7 @@ import {
   Dropdown
 } from "semantic-ui-react";
 
-const { getReport7File } = require('../../Util/CreateReportFile');
+const { getReport7or9or10File } = require('../../Util/CreateReportFile');
 
 function Report7(props) {
     const { dark, language } = props;
@@ -27,15 +27,15 @@ function Report7(props) {
     function onChange(event, data) {  
         const { name, value } = data;
         setreport7Values(prevState => ({ ...prevState, [name]: (value) }));
-      }
+    }
 
     const onSubmit = async () => {
       console.log(report7Values);
 
-      const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatus(report7Values.startDate, report7Values.endDate, report7Values.orderStatus, "all")
+      const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatus(report7Values.startDate, report7Values.endDate, report7Values.orderStatus, report7Values.category)
       console.log(orderData)
       if(orderData.length){
-        const file = await getReport7File(orderData);
+        const file = await getReport7or9or10File(orderData, '7');
         props.firebase.saveReportToFirebase(file);
       }
     }
@@ -69,15 +69,18 @@ function Report7(props) {
           onChange={onChange}
         />
         <Header as="h3">Category</Header>
-        <Input
-          name="category"
-          value={report7Values.category}
-          size="large"
+        <Dropdown          
           placeholder='Category'
-          icon="tags"
+          name="category"
+          label="Category"
+          selection
+          size="large"
+          options={REPORTS.category}
+          // icon="clipboard outline"
+          value={report7Values.category}
           onChange={onChange}
         />
-        <Header as="h3">Date Range of Delivery</Header>
+        <Header as="h3">Date Range of Order</Header>
         <SemanticDatepicker 
           showToday
           autoComplete="off" 

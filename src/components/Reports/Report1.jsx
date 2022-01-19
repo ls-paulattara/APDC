@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TRANSLATIONS from "../../constants/translation";
 import SemanticDatepicker from 'react-semantic-ui-datepickers';
 import 'react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css';
+
 import {
   Header,
   Grid,
@@ -23,7 +24,8 @@ function Report1(props) {
         startDate: null,
         endDate: null
     })
-    function onChange(event, data) {  
+
+    function onChange(event, data) {
         const { name, value } = data;
         setreport1Values(prevState => ({ ...prevState, [name]: (value) }));
       }
@@ -36,7 +38,10 @@ function Report1(props) {
         console.log(orderData)
         if(orderData.length){
           const file = await getReport1or2File(orderData, '1');
-          props.firebase.saveReportToFirebase(file);
+          const url = await props.firebase.saveReportToFirebase(file);
+          
+          props.setReportValues(file);
+          props.nextStep();
         }
     }
 

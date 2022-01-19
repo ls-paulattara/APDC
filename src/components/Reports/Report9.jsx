@@ -12,48 +12,49 @@ import {
   Dropdown
 } from "semantic-ui-react";
 
-const { getReport8or11File } = require('../../Util/CreateReportFile');
+const { getReport7or9or10File } = require('../../Util/CreateReportFile');
 
-function Report8(props) {
+function Report9(props) {
     const { dark, language } = props;
     const { REPORTS,HOME } = TRANSLATIONS[`${language}`];
 
-    const [report8Values, setreport8Values] = useState({
+    const [report9Values, setreport9Values] = useState({
         orderStatus: "",
+        pickupPoint: "",
         category: "",
         startDate: null,
         endDate: null
     })
     function onChange(event, data) {  
         const { name, value } = data;
-        setreport8Values(prevState => ({ ...prevState, [name]: (value) }));
+        setreport9Values(prevState => ({ ...prevState, [name]: (value) }));
     }
 
     const onSubmit = async () => {
-      console.log(report8Values);
+      console.log(report9Values);
 
-      const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatus(report8Values.startDate, report8Values.endDate, report8Values.orderStatus, report8Values.category)
+      const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatusAndLocation(report9Values.startDate, report9Values.endDate, report9Values.orderStatus, report9Values.category, "pickup", report9Values.pickupPoint)
       console.log(orderData)
       if(orderData.length){
-        const file = await getReport8or11File(orderData, '8');
-        props.firebase.saveReportToFirebase(file);
+        const file = await getReport7or9or10File(orderData, '9');
+        // props.firebase.saveReportToFirebase(file);
       }
     }
 
     useEffect(() => {
-        const report8Values = JSON.parse(localStorage.getItem('report8Values'));
-        if(report8Values) {
-            setreport8Values(report8Values);
+        const report9Values = JSON.parse(localStorage.getItem('report9Values'));
+        if(report9Values) {
+            setreport9Values(report9Values);
         }
       }, []);
 
     useEffect(() => {
-        localStorage.setItem('report8Values', JSON.stringify(report8Values));
-      }, [report8Values]);
+        localStorage.setItem('report9Values', JSON.stringify(report9Values));
+      }, [report9Values]);
     
   return (
     <>
-        <Header as="h2">{HOME.report8}</Header>
+        <Header as="h2">{HOME.report9}</Header>
         <Divider/>
         <Header as="h3">Order Status</Header>
         <Dropdown          
@@ -64,8 +65,19 @@ function Report8(props) {
           size="large"
           options={REPORTS.orderStatus}
           // icon="clipboard outline"
-          value={report8Values.orderStatus}
+          value={report9Values.orderStatus}
           onChange={onChange}
+        />
+        <Header as="h3">Pickup Point</Header>
+        <Dropdown
+        placeholder="Pickup Point"
+        name="pickupPoint"
+        label="Pickup Point"
+        selection
+        size="large"
+        options={REPORTS.pickupPoint}
+        value={report9Values.pickupPoint}
+        onChange={onChange}
         />
         <Header as="h3">Category</Header>
         <Dropdown          
@@ -76,10 +88,10 @@ function Report8(props) {
           size="large"
           options={REPORTS.category}
           // icon="clipboard outline"
-          value={report8Values.category}
+          value={report9Values.category}
           onChange={onChange}
         />
-        <Header as="h3">Date Range of Order</Header>
+        <Header as="h3">Date Range of Pickup</Header>
         <SemanticDatepicker 
           showToday
           autoComplete="off" 
@@ -108,12 +120,13 @@ function Report8(props) {
                   positive
                   disabled=
                   {
-                    !report8Values.category ||
-                    !report8Values.orderStatus ||
-                    report8Values.startDate==null ||
-                    report8Values.endDate==null ||
-                    report8Values.startDate=="null" ||
-                    report8Values.endDate=="null" 
+                    !report9Values.category ||
+                    !report9Values.orderStatus ||
+                    !report9Values.pickupPoint ||
+                    report9Values.startDate==null ||
+                    report9Values.endDate==null ||
+                    report9Values.startDate=="null" ||
+                    report9Values.endDate=="null" 
                 } 
                   onClick={() => onSubmit()}
                   >Submit
@@ -125,4 +138,4 @@ function Report8(props) {
   );
 };
 
-export default Report8;
+export default Report9;

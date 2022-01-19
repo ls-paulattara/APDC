@@ -12,48 +12,49 @@ import {
   Dropdown
 } from "semantic-ui-react";
 
-const { getReport8or11File } = require('../../Util/CreateReportFile');
+const { getReport7or9or10File } = require('../../Util/CreateReportFile');
 
-function Report8(props) {
+function Report10(props) {
     const { dark, language } = props;
     const { REPORTS,HOME } = TRANSLATIONS[`${language}`];
 
-    const [report8Values, setreport8Values] = useState({
+    const [report10Values, setreport10Values] = useState({
         orderStatus: "",
+        deliveryZone: "",
         category: "",
         startDate: null,
         endDate: null
     })
     function onChange(event, data) {  
         const { name, value } = data;
-        setreport8Values(prevState => ({ ...prevState, [name]: (value) }));
+        setreport10Values(prevState => ({ ...prevState, [name]: (value) }));
     }
 
     const onSubmit = async () => {
-      console.log(report8Values);
+      console.log(report10Values);
 
-      const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatus(report8Values.startDate, report8Values.endDate, report8Values.orderStatus, report8Values.category)
+      const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatusAndLocation(report10Values.startDate, report10Values.endDate, report10Values.orderStatus, report10Values.category, "delivery", report10Values.deliveryZone)
       console.log(orderData)
       if(orderData.length){
-        const file = await getReport8or11File(orderData, '8');
+        const file = await getReport7or9or10File(orderData,'10');
         props.firebase.saveReportToFirebase(file);
       }
     }
 
     useEffect(() => {
-        const report8Values = JSON.parse(localStorage.getItem('report8Values'));
-        if(report8Values) {
-            setreport8Values(report8Values);
+        const report10Values = JSON.parse(localStorage.getItem('report10Values'));
+        if(report10Values) {
+            setreport10Values(report10Values);
         }
       }, []);
 
     useEffect(() => {
-        localStorage.setItem('report8Values', JSON.stringify(report8Values));
-      }, [report8Values]);
+        localStorage.setItem('report10Values', JSON.stringify(report10Values));
+      }, [report10Values]);
     
   return (
     <>
-        <Header as="h2">{HOME.report8}</Header>
+        <Header as="h2">{HOME.report10}</Header>
         <Divider/>
         <Header as="h3">Order Status</Header>
         <Dropdown          
@@ -64,9 +65,20 @@ function Report8(props) {
           size="large"
           options={REPORTS.orderStatus}
           // icon="clipboard outline"
-          value={report8Values.orderStatus}
+          value={report10Values.orderStatus}
           onChange={onChange}
         />
+      <Header as="h3">Delivery Zone</Header>
+      <Dropdown
+        placeholder="Delivery Zone"
+        name="deliveryZone"
+        label="Delivery Zone"
+        selection
+        size="large"
+        options={REPORTS.deliveryZone}
+        value={report10Values.deliveryZone}
+        onChange={onChange}
+      />
         <Header as="h3">Category</Header>
         <Dropdown          
           placeholder='Category'
@@ -76,10 +88,10 @@ function Report8(props) {
           size="large"
           options={REPORTS.category}
           // icon="clipboard outline"
-          value={report8Values.category}
+          value={report10Values.category}
           onChange={onChange}
         />
-        <Header as="h3">Date Range of Order</Header>
+        <Header as="h3">Date Range of Delivery</Header>
         <SemanticDatepicker 
           showToday
           autoComplete="off" 
@@ -108,12 +120,13 @@ function Report8(props) {
                   positive
                   disabled=
                   {
-                    !report8Values.category ||
-                    !report8Values.orderStatus ||
-                    report8Values.startDate==null ||
-                    report8Values.endDate==null ||
-                    report8Values.startDate=="null" ||
-                    report8Values.endDate=="null" 
+                    !report10Values.category ||
+                    !report10Values.orderStatus ||
+                    !report10Values.deliveryZone ||
+                    report10Values.startDate==null ||
+                    report10Values.endDate==null ||
+                    report10Values.startDate=="null" ||
+                    report10Values.endDate=="null" 
                 } 
                   onClick={() => onSubmit()}
                   >Submit
@@ -125,4 +138,4 @@ function Report8(props) {
   );
 };
 
-export default Report8;
+export default Report10;

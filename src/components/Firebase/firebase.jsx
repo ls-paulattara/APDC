@@ -114,20 +114,25 @@ class Firebase {
   // *** Storage API - Reference File ***
   fileRef = (path) => this.storage.ref(path);
 
-  saveReportToFirebase = (file) => {
+  saveReportToFirebase = async (file) => {
     var metadata = {
       'contentType': file.type
     };
-    this.storage.ref().child('reports/' + file.name).put(file, metadata).then(function(snapshot) {
+    let urlToDownload = '';
+
+    return this.storage.ref().child('reports/' + file.name).put(file, metadata).then(function(snapshot) {
     console.log('Uploaded', snapshot.totalBytes, 'bytes.');
-    console.log('File metadata:', snapshot.metadata);
-    snapshot.ref.getDownloadURL().then(function(url) {
+    // console.log('File metadata:', snapshot.metadata);
+    return snapshot.ref.getDownloadURL().then(function(url) {
+      urlToDownload = url;
       console.log('File available at', url);
       // document.getElementById('linkbox').innerHTML = '<a href="' +  url + '">Click For File</a>';
+      return urlToDownload;
     });
   }).catch(function(error) {
     console.error('Upload failed:', error);
   });
+  
 }
 
   getAllUsers = () => {
@@ -141,17 +146,31 @@ class Firebase {
     });
   }
 
-  getAllOrders = () => {
-    return this.db.ref("orders").once("value", (snapshot) => {
-      const usersObject = snapshot.val();
-      const usersList = Object.keys(usersObject).map((key) => ({
-        ...usersObject[key],
-        uid: key,
-      }));
-      console.log(usersList)
-    });
-  }
+  // report 3
+  getAllFirebaseOrdersByDate = async (start, end) => {
 
+    var myTimestamp = app.firestore.Timestamp.fromDate(new Date());
+    // console.log(myTimestamp)
+
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate()
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate()
+    var jsonvalue = []
+
+    return this.firestore.collection('orders')
+      .where('createdAt', '>=', start2)
+      .where('createdAt', '<=', end2)
+      .get()  
+      .then(snapshot => {
+        snapshot.forEach(docs => {
+          jsonvalue.push(docs.data())
+        })
+        // console.log(jsonvalue);
+        return jsonvalue;
+      }).catch(error => {
+        console.log(error)
+      })
+  }
+  // report 1 and 2
   getAllFirebaseOrdersByDateAndStatus = async (start, end, status, orderType, location) => {
 
     var myTimestamp = app.firestore.Timestamp.fromDate(new Date());
@@ -175,7 +194,7 @@ class Firebase {
       .where('startTime', '>=', start2)
       .where('startTime', '<=', end2)
       .get()  
-      .then(snapshot => {              
+      .then(snapshot => {
         snapshot.forEach(docs => {
           jsonvalue.push(docs.data())
         })
@@ -185,7 +204,7 @@ class Firebase {
         console.log(error)
       })
   }
-
+  // report 7 and 8
   getAllFirebaseOrdersByDateAndCategoryAndStatus = async (start, end, status, category) => {
 
     let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate()
@@ -197,44 +216,201 @@ class Firebase {
       query = query.where('status', '==', status);
     }
 
+    let filteredProducts;
+
     return query = query
       .where('startTime', '>=', start2)
       .where('startTime', '<=', end2)
       .get()  
-      .then(snapshot => {              
+      .then(snapshot => {
+
         snapshot.forEach(docs => {
-          jsonvalue.push(docs.data())
+
+
+          // let order = docs.data()
+          // if(category !== 'any'){
+          //   filteredProducts = order.products.filter(prod => /*prod.category !== undefined &&*/ prod.category == category)
+          //   order.products = filteredProducts;
+          //   if(order.products.length > 0){
+          //     jsonvalue.push(order)
+          //   }
+          // }
+
+          let order = docs.data()
+            
+          if(category !== 'any'){
+            filteredProducts = order.products.filter(prod => /*prod.category !== undefined &&*/ prod.category == category)
+            // console.log(order.number, filteredProducts)
+            order.products = filteredProducts;
+            // console.log(order.number, order)
+            if(order.products.length > 0){
+              jsonvalue.push(order);
+            }
+          }
+          else{
+            jsonvalue.push(order);
+          }
+
+          
+
+          // docs.data().products.forEach((doc) => {
+          //   if(category == 'any'){
+          //     jsonvalue.push(doc);
+          //   }
+          //   else if(category != 'any' && doc.category !== undefined && doc.category == category){
+          //     jsonvalue.push(doc);
+          //   }
+          // })
         })
+        
+
         // console.log(jsonvalue);
         return jsonvalue;
       }).catch(error => {
         console.log(error)
       })
   }
-
-  getAllFirebaseOrdersByDate = async (start, end) => {
-
-    var myTimestamp = app.firestore.Timestamp.fromDate(new Date());
-    console.log(myTimestamp)
+  
+  // report 9 and 10
+  getAllFirebaseOrdersByDateAndCategoryAndStatusAndLocation = async (start, end, status, category, orderType, location) => {
 
     let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate()
     let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate()
     var jsonvalue = []
+    
+    let query = this.firestore.collection('orders');
+    if(orderType != 'all'){
+      query = query.where('type', '==', orderType)
+    }
+    if(status != 'any'){
+      query = query.where('status', '==', status);
+    }
+    if(location != 'any'){
+      query = query.where('locationName', '==', location);
+    }
+    let filteredProducts;
 
-    return this.firestore.collection('orders')
+    return query = query
       .where('startTime', '>=', start2)
       .where('startTime', '<=', end2)
       .get()  
-      .then(snapshot => {              
+      .then(snapshot => {
         snapshot.forEach(docs => {
-          jsonvalue.push(docs.data())
+            let order = docs.data()
+            
+            if(category !== 'any'){
+              filteredProducts = order.products.filter(prod => /*prod.category !== undefined &&*/ prod.category == category)
+              // console.log(order.number, filteredProducts)
+              order.products = filteredProducts;
+              // console.log(order.number, order)
+              if(order.products.length > 0){
+                jsonvalue.push(order);
+              }
+            }
+            else{
+              jsonvalue.push(order);
+            }
         })
-        // console.log(jsonvalue);
         return jsonvalue;
       }).catch(error => {
         console.log(error)
       })
   }
+  
+  // report 11
+  getAllFirebaseOrdersByOrderDateAndCategoryAndStatusAndCarrier = async (start, end, status, category, carrier) => {
+
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate()
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate()
+    var jsonvalue = []
+    
+    let query = this.firestore.collection('orders');
+    if(carrier != 'any'){
+      query = query.where('type', '==', carrier)
+    }
+    if(status != 'any'){
+      query = query.where('status', '==', status);
+    }
+    // if(category != 'any'){
+    //   // query = query.where('category', '==', category);
+    //   query = query.where("products", "array-contains", { category: category });
+
+    // }
+
+    let filteredProducts;
+
+    return query = query
+      .where('createdAt', '>=', start2)
+      .where('createdAt', '<=', end2)
+      .get()  
+      .then(snapshot => {
+        snapshot.forEach(docs => {
+
+          let order = docs.data()
+            
+          if(category !== 'any'){
+            filteredProducts = order.products.filter(prod => /*prod.category !== undefined &&*/ prod.category == category)
+            // console.log(order.number, filteredProducts)
+            order.products = filteredProducts;
+            // console.log(order.number, order)
+            if(order.products.length > 0){
+              jsonvalue.push(order);
+            }
+          }
+          else{
+            jsonvalue.push(order);
+          }
+
+          // docs.data().products.forEach((doc) => {
+          //   if(category == 'any'){
+          //     jsonvalue.push(doc);
+          //   }
+          //   else if(category != 'any' && doc.category !== undefined && doc.category == category){
+          //     jsonvalue.push(doc);
+          //   }
+          // })
+        })
+
+        // console.log(jsonvalue);
+        return jsonvalue;
+      }).catch(error => {
+        console.log(error);
+      })
+  }
+  getAllFirebaseOrdersByDateAndStatusAndNumber = async (start, end, status, orderType, location) => {
+
+    var myTimestamp = app.firestore.Timestamp.fromDate(new Date());
+
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate()
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate()
+    var jsonvalue = []
+    
+    let query = this.firestore.collection('orders');
+    if(orderType != 'all'){
+      query = query.where('type', '==', orderType)
+    }
+    if(status != 'any'){
+      query = query.where('status', '==', status);
+    }
+    if(location != 'any'){
+      query = query.where('locationName', '==', location);
+    }
+
+    return query = query
+      .where('startTime', '>=', start2)
+      .where('startTime', '<=', end2)
+      .get()  
+      .then(snapshot => {
+        snapshot.forEach(docs => {
+          jsonvalue.push(docs.data())
+        })
+        console.log(jsonvalue);
+        return jsonvalue;
+      }).catch(error => {
+        console.log(error)
+      })
+  }
+  
 }
 
 export default Firebase;

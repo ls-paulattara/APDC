@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import TRANSLATIONS from "../../constants/translation";
 import SemanticDatepicker from 'react-semantic-ui-datepickers';
 import 'react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css';
@@ -12,51 +13,51 @@ import {
   Dropdown
 } from "semantic-ui-react";
 
-const { getReport1or2File } = require('../../Util/CreateReportFile');
+const { getReport12File } = require('../../Util/CreateReportFile');
 
 
-function Report2(props) {
+function Report12(props) {
     const { dark, language } = props;
     const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
 
-    const [report2Values, setreport2Values] = useState({
-        pickupPoint: "",
+    const [report12Values, setReport12Values] = useState({
+        deliveryZone: "",
         orderStatus: "",
         startDate: null,
         endDate: null
     })
     function onChange(event, data) {  
         const { name, value } = data;
-        setreport2Values(prevState => ({ ...prevState, [name]: (value) }));
+        setReport12Values(prevState => ({ ...prevState, [name]: (value) }));
       }
 
     const onSubmit = async () => {
-        console.log(report2Values);
+        console.log(report12Values);
 
-        const orderData = await props.firebase.getAllFirebaseOrdersByDateAndStatus(report2Values.startDate, report2Values.endDate, report2Values.orderStatus, "pickup", report2Values.pickupPoint)
+        const orderData = await props.firebase.getAllFirebaseOrdersByDateAndStatus(report12Values.startDate, report12Values.endDate, report12Values.orderStatus, "delivery", report12Values.deliveryZone)
         console.log(orderData)
         if(orderData.length){
-          const file = await getReport1or2File(orderData, '2');
-          props.firebase.saveReportToFirebase(file);
+          const file = await getReport12File(orderData, '12');
+          // props.firebase.saveReportToFirebase(file);
         }
     }
 
     useEffect(() => {
-        const report2Values = JSON.parse(localStorage.getItem('report2Values'));
-        console.log(report2Values);
-        if(report2Values) {
-            setreport2Values(report2Values);
+        const report12Values = JSON.parse(localStorage.getItem('report12Values'));
+        console.log(report12Values);
+        if(report12Values) {
+            setReport12Values(report12Values);
         }
       }, []);
 
     useEffect(() => {
-        localStorage.setItem('report2Values', JSON.stringify(report2Values));
-        console.log(report2Values);
-      }, [report2Values]);
+        localStorage.setItem('report12Values', JSON.stringify(report12Values));
+        console.log(report12Values);
+      }, [report12Values]);
     
   return (
     <>
-        <Header as="h2">{HOME.report2}</Header>
+        <Header as="h2">{HOME.report12}</Header>
         <Divider/>
         <Header as="h3">Order Status</Header>
         <Dropdown       
@@ -67,19 +68,19 @@ function Report2(props) {
           size="large"
           options={REPORTS.orderStatus}
           // icon="clipboard outline"
-          value={report2Values.orderStatus}
+          value={report12Values.orderStatus}
           onChange={onChange}
         />
 
-        <Header as="h3">Pickup Point</Header>
+        <Header as="h3">Delivery Zone</Header>
         <Dropdown
-        placeholder="Pickup Point"
-        name="pickupPoint"
-        label="Pickup Point"
+        placeholder="Delivery Zone"
+        name="deliveryZone"
+        label="Delivery Zone"
         selection
         size="large"
-        options={REPORTS.pickupPoint}
-        value={report2Values.pickupPoint}
+        options={REPORTS.deliveryZone}
+        value={report12Values.deliveryZone}
         onChange={onChange}
       />
         <Header as="h3">Date Range of Pickup</Header>
@@ -110,12 +111,12 @@ function Report2(props) {
                 <Button 
                   positive
                   disabled={
-                    !report2Values.pickupPoint  ||
-                    !report2Values.orderStatus  ||
-                    report2Values.startDate=="null"||
-                    report2Values.endDate=="null" ||
-                    report2Values.startDate==null ||
-                    report2Values.endDate==null
+                    !report12Values.category
+                    || !report12Values.orderStatus 
+                    || report12Values.startDate=="null" 
+                    || report12Values.endDate=="null" 
+                    || report12Values.startDate==null 
+                    || report12Values.endDate==null 
                   } 
                   onClick={() => onSubmit()}
                   >Submit
@@ -127,4 +128,4 @@ function Report2(props) {
   );
 };
 
-export default Report2;
+export default Report12;

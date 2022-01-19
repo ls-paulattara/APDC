@@ -8,7 +8,12 @@ import Report2 from './Report2'
 import Report3 from './Report3'
 import Report7 from './Report7'
 import Report8 from './Report8'
-import Success from './Success';
+import Report9 from './Report9'
+import Report10 from './Report10'
+import Report11 from './Report11'
+import Report12 from './Report12'
+import ListOfReports from './ListOfReports';
+import DisplayReport from './DisplayReport';
 // import Failure from './Failure';
 import {
   Segment,
@@ -16,68 +21,57 @@ import {
   Icon,
   Step
 } from "semantic-ui-react";
-import ListOfReports from './ListOfReports';
+
 
 function GenerateReport(props) {
+    // const { HOME } = TRANSLATIONS[`${language}`];
+    const { dark, language } = props;
+
     const [step, setStep] = useState(1);
     const [selectedReport, setSelectedReport] = useState(0);
-    // const [isStep1Active, setIsStep1Active] = useState(true);
-    // const [isStep2Active, setIsStep2Active] = useState(false);
-    // const [isStep3Active, setIsStep3Active] = useState(false);
+    const [reportValues, setReportValues] = useState({ });
 
-    const { dark, language } = props;
-    // const { HOME } = TRANSLATIONS[`${language}`];
-    // let reportID = props.match.params.reportID;
     const nextStep = () => {
         setStep(step + 1)
-        // renderSwitch();    
-        // switch(step + 1){
-        //     case 2:
-        //         setIsStep1Active(false)
-        //         setIsStep2Active(true)
-        //         setIsStep3Active(false)
-        //         break;
-        //     // case 3:
-        //     //     setIsStep1Active(false)
-        //     //     setIsStep2Active(false)
-        //     //     setIsStep3Active(true)
-        // }    
     }
     const prevStep = () => {
         if(step !== 1){
             setStep(step - 1)
-            // switch(step - 1){
-            //     case 1:
-            //         setIsStep1Active(true)
-            //         setIsStep2Active(false)
-            //         setIsStep3Active(false)
-            //         break;
-            // }
         }
     }
 
     useEffect(() => {
       const step = JSON.parse(localStorage.getItem('step'));
       const selectedReport = JSON.parse(localStorage.getItem('selectedReport'));
+
       if(step) {
-          console.log(step)
+        if(step == 3){
+          setStep(2);
+        }
+        else{
           setStep(step);
+        }
+          // console.log(step)
       }
       if(selectedReport){
         setSelectedReport(selectedReport)
-        console.log(selectedReport)
+        // console.log(selectedReport)
       }
     }, []);
 
-  useEffect(() => {
+
+
+    useEffect(() => {
       localStorage.setItem('step', JSON.stringify(step));
     }, [step]);
 
-  useEffect(() => {
+    useEffect(() => {
       localStorage.setItem('selectedReport', JSON.stringify(selectedReport));
     }, [selectedReport]);
 
-    function renderSwitch () {
+
+
+    function renderSelectedReport () {
         switch(step) {
           case 1:
             return (
@@ -98,6 +92,7 @@ function GenerateReport(props) {
                         prevStep={prevStep} 
                         nextStep={nextStep} 
                         setSelectedReport={setSelectedReport} 
+                        setReportValues={setReportValues}
                         dark={dark}
                     />)
                 case 2: 
@@ -116,6 +111,7 @@ function GenerateReport(props) {
                       prevStep={prevStep} 
                       nextStep={nextStep} 
                       setSelectedReport={setSelectedReport} 
+                      setReportValues={setReportValues}
                       dark={dark}
                     />)
                 case 7: 
@@ -136,11 +132,54 @@ function GenerateReport(props) {
                       setSelectedReport={setSelectedReport} 
                       dark={dark}
                     />)
+                case 9: 
+                    return( 
+                    <Report9
+                      {...props} 
+                      prevStep={prevStep} 
+                      nextStep={nextStep} 
+                      setSelectedReport={setSelectedReport} 
+                      dark={dark}
+                    />)   
+                case 10: 
+                    return( 
+                    <Report10
+                      {...props} 
+                      prevStep={prevStep} 
+                      nextStep={nextStep} 
+                      setSelectedReport={setSelectedReport} 
+                      dark={dark}
+                    />)   
+                case 11: 
+                    return( 
+                    <Report11
+                      {...props} 
+                      prevStep={prevStep} 
+                      nextStep={nextStep} 
+                      setSelectedReport={setSelectedReport} 
+                      dark={dark}
+                    />)
+                case 12: 
+                    return( 
+                    <Report12
+                      {...props} 
+                      prevStep={prevStep} 
+                      nextStep={nextStep} 
+                      setSelectedReport={setSelectedReport} 
+                      setReportValues={setReportValues}
+                      dark={dark}
+                    />)                           
             }    
             break;    
         case 3:
-            return <Success></Success>
-            
+            return(
+            <DisplayReport 
+              {...props} 
+              prevStep={prevStep}
+              selectedReport={selectedReport}
+              reportNumber={selectedReport}
+              reportValues={reportValues}
+            />)   
         }
       }
  
@@ -148,26 +187,35 @@ function GenerateReport(props) {
       <>
         <Container>
           <Segment padded raised inverted={dark}>
-          <Step.Group size="large">
-          {/* <Step active={step == 1}> */}
-          <Step>
-            <Icon name='clipboard outline' />
-            <Step.Content>
-              <Step.Title>Step 1: Report Selection</Step.Title>
-              <Step.Description>Please select a report</Step.Description>
-            </Step.Content>
-          </Step>
-          {/* <Step active={step == 2} > */}
-          <Step >
-            <Icon name='info' />
-            <Step.Content>
-              <Step.Title>Step 2: Report Info</Step.Title>
-              <Step.Description>Please fill in the required fields</Step.Description>
-            </Step.Content>
-          </Step>
-          </Step.Group>
-      {renderSwitch()}
-    </Segment>
+            <Step.Group widths={3} size='large'>
+            
+            <Step active={step == 1}>
+              <Icon name='clipboard outline' />
+              <Step.Content>
+                <Step.Title>Step 1: Report Selection</Step.Title>
+                <Step.Description>Please select a report</Step.Description>
+              </Step.Content>
+            </Step>
+
+            <Step active={step == 2}>
+              <Icon name='info' />
+              <Step.Content>
+                <Step.Title>Step 2: Report Info</Step.Title>
+                <Step.Description>Please fill in the required fields</Step.Description>
+              </Step.Content>
+            </Step>
+
+            <Step active={step == 3}>
+              <Icon name='numbered list' />
+              <Step.Content>
+                <Step.Title>Step 3: View Report</Step.Title>
+                <Step.Description>View the report</Step.Description>
+              </Step.Content>
+            </Step>
+
+            </Step.Group>
+            {renderSelectedReport()}
+          </Segment>
     </Container>
     </>
   )

@@ -14,47 +14,60 @@ import {
 
 const { getReport8or11File } = require('../../Util/CreateReportFile');
 
-function Report8(props) {
+function Report11(props) {
     const { dark, language } = props;
-    const { REPORTS,HOME } = TRANSLATIONS[`${language}`];
+    const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
 
-    const [report8Values, setreport8Values] = useState({
+    const [report11Values, setreport11Values] = useState({
         orderStatus: "",
         category: "",
         startDate: null,
-        endDate: null
+        endDate: null,
+        carrier: ""
     })
     function onChange(event, data) {  
         const { name, value } = data;
-        setreport8Values(prevState => ({ ...prevState, [name]: (value) }));
+        setreport11Values(prevState => ({ ...prevState, [name]: (value) }));
     }
 
     const onSubmit = async () => {
-      console.log(report8Values);
+      console.log(report11Values);
 
-      const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatus(report8Values.startDate, report8Values.endDate, report8Values.orderStatus, report8Values.category)
+      const orderData = await props.firebase.getAllFirebaseOrdersByOrderDateAndCategoryAndStatusAndCarrier(report11Values.startDate, report11Values.endDate, report11Values.orderStatus, report11Values.category, report11Values.carrier)
       console.log(orderData)
       if(orderData.length){
-        const file = await getReport8or11File(orderData, '8');
+        const file = await getReport8or11File(orderData, '11');
         props.firebase.saveReportToFirebase(file);
       }
     }
 
     useEffect(() => {
-        const report8Values = JSON.parse(localStorage.getItem('report8Values'));
-        if(report8Values) {
-            setreport8Values(report8Values);
+        const report11Values = JSON.parse(localStorage.getItem('report11Values'));
+        if(report11Values) {
+            setreport11Values(report11Values);
         }
       }, []);
 
     useEffect(() => {
-        localStorage.setItem('report8Values', JSON.stringify(report8Values));
-      }, [report8Values]);
+        localStorage.setItem('report11Values', JSON.stringify(report11Values));
+      }, [report11Values]);
     
   return (
     <>
-        <Header as="h2">{HOME.report8}</Header>
+        <Header as="h2">{HOME.report11}</Header>
         <Divider/>
+        <Header as="h3">Carrier</Header>
+        <Dropdown          
+          placeholder='Carrier'
+          name="carrier"
+          label="Carrier"
+          selection
+          size="large"
+          options={REPORTS.carrierType}
+          // icon="clipboard outline"
+          value={report11Values.carrier}
+          onChange={onChange}
+        />
         <Header as="h3">Order Status</Header>
         <Dropdown          
           placeholder='Order Status'
@@ -64,7 +77,7 @@ function Report8(props) {
           size="large"
           options={REPORTS.orderStatus}
           // icon="clipboard outline"
-          value={report8Values.orderStatus}
+          value={report11Values.orderStatus}
           onChange={onChange}
         />
         <Header as="h3">Category</Header>
@@ -76,7 +89,7 @@ function Report8(props) {
           size="large"
           options={REPORTS.category}
           // icon="clipboard outline"
-          value={report8Values.category}
+          value={report11Values.category}
           onChange={onChange}
         />
         <Header as="h3">Date Range of Order</Header>
@@ -108,12 +121,13 @@ function Report8(props) {
                   positive
                   disabled=
                   {
-                    !report8Values.category ||
-                    !report8Values.orderStatus ||
-                    report8Values.startDate==null ||
-                    report8Values.endDate==null ||
-                    report8Values.startDate=="null" ||
-                    report8Values.endDate=="null" 
+                    !report11Values.category ||
+                    !report11Values.carrier ||
+                    !report11Values.orderStatus ||
+                    report11Values.startDate==null ||
+                    report11Values.endDate==null ||
+                    report11Values.startDate=="null" ||
+                    report11Values.endDate=="null" 
                 } 
                   onClick={() => onSubmit()}
                   >Submit
@@ -125,4 +139,4 @@ function Report8(props) {
   );
 };
 
-export default Report8;
+export default Report11;

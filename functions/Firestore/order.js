@@ -1,15 +1,45 @@
-const { firestore } = require("../admin")
+const { firestore } = require("../admin");
 const axios = require('axios').default;
+const { getLSAPICredentials, getCalendlyCredentials } = require("../SecretManager/index")
 
-exports.addOrder = (req, res) => {
-    const { id, number, status, priceIncl, email, firstname, lastname, updatedAt, createdAt, products, shipmentTitle } = req.body.order;
+exports.addOrder = async (req, res) => {
+    let { id, number, status, priceIncl, email, firstname, lastname, updatedAt, createdAt, products, shipmentTitle } = req.body.order;
     let type;
 
     if(shipmentTitle.includes("Pickup")){
-        type = "pickup"
+        type = "pickup";
     }
     else if(shipmentTitle.includes("Delivery")){
-        type = "delivery"
+        type = "delivery";
+    }
+    else if(shipmentTitle.includes("Default Shipping")){
+        type = "mail";
+    }
+    let LS_APD_CREDENTIALS = await getLSAPICredentials()
+    let categories_products_endpoint = `https://${LS_APD_CREDENTIALS}@api.shoplightspeed.com/en/categories/products.json`
+    let categories_endpoint = `https://${LS_APD_CREDENTIALS}@api.shoplightspeed.com/en/categories`
+    let category_product = [];
+
+    await axios({ method:'get', url: categories_products_endpoint }).then((response) => {
+        category_product = response.data.categoriesProducts;
+    }).catch(() => {
+        return; 
+    });
+
+    products = products.resource.embedded;
+
+    for(const product of products){
+        const found = category_product.find(element => element.product.resource.id == product.product.resource.id);
+        if(found){
+            console.log('FOUND1' + found)
+            let categoryID = found.category.resource.id;
+            await axios({ method:'get', url: `${categories_endpoint}/${categoryID}.json` }).then((response) => {
+                product.category = response.data.category.fulltitle;
+                console.log('foundd cat' + response.data.category.fulltitle)
+            }).catch(() => {
+                return; 
+            });
+        }
     }
 
     const orderObject = {
@@ -23,7 +53,7 @@ exports.addOrder = (req, res) => {
         lastname,
         updatedAt: new Date(updatedAt),
         createdAt: new Date(createdAt),
-        products: products.resource.embedded,
+        products,
         shipmentTitle,
         type
     }
@@ -45,9 +75,9 @@ exports.addCalendlyInfo = async (req, res) => {
         startTime: '',
         locationName: ''
     }
-    const token = 'eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2F1dGguY2FsZW5kbHkuY29tIiwiaWF0IjoxNjM4ODE4NDUwLCJqdGkiOiJmY2I0ZjkyZC1kNTRhLTRkNWItOWVhMy05ZWM3ZDQwYmVmMzciLCJ1c2VyX3V1aWQiOiJFRENFR0o3WEdKTTVMN000In0.XFvqI511xLarGjllZFYhT96N1vlL-7EZMFsjF0aZiqg';
+    const calendly_token = await getCalendlyCredentials();
     
-    await axios({ method:'get', url: eventIdURL, headers: { "Authorization" : `Bearer ${token}` }}).then((response) => {
+    await axios({ method:'get', url: eventIdURL, headers: { "Authorization" : `Bearer ${calendly_token}` }}).then((response) => {
         calendlyEventDetails.startTime = response.data.resource.start_time;
         calendlyEventDetails.locationName = response.data.resource.name;
     }).catch(() => {

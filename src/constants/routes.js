@@ -4,6 +4,7 @@ export const SIGN_IN = "/signin";
 export const REPORTS = "/reports";
 // export const SPECIFIC_REPORT = "/specific-report/:reportID";
 export const GENERATE_REPORT = "/generate-report/";
+export const DISPLAY_REPORT = "/display-report/";
 export const ACCOUNT = "/account";
 export const ADMIN = "/admin";
 export const PASSWORD_FORGET = "/forgot-password";

@@ -2,6 +2,8 @@ import React from "react";
 import {
   Segment,
   List,
+  Button,
+  Divider
 } from "semantic-ui-react";
 
 import TRANSLATIONS from "../../constants/translation";
@@ -11,7 +13,7 @@ function ListOfReports(props) {
   const { dark, language } = props;
   const { HOME } = TRANSLATIONS[`${language}`];
   const ReportsIcon = "chart bar";
-  const reportsIndex = [1,2,3,7,8]
+  const reportsIndex = [1,2,3,7,8,9,10,11]
   // const reportsIndex = [1,2,3,4,5,6,7,8,9,10,11,12,13]
 
   const handleSelectedReport = (index) => {
@@ -42,6 +44,11 @@ function ListOfReports(props) {
         </div>
     ))    
     }
+    <Divider />
+     <Button 
+        onClick={() => props.history.push('reports')}
+      > Back to Reports
+      </Button>
     </Segment>
   );
 }
