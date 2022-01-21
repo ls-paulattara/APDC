@@ -29,29 +29,25 @@ function ListOfReports(props) {
       style={{ marginTop: 0, marginBottom: 0 }}
     >
 
-    {
-      reportsIndex.map((index) => (
-        <div key={index}>
-        <List selection divided size='huge' inverted={dark}>       
-        <List.Item onClick={() => handleSelectedReport(index)}>
-          <List.Icon name={ReportsIcon}/>
-          <List.Content>
-            <List.Header>{`${HOME["report" + index]}`}</List.Header>
-            <List.Description>{`${HOME["report" + index + "Description"]}`}</List.Description>
-          </List.Content>
-        </List.Item>
-        </List>
-        </div>
-    ))    
-    }
-    <Divider />
-     <Button 
-        onClick={() => props.history.push('reports')}
-      > Back to Reports
-      </Button>
+      {
+        reportsIndex.map((index) => (
+          <div key={index}>
+          <List selection divided size='huge' inverted={dark}>       
+          <List.Item onClick={() => handleSelectedReport(index)}>
+            <List.Icon name={ReportsIcon}/>
+            <List.Content>
+              <List.Header>{`${HOME["report" + index]}`}</List.Header>
+              <List.Description>{`${HOME["report" + index + "Description"]}`}</List.Description>
+            </List.Content>
+          </List.Item>
+          </List>
+          </div>
+      ))    
+      }
+      <Divider />
+      <Button content="Back" icon='left arrow' onClick={() => props.history.push('reports')}></Button>
     </Segment>
   );
 }
 
-// export default React.memo(Home);
 export default ListOfReports

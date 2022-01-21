@@ -1,73 +1,113 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import TRANSLATIONS from "../../constants/translation";
-import SemanticDatepicker from 'react-semantic-ui-datepickers';
-import 'react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css';
+import SemanticDatepicker from "react-semantic-ui-datepickers";
+import "react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css";
 
 import {
   Header,
   Grid,
   Divider,
   Button,
-  Input,
-  Dropdown
+  Dropdown,
+  Message,
+  Icon,
 } from "semantic-ui-react";
 
-const { getReport7or9or10File } = require('../../Util/CreateReportFile');
+const { getInitialDate } = require("../../Util/HelperFunctions");
+const { getReport7or9or10File } = require("../../Util/CreateReportFile");
 
 function Report10(props) {
-    const { dark, language } = props;
-    const { REPORTS,HOME } = TRANSLATIONS[`${language}`];
+  const { dark, language } = props;
+  const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
 
-    const [report10Values, setreport10Values] = useState({
-        orderStatus: "",
-        deliveryZone: "",
-        category: "",
-        startDate: null,
-        endDate: null
-    })
-    function onChange(event, data) {  
-        const { name, value } = data;
-        setreport10Values(prevState => ({ ...prevState, [name]: (value) }));
+  const [report10Values, setreport10Values] = useState({
+    orderStatus: "",
+    deliveryZone: "",
+    category: "",
+    startDate: null,
+    endDate: null,
+  });
+  const [error, setError] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const onChange = (event, data) => {
+    let { name, value } = data;
+    setreport10Values((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  const onSubmit = async () => {
+    console.log(report10Values);
+
+    const orderData =
+      await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatusAndLocation(
+        report10Values.startDate,
+        report10Values.endDate,
+        report10Values.orderStatus,
+        report10Values.category,
+        "delivery",
+        report10Values.deliveryZone
+      );
+    console.log(orderData);
+    if (orderData.length) {
+      setSuccess(true);
+      setError(false);
+      const file = await getReport7or9or10File(orderData, "10", report10Values);
+      props.firebase.saveReportToFirebase(file);
+      props.setReportValues(file);
+      props.nextStep();
+    } else {
+      setError(true);
     }
+  };
 
-    const onSubmit = async () => {
-      console.log(report10Values);
-
-      const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatusAndLocation(report10Values.startDate, report10Values.endDate, report10Values.orderStatus, report10Values.category, "delivery", report10Values.deliveryZone)
-      console.log(orderData)
-      if(orderData.length){
-        const file = await getReport7or9or10File(orderData,'10');
-        props.firebase.saveReportToFirebase(file);
-      }
+  useEffect(() => {
+    const report10Values = JSON.parse(localStorage.getItem("report10Values"));
+    if (report10Values) {
+      setreport10Values(report10Values);
     }
+  }, []);
 
-    useEffect(() => {
-        const report10Values = JSON.parse(localStorage.getItem('report10Values'));
-        if(report10Values) {
-            setreport10Values(report10Values);
-        }
-      }, []);
+  useEffect(() => {
+    localStorage.setItem("report10Values", JSON.stringify(report10Values));
+  }, [report10Values]);
 
-    useEffect(() => {
-        localStorage.setItem('report10Values', JSON.stringify(report10Values));
-      }, [report10Values]);
-    
+  const getErrorMessage = () =>
+    error ? (
+      <Message
+        negative
+        header="No results"
+        content="No results were found. Try again"
+      />
+    ) : (
+      ""
+    );
+  const getSuccessMessage = () =>
+    success ? (
+      <Message icon>
+        <Icon name="circle notched" loading />
+        <Message.Content>
+          <Message.Header>Just one second</Message.Header>
+          Generating your report
+        </Message.Content>
+      </Message>
+    ) : (
+      ""
+    );
+
   return (
     <>
-        <Header as="h2">{HOME.report10}</Header>
-        <Divider/>
-        <Header as="h3">Order Status</Header>
-        <Dropdown          
-          placeholder='Order Status'
-          name="orderStatus"
-          label="Order Status"
-          selection
-          size="large"
-          options={REPORTS.orderStatus}
-          // icon="clipboard outline"
-          value={report10Values.orderStatus}
-          onChange={onChange}
-        />
+      <Header as="h3">Order Status</Header>
+      <Dropdown
+        placeholder="Order Status"
+        name="orderStatus"
+        label="Order Status"
+        selection
+        size="large"
+        options={REPORTS.orderStatus}
+        // icon="clipboard outline"
+        value={report10Values.orderStatus}
+        onChange={onChange}
+      />
       <Header as="h3">Delivery Zone</Header>
       <Dropdown
         placeholder="Delivery Zone"
@@ -79,63 +119,64 @@ function Report10(props) {
         value={report10Values.deliveryZone}
         onChange={onChange}
       />
-        <Header as="h3">Category</Header>
-        <Dropdown          
-          placeholder='Category'
-          name="category"
-          label="Category"
-          selection
+      <Header as="h3">Category</Header>
+      <Dropdown
+        placeholder="Category"
+        name="category"
+        label="Category"
+        selection
+        size="large"
+        options={REPORTS.category}
+        // icon="clipboard outline"
+        value={report10Values.category}
+        onChange={onChange}
+      />
+      <Header as="h3">Date Range of Delivery</Header>
+      <Grid style={{ marginTop: "0", marginBottom: "0" }}>
+        <SemanticDatepicker
+          showToday
+          autoComplete="off"
+          name="startDate"
           size="large"
-          options={REPORTS.category}
-          // icon="clipboard outline"
-          value={report10Values.category}
           onChange={onChange}
+          value={getInitialDate(report10Values.startDate)}
         />
-        <Header as="h3">Date Range of Delivery</Header>
-        <SemanticDatepicker 
+        <SemanticDatepicker
           showToday
-          autoComplete="off" 
-          name="startDate" 
-          size="large" 
-          onChange={onChange} 
+          autoComplete="off"
+          name="endDate"
+          size="large"
+          onChange={onChange}
+          value={getInitialDate(report10Values.endDate)}
         />
-        <SemanticDatepicker 
-          showToday
-          autoComplete="off" 
-          name="endDate" 
-          size="large" 
-          onChange={onChange} 
-        />
-        <Divider />
-        <Grid>
-            <Grid.Row>
-              <Grid.Column width={4}>
-                <Button 
-                  onClick={() => props.prevStep()}
-                  >Back
-                </Button>
-              </Grid.Column>
-              <Grid.Column width={8}>
-                <Button 
-                  positive
-                  disabled=
-                  {
-                    !report10Values.category ||
-                    !report10Values.orderStatus ||
-                    !report10Values.deliveryZone ||
-                    report10Values.startDate==null ||
-                    report10Values.endDate==null ||
-                    report10Values.startDate=="null" ||
-                    report10Values.endDate=="null" 
-                } 
-                  onClick={() => onSubmit()}
-                  >Submit
-                </Button>
-              </Grid.Column>
-            </Grid.Row>
-        </Grid>
+      </Grid>
+      <Divider />
+      <Button
+        content="Back"
+        icon="left arrow"
+        size="large"
+        labelPosition="left"
+        onClick={() => props.prevStep()}
+      />
+      <Button
+        positive
+        content="Next"
+        icon="right arrow"
+        size="large"
+        labelPosition="right"
+        onClick={() => onSubmit()}
+        disabled={
+          !report10Values.category ||
+          !report10Values.orderStatus ||
+          !report10Values.deliveryZone ||
+          report10Values.startDate == null ||
+          report10Values.endDate == null
+        }
+      />
+      {getErrorMessage()}
+      {getSuccessMessage()}
     </>
   );
-};
+}
 
 export default Report10;

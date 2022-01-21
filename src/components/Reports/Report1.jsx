@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import TRANSLATIONS from "../../constants/translation";
-import SemanticDatepicker from 'react-semantic-ui-datepickers';
-import 'react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css';
+import SemanticDatepicker from "react-semantic-ui-datepickers";
+import "react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css";
 
 import {
   Header,
@@ -9,58 +9,95 @@ import {
   Divider,
   Button,
   Dropdown,
-  Message
+  Message,
+  Icon,
 } from "semantic-ui-react";
 
-const {getReport1or2File} = require('../../Util/CreateReportFile');
+const { getInitialDate } = require("../../Util/HelperFunctions");
+const { getReport1or2File } = require("../../Util/CreateReportFile");
 
 function Report1(props) {
-    const { dark, language } = props;
-    const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
+  const { dark, language } = props;
+  const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
 
-    const [report1Values, setreport1Values] = useState({
-        deliveryZone: "",
-        orderStatus: "",
-        startDate: null,
-        endDate: null
-    })
+  const [report1Values, setreport1Values] = useState({
+    deliveryZone: "",
+    orderStatus: "",
+    startDate: null,
+    endDate: null,
+  });
 
-    function onChange(event, data) {
-        const { name, value } = data;
-        setreport1Values(prevState => ({ ...prevState, [name]: (value) }));
-      }
+  const [error, setError] = useState(false);
+  const [success, setSuccess] = useState(false);
 
-    const onSubmit = async () => {
-        console.log(report1Values);
+  function onChange(event, data) {
+    const { name, value } = data;
+    setreport1Values((prevState) => ({ ...prevState, [name]: value }));
+  }
 
-        let orderData = [];
-        orderData = await props.firebase.getAllFirebaseOrdersByDateAndStatus(report1Values.startDate, report1Values.endDate, report1Values.orderStatus, "delivery", report1Values.deliveryZone)
-        console.log(orderData)
-        if(orderData.length){
-          const file = await getReport1or2File(orderData, '1');
-          const url = await props.firebase.saveReportToFirebase(file);
-          
-          props.setReportValues(file);
-          props.nextStep();
-        }
+  const onSubmit = async () => {
+    console.log(report1Values);
+
+    let orderData = [];
+    orderData = await props.firebase.getAllFirebaseOrdersByDateAndStatus(
+      report1Values.startDate,
+      report1Values.endDate,
+      report1Values.orderStatus,
+      "delivery",
+      "Any" /*report1Values.deliveryZone*/
+    );
+    console.log(orderData);
+    if (orderData.length) {
+      setSuccess(true);
+      setError(false);
+      const file = await getReport1or2File(orderData, "1", report1Values);
+      await props.firebase.saveReportToFirebase(file);
+      props.setReportValues(file);
+      props.nextStep();
+    } else {
+      setError(true);
     }
+  };
 
   useEffect(() => {
-      const report1Values = JSON.parse(localStorage.getItem('report1Values'));
-      if(report1Values) {
-          setreport1Values(report1Values);
-      }
-    }, []);
-    
+    const report1Values = JSON.parse(localStorage.getItem("report1Values"));
+    if (report1Values) {
+      setreport1Values(report1Values);
+    }
+  }, []);
+
   useEffect(() => {
-      localStorage.setItem('report1Values', JSON.stringify(report1Values));
-      console.log(report1Values);
-    }, [report1Values]);
+    localStorage.setItem("report1Values", JSON.stringify(report1Values));
+    console.log(report1Values);
+  }, [report1Values]);
+
+  const getErrorMessage = () =>
+    error ? (
+      <Message
+        negative
+        header="No results"
+        content="No results were found. Try again"
+      />
+    ) : (
+      ""
+    );
+  const getSuccessMessage = () =>
+    success ? (
+      <Message icon>
+        <Icon name="circle notched" loading />
+        <Message.Content>
+          <Message.Header>Just one second</Message.Header>
+          Generating your report
+        </Message.Content>
+      </Message>
+    ) : (
+      ""
+    );
 
   return (
     <>
-      <Header as="h2">{HOME.report1}</Header>
-      <Divider/>
+      {/* <Header as="h2">{HOME.report1}</Header>
+      <Divider /> */}
       <Header as="h3">Order Status</Header>
       <Dropdown
         placeholder="Order Status"
@@ -70,7 +107,7 @@ function Report1(props) {
         size="large"
         options={REPORTS.orderStatus}
         // icon="clipboard outline"
-        value={report1Values.orderStatus}        
+        value={report1Values.orderStatus}
         onChange={onChange}
       />
       <Header as="h3">Delivery Zone</Header>
@@ -88,78 +125,54 @@ function Report1(props) {
         label="Delivery Zone"
         selection
         size="large"
-        options={REPORTS.deliveryZone}
+        options={REPORTS.deliveryZoneWithoutAny}
         value={report1Values.deliveryZone}
         onChange={onChange}
       />
       <Header as="h3">Date Range of Delivery</Header>
-      <SemanticDatepicker 
-        showToday
-        autoComplete="off" 
-        name="startDate" 
-        size="large" 
-        onChange={onChange} 
-      />
-      <SemanticDatepicker 
-        showToday
-        autoComplete="off" 
-        name="endDate" 
-        size="large" 
-        onChange={onChange} 
-      />
-      {/* <Grid>
-          <Grid.Column computer={4} mobile={16}>
-              <SemanticDatepicker 
-              autoComplete="off" 
-              name="startDate" 
-              size="large" 
-              onChange={onChange} 
-          />
-          </Grid.Column>
-          <Grid.Column computer={4} mobile={16}>
-              <SemanticDatepicker 
-                  autoComplete="off" 
-                  name="endDate" 
-                  size="large" 
-                  onChange={onChange} 
-              />
-          </Grid.Column>
-      </Grid> */}
-      <Divider />
-      <Grid>
-          <Grid.Row>
-            <Grid.Column width={4}>
-              <Button 
-                onClick={() => props.prevStep()}
-                >Back
-              </Button>
-            </Grid.Column>
-            <Grid.Column width={8}>
-              <Button 
-                positive
-                disabled=
-                {
-                  !report1Values.deliveryZone ||
-                  !report1Values.orderStatus  || 
-                  report1Values.startDate=="null" ||
-                  report1Values.endDate=="null" ||
-                  report1Values.startDate==null ||
-                  report1Values.endDate==null 
-                } 
-                onClick={() => onSubmit()}
-                >Generate
-              </Button>
-            </Grid.Column>
-          </Grid.Row>
-
-          {/* <Grid.Row>
-          <Message negative floating>
-            <Message.Header>We're sorry we can't apply that discount</Message.Header>
-            </Message>
-          </Grid.Row> */}
+      <Grid style={{ marginTop: "0", marginBottom: "0" }}>
+        <SemanticDatepicker
+          showToday
+          autoComplete="off"
+          name="startDate"
+          size="large"
+          onChange={onChange}
+          value={getInitialDate(report1Values.startDate)}
+        />
+        <SemanticDatepicker
+          showToday
+          autoComplete="off"
+          name="endDate"
+          size="large"
+          onChange={onChange}
+          value={getInitialDate(report1Values.endDate)}
+        />
       </Grid>
+      <Divider />
+      <Button
+        content="Back"
+        icon="left arrow"
+        size="large"
+        labelPosition="left"
+        onClick={() => props.prevStep()}
+      />
+      <Button
+        positive
+        content="Next"
+        icon="right arrow"
+        size="large"
+        labelPosition="right"
+        onClick={() => onSubmit()}
+        disabled={
+          !report1Values.deliveryZone ||
+          !report1Values.orderStatus ||
+          report1Values.startDate == null ||
+          report1Values.endDate == null
+        }
+      />
+      {getErrorMessage()}
+      {getSuccessMessage()}
     </>
   );
-};
-
+}
 export default Report1;

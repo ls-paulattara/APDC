@@ -31,7 +31,7 @@ const TRANSLATIONS = {
       report10Description: `Shows the number of items in delivery on a given date as well as the total of this item, in a given delivery zone in PDF format.`,
       report11Description: `Shows total items sold on a given date in CSV format.`,
       report12Description: `Generates all the delivery tickets of a given date in a given delivery zone upon delivery in PDF format.`,
-      report13Description: `Generates all the delivery tickets of a given date at a given pickup point upon order pickup in PDF format.`
+      report13Description: `Generates all the delivery tickets of a given date at a given pickup point upon order pickup in PDF format.`,
     },
     NAVIGATION: {
       header: "header",
@@ -67,7 +67,7 @@ const TRANSLATIONS = {
       instagram: "Connect with us on Instagram",
       twitter: "Connect with us on Twitter",
       github: "View our projects on GitHub",
-      copyCompany:"Your Company"
+      copyCompany: "Your Company",
     },
     ACCOUNT: {
       heading: "Account Settings",
@@ -100,68 +100,238 @@ const TRANSLATIONS = {
       google: "Connect with Google",
       message: "Don't have an account? ",
     },
-    SIGNIN:{
-      header:"Sign In",
+    SIGNIN: {
+      header: "Sign In",
       email: "Email Address",
       password: "Password",
       or: "OR",
     },
     REPORTS: {
       orderStatus: [
-        { key: "1", text: "Any", value: "any" },
+        { key: "1", text: "Any", value: "Any" },
         { key: "2", text: "On Hold", value: "on_hold" },
-        { key: "3", text: "Processing Awaiting Payment", value: "processing_awaiting_payment" },
-        { key: "4", text: "Processing Awaiting Shipment", value: "processing_awaiting_shipment" },
-        { key: "5", text: "Processing Awaiting Pickup", value: "processing_awaiting_pickup" },
-        { key: "6", text: "Processing Ready for Pickup", value: "processing_ready_for_pickup" },
+        {
+          key: "3",
+          text: "Processing Awaiting Payment",
+          value: "processing_awaiting_payment",
+        },
+        {
+          key: "4",
+          text: "Processing Awaiting Shipment",
+          value: "processing_awaiting_shipment",
+        },
+        {
+          key: "5",
+          text: "Processing Awaiting Pickup",
+          value: "processing_awaiting_pickup",
+        },
+        {
+          key: "6",
+          text: "Processing Ready for Pickup",
+          value: "processing_ready_for_pickup",
+        },
         { key: "7", text: "Completed", value: "completed" },
         { key: "8", text: "Completed Shipped", value: "completed_shipped" },
         { key: "9", text: "Completed Picked Up", value: "completed_picked_up" },
         { key: "10", text: "Cancelled", value: "cancelled" },
       ],
       deliveryZone: [
-        { key: "1", text: "Any", value: "any" },
-        { key: "2", text: "Zone 1: Montréal-Centre", value: "Zone 1 Montreal-Centre" },
-        { key: "3", text: "Zone 2: Rive-Sud", value: "Zone 2 Rive-Sud" },
-        { key: "4", text: "Zone 3: Montréal Est", value: "Montréal Est" },
-        { key: "5", text: "Zone 4: Couronne-Nord", value: "Couronne-Nord" },
-        { key: "6", text: "Zone 5: Montréal Ouest", value: "Montréal Ouest" }
+        { key: "1", text: "Any", value: "Any" },
+        {
+          key: "2",
+          text: "Zone 1: Montréal-Centre",
+          value: "Delivery at Home in Montréal-Centre",
+        },
+        {
+          key: "3",
+          text: "Zone 2: Rive-Sud",
+          value: "Delivery at Home in Rive-Sud",
+        },
+        {
+          key: "4",
+          text: "Zone 3: Montréal Est",
+          value: "Delivery at Home in Montréal Est",
+        },
+        {
+          key: "5",
+          text: "Zone 4: Couronne-Nord",
+          value: "Delivery at home in Couronne-Nord",
+        },
+        {
+          key: "6",
+          text: "Zone 5: Montréal Ouest",
+          value: "Delivery at home in Montreal Ouest",
+        },
+      ],
+      deliveryZoneWithoutAny: [
+        {
+          key: "2",
+          text: "Zone 1: Montréal-Centre",
+          value: "Delivery at Home in Montréal-Centre",
+        },
+        {
+          key: "3",
+          text: "Zone 2: Rive-Sud",
+          value: "Delivery at Home in Rive-Sud",
+        },
+        {
+          key: "4",
+          text: "Zone 3: Montréal Est",
+          value: "Delivery at Home in Montréal Est",
+        },
+        {
+          key: "5",
+          text: "Zone 4: Couronne-Nord",
+          value: "Delivery at home in Couronne-Nord",
+        },
+        {
+          key: "6",
+          text: "Zone 5: Montréal Ouest",
+          value: "Delivery at home in Montreal Ouest",
+        },
       ],
       pickupPoint: [
-        { key: "1", text: "Any", value: "any" },
-        { key: "2", text: "Montreal", value: "Montréal Pickup Location" },
-        { key: "3", text: "Mirabel", value: "Montréy l-Centre" },
-        { key: "4", text: "Québec Centre", value: "onytréal-Centre" },
-        { key: "5", text: "Victoriaville", value: "Victoriaville Pickup Location" },
-        { key: "6", text: "Drummondville", value: "Moyntréal-jCentre" },
-        { key: "7", text: "Gatineau", value: "Montréal-Centtre" },
-        { key: "8", text: "Granby", value: "Montréalty-Centre" },
-        { key: "9", text: "Sherbrooke", value: "Sherbrooke Pickup Location" },
-        { key: "10", text: "Lévis", value: "Montréal-Cyiientre" },
-        { key: "11", text: "Buckingham", value: "Moyntryéal-Centre" },
-        { key: "12", text: "Saint-Hull", value: "Montréyal-Centre" },
-        { key: "13", text: "Shawinigan", value: "Montréal-tCentkkre" },
-        { key: "14", text: "Mont-Tremblant", value: "Monytréal-Centre" },
-        { key: "15", text: "Québec Marché", value: "Montréal-Ceuntre" },
+        { key: "1", text: "Any", value: "Any" },
+        {
+          key: "2",
+          text: "Victoriaville",
+          value: "Pickup: Bistro Le Lux - Victoriaville",
+        },
+        {
+          key: "3",
+          text: "Downtown Montreal",
+          value: "Pickup: Downtown Montreal - 540 avenue Duluth Est",
+        },
+        {
+          key: "4",
+          text: "Mirabel",
+          value: "Pickup: Cabane à Sucre Au Pied de Cochon - Mirabel",
+        },
+        {
+          key: "5",
+          text: "Mont-Tremblant",
+          value: "Pickup: Café et Bistro La Sandwicherie - Mont-Tremblant",
+        },
+        {
+          key: "6",
+          text: "Québec Grand Marché",
+          value: "Le Grand Marché de Québec - Québec City",
+        },
+        {
+          key: "7",
+          text: "Lévis",
+          value: "Pickup: Centre des congrès de Lévis - Lévis",
+        },
+        {
+          key: "8",
+          text: "Drummondville",
+          value: "Pickup: Doyon Després - Drummondville",
+        },
+        { key: "9", text: "Granby", value: "Pickup: Doyon Després - Granby" },
+        {
+          key: "10",
+          text: "Buckingham",
+          value: "Pickup: Fine et Fûtés - Buckingham",
+        },
+        {
+          key: "11",
+          text: "Saint-Hull",
+          value: "Pickup: La Boîte à Grains - Hull",
+        },
+        {
+          key: "12",
+          text: "Québec Centre Commercial",
+          value: "Pickup: Centre commercial Fleur de Lys - Quebec City",
+        },
+        { key: "13", text: "Saint-Saveur", value: "Pickup: Saint-Sauveur" },
+        { key: "14", text: "Shawinigan", value: "Pickup: Shawinigan" },
+        { key: "15", text: "Sherbrooke", value: "Pickup: Sherbrooke" },
+        { key: "16", text: "Gatineau", value: "Pickup: Victoriaville" },
       ],
+      pickupPointWithoutAny: [
+        {
+          key: "2",
+          text: "Victoriaville",
+          value: "Pickup: Bistro Le Lux - Victoriaville",
+        },
+        {
+          key: "3",
+          text: "Downtown Montreal",
+          value: "Pickup: Downtown Montreal - 540 avenue Duluth Est",
+        },
+        {
+          key: "4",
+          text: "Mirabel",
+          value: "Pickup: Cabane à Sucre Au Pied de Cochon - Mirabel",
+        },
+        {
+          key: "5",
+          text: "Mont-Tremblant",
+          value: "Pickup: Café et Bistro La Sandwicherie - Mont-Tremblant",
+        },
+        {
+          key: "6",
+          text: "Québec Grand Marché",
+          value: "Le Grand Marché de Québec - Québec City",
+        },
+        {
+          key: "7",
+          text: "Lévis",
+          value: "Pickup: Centre des congrès de Lévis - Lévis",
+        },
+        {
+          key: "8",
+          text: "Drummondville",
+          value: "Pickup: Doyon Després - Drummondville",
+        },
+        { key: "9", text: "Granby", value: "Pickup: Doyon Després - Granby" },
+        {
+          key: "10",
+          text: "Buckingham",
+          value: "Pickup: Fine et Fûtés - Buckingham",
+        },
+        {
+          key: "11",
+          text: "Saint-Hull",
+          value: "Pickup: La Boîte à Grains - Hull",
+        },
+        {
+          key: "12",
+          text: "Québec Centre Commercial",
+          value: "Pickup: Centre commercial Fleur de Lys - Quebec City",
+        },
+        { key: "13", text: "Saint-Saveur", value: "Pickup: Saint-Sauveur" },
+        { key: "14", text: "Shawinigan", value: "Pickup: Shawinigan" },
+        { key: "15", text: "Sherbrooke", value: "Pickup: Sherbrooke" },
+        { key: "16", text: "Gatineau", value: "Pickup: Victoriaville" },
+      ],
+      // 1
+      // 2
+      // 3
+      // 4
+      // 5
+      // 6
+      // 7
+      // 8
+      // 9
       carrierType: [
-        { key: "1", text: "Any", value: "any" },
+        { key: "1", text: "Any", value: "Any" },
         { key: "2", text: "Delivery", value: "delivery" },
         { key: "3", text: "Pickup", value: "pickup" },
         { key: "4", text: "Mail", value: "mail" },
       ],
       category: [
-        { key: "1", text: "Any", value: "any" },
+        { key: "1", text: "Any", value: "Any" },
         { key: "2", text: "Ciders", value: "Ciders" },
         { key: "3", text: "Apparel", value: "Apparel" },
         { key: "4", text: "Pantry", value: "Pantry" },
         { key: "5", text: "Maple Products", value: "Maple Products" },
         { key: "6", text: "Frozen Products", value: "Frozen Products" },
         { key: "7", text: "Library", value: "Library" },
-        { key: "8", text: "Gift Ideas", value: "Gift Ideas" },        
-        { key: "9", text: "Spirits", value: "Spirits" }
-      ]
-    }
+        { key: "8", text: "Gift Ideas", value: "Gift Ideas" },
+        { key: "9", text: "Spirits", value: "Spirits" },
+      ],
+    },
   },
   FR: {
     GLOBAL: {
@@ -195,7 +365,7 @@ const TRANSLATIONS = {
       report10Description: `Shows the number of items in delivery on a given date as well as the total of this item, in a given delivery zone in PDF format.`,
       report11Description: `Shows total items sold on a given date in CSV format.`,
       report12Description: `Generates all the delivery tickets of a given date in a given delivery zone upon delivery in PDF format.`,
-      report13Description: `Generates all the delivery tickets of a given date at a given pickup point upon order pickup in PDF format.`
+      report13Description: `Generates all the delivery tickets of a given date at a given pickup point upon order pickup in PDF format.`,
     },
     NAVIGATION: {
       header: "header",
@@ -231,7 +401,7 @@ const TRANSLATIONS = {
       instagram: "Suivez-nous sur Instagram",
       twitter: "Suivez-nous sur Twitter",
       github: "Consultez nos projets sur GitHub",
-      copyCompany:"Votre Entreprise"
+      copyCompany: "Votre Entreprise",
     },
     ACCOUNT: {
       heading: "Paramètres du compte",
@@ -265,25 +435,41 @@ const TRANSLATIONS = {
       message: "Vous n'avez pas de compte ? ",
     },
     SIGNIN: {
-      header:"Connexion",
+      header: "Connexion",
       email: "Courriel",
       password: "Mot de passe",
       or: "OU",
     },
     REPORTS: {
       orderStatus: [
-        { key: "1", text: "Any", value: "any" },
+        { key: "1", text: "Any", value: "Any" },
         { key: "2", text: "On Hold", value: "on_hold" },
-        { key: "3", text: "Processing Awaiting Payment", value: "processing_awaiting_payment" },
-        { key: "4", text: "Processing Awaiting Shipment", value: "processing_awaiting_shipment" },
-        { key: "5", text: "Processing Awaiting Pickup", value: "processing_awaiting_pickup" },
-        { key: "6", text: "Processing Ready for Pickup", value: "processing_ready_for_pickup" },
+        {
+          key: "3",
+          text: "Processing Awaiting Payment",
+          value: "processing_awaiting_payment",
+        },
+        {
+          key: "4",
+          text: "Processing Awaiting Shipment",
+          value: "processing_awaiting_shipment",
+        },
+        {
+          key: "5",
+          text: "Processing Awaiting Pickup",
+          value: "processing_awaiting_pickup",
+        },
+        {
+          key: "6",
+          text: "Processing Ready for Pickup",
+          value: "processing_ready_for_pickup",
+        },
         { key: "7", text: "Completed", value: "completed" },
         { key: "8", text: "Completed Shipped", value: "completed_shipped" },
         { key: "9", text: "Completed Picked Up", value: "completed_picked_up" },
         { key: "10", text: "Cancelled", value: "cancelled" },
-      ]
-    }
-  }
+      ],
+    },
+  },
 };
 export default TRANSLATIONS;
