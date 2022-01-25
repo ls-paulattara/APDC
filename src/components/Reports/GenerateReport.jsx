@@ -223,6 +223,7 @@ function GenerateReport(props) {
               selectedReport={selectedReport}
               reportNumber={selectedReport}
               reportValues={reportValues}
+              setStep={setStep}
             />
           </>
         );
@@ -231,10 +232,15 @@ function GenerateReport(props) {
 
   return (
     <>
+      {/* <Divider
+          inverted={dark}
+          hidden={!dark}
+          style={{ margin: "1rem", marginBottom: "0rem" }}
+        /> */}
       <Container>
-        <Segment padded raised inverted={dark}>
+        <Segment padded inverted={dark}>
           <Step.Group widths={3} size="large">
-            <Step active={step == 1}>
+            <Step active={step == 1} completed={step > 1}>
               <Icon name="clipboard outline" />
               <Step.Content>
                 <Step.Title>Step 1: Report Selection</Step.Title>
@@ -242,7 +248,7 @@ function GenerateReport(props) {
               </Step.Content>
             </Step>
 
-            <Step active={step == 2}>
+            <Step active={step == 2} completed={step > 2}>
               <Icon name="info" />
               <Step.Content>
                 <Step.Title>Step 2: Report Info</Step.Title>

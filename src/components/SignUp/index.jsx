@@ -15,7 +15,7 @@ import {
 import { withFirebase } from "../Firebase";
 import * as ROUTES from "../../constants/routes";
 import * as ROLES from "../../constants/roles";
-import logo from "../../media/Logo_500.webp";
+// import logo from "../../media/Logo_500.webp";
 import { SignInGoogle } from "../SignIn";
 import TRANSLATIONS from "../../constants/translation";
 
@@ -36,10 +36,10 @@ const SignUpPage = (props) => {
       >
         <Grid.Column style={{ maxWidth: 450 }}>
           <Header as="h2" textAlign="center" inverted={dark}>
-            <Image src={logo} loading="lazy" size="small" alt="Logo" width="33" height="48" />{SIGNUP.header}
+            {/* <Image src={logo} loading="lazy" size="small" alt="Logo" width="33" height="48" />{SIGNUP.header} */}
           </Header>
           <SignUpForm {...props} />
-          <SignUpLink dark={dark} SIGNUP={SIGNUP}  />
+          <SignUpLink dark={dark} SIGNUP={SIGNUP} />
         </Grid.Column>
       </Grid>
     </Segment>
@@ -65,13 +65,7 @@ class SignUpFormBase extends Component {
   }
 
   onSubmit = (event) => {
-    const {
-      firstName,
-      lastName,
-      email,
-      passwordOne,
-      phoneNumber,
-    } = this.state;
+    const { firstName, lastName, email, passwordOne, phoneNumber } = this.state;
     const roles = {};
     roles[ROLES.CUSTOMER] = ROLES.CUSTOMER;
     const adminEmail = new RegExp("@lightspeedhq.com");
@@ -93,8 +87,8 @@ class SignUpFormBase extends Component {
             displayName,
             phoneNumber,
             email,
-            isAuthorized:adminEmail.test(email),
-            enabled:adminEmail.test(email),
+            isAuthorized: adminEmail.test(email),
+            enabled: adminEmail.test(email),
             roles,
           });
         })
@@ -145,7 +139,7 @@ class SignUpFormBase extends Component {
     return (
       <Container fluid>
         <Form
-          error={error ?true :false}
+          error={error ? true : false}
           size="large"
           onSubmit={this.onSubmit}
           inverted={dark}
@@ -248,7 +242,7 @@ class SignUpFormBase extends Component {
 const SignUpLink = (props) => {
   const { dark, SIGNUP } = props;
   return (
-    <Message  color={dark ? "black" : null}>
+    <Message color={dark ? "black" : null}>
       {SIGNUP.message}
       <Link to={ROUTES.SIGN_UP} style={{ color: dark ? "#A7A7A7" : "#0051a0" }}>
         {SIGNUP.signUp}

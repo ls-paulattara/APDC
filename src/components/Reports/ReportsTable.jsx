@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useEffect } from 'react';
+import React, { useState, useLayoutEffect, useEffect } from "react";
 import _ from "lodash";
 import {
   Header,
@@ -15,23 +15,22 @@ import {
 import { isMobileOnly } from "react-device-detect";
 
 function ReportsTable(props) {
-    const { dark, language } = props;
+  const { dark, language } = props;
 
-    const [documents, setDocuments] = useState([]);
-    const [error, setError] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [column, setColumn] = useState(null);
-    const [direction, setDirection] = useState(null);
-    const [sorted, setSorted] = useState(null);
+  const [documents, setDocuments] = useState([]);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [column, setColumn] = useState(null);
+  const [direction, setDirection] = useState(null);
+  const [sorted, setSorted] = useState(null);
 
   useEffect(() => {
-  
     setLoading(true);
 
     let documentArray = [];
 
     const storageRef = props.firebase.storageRef().child("reports");
-    
+
     const getStorageItems = async (storageRef) => {
       const list = await storageRef.listAll();
       let promises = [];
@@ -44,43 +43,48 @@ function ReportsTable(props) {
             })
             .catch((error) => {
               console.log(error);
-              setError(error );
+              setError(error);
             })
         );
       });
+
       Promise.all(promises).then(() => {
-       setDocuments(documentArray);
-       setLoading(false);        
-    //    if (sorted === null) {
+        documentArray.sort(function (a, b) {
+          return new Date(b.timeCreated) - new Date(a.timeCreated);
+        });
+
+        setDocuments(documentArray);
+        setLoading(false);
+        //    if (sorted === null) {
         setSorted(documentArray);
         // setColumn("timeCreated")
         // setDirection("descending")
-    //   }
+        //   }
       });
     };
     getStorageItems(storageRef);
-}, []);
-useEffect(() => {
-    console.log(sorted)
-}, [sorted]);
+  }, []);
+
+  // useEffect(() => {
+  //   console.log(sorted);
+  // }, [sorted]);
 
   useLayoutEffect(() => {
     return () => {
-        setLoading(false);
-    }
-}, [])
+      setLoading(false);
+    };
+  }, []);
 
   const onSort = (e, data) => {
     let name = e.currentTarget.dataset.name;
 
     if (column === name) {
-        setDirection(direction === "ascending" ? "descending" : "ascending");
-        setSorted(sorted.reverse());
-
+      setDirection(direction === "ascending" ? "descending" : "ascending");
+      setSorted(sorted.reverse());
     } else {
-        setColumn(name);
-        setDirection("ascending");
-        setSorted(_.sortBy(documents, [name]));
+      setColumn(name);
+      setDirection("ascending");
+      setSorted(_.sortBy(documents, [name]));
     }
   };
 
@@ -105,16 +109,16 @@ useEffect(() => {
       });
   };
 
-const DocumentHeader = (props) => {
+  const DocumentHeader = (props) => {
     const { dark } = props;
     return (
-      <Header as="h2" icon textAlign="center" inverted={dark}>
+      <Header as="h1" icon textAlign="center" inverted={dark}>
         <Icon name="file alternate outline" size="massive" inverted={dark} />
         Your Reports
       </Header>
     );
   };
-  
+
   const DocumentTable = (props) => {
     const { sorted, dark, column, onSort, direction, downloadFile } = props;
     return (
@@ -193,7 +197,7 @@ const DocumentHeader = (props) => {
       </Table>
     );
   };
-  
+
   const DocumentCards = (props) => {
     const { sorted, dark, downloadFile } = props;
     return (
@@ -213,7 +217,7 @@ const DocumentHeader = (props) => {
                   style={{ marginBottom: "0.3em", marginTop: "0.3em" }}
                 />
               </div>
-  
+
               <Card.Content>
                 <Card.Header>
                   {document.name.split(".").slice(0, -1).join(" ")}
@@ -241,43 +245,42 @@ const DocumentHeader = (props) => {
     );
   };
 
-    return (
-      <Container fluid>
-        <Segment fluid="true" basic inverted={dark} style={{ margin: 0 }}>
-          <Divider hidden />
-          {documents && <DocumentHeader dark={dark} />}
-          {error && <Message error content={error.message} />}
-          <Divider inverted={dark} />
-        </Segment>
-        <Segment
-          fluid="true"
-          basic
-          loading={loading}
-          inverted={dark}
-          style={{ minHeight: "50vh", margin: 0 }}
-        >
-          {!isMobileOnly && sorted && (
-            <DocumentTable
-              dark={dark}
-              sorted={sorted}
-              column={column}
-              direction={direction}
-              onSort={onSort}
-              downloadFile={downloadFile}
-            />
-          )}
-          {isMobileOnly && sorted && (
-            <DocumentCards
-              dark={dark}
-              sorted={sorted}
-              downloadFile={downloadFile}
-            />
-          )}
-        </Segment>
+  return (
+    <Container fluid>
+      <Segment fluid="true" basic inverted={dark} style={{ margin: 0 }}>
         <Divider hidden />
-      </Container>
-    );
-
+        {documents && <DocumentHeader dark={dark} />}
+        {error && <Message error content={error.message} />}
+        {/* <Divider inverted={dark} /> */}
+      </Segment>
+      <Segment
+        fluid="true"
+        basic
+        loading={loading}
+        inverted={dark}
+        style={{ minHeight: "50vh", margin: 0 }}
+      >
+        {!isMobileOnly && sorted && (
+          <DocumentTable
+            dark={dark}
+            sorted={sorted}
+            column={column}
+            direction={direction}
+            onSort={onSort}
+            downloadFile={downloadFile}
+          />
+        )}
+        {isMobileOnly && sorted && (
+          <DocumentCards
+            dark={dark}
+            sorted={sorted}
+            downloadFile={downloadFile}
+          />
+        )}
+      </Segment>
+      <Divider hidden />
+    </Container>
+  );
 }
 
 export default ReportsTable;

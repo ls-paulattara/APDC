@@ -23,8 +23,8 @@ function Report7(props) {
   const [report7Values, setreport7Values] = useState({
     orderStatus: "",
     category: "",
-    startDate: "null",
-    endDate: "null",
+    startDate: null,
+    endDate: null,
   });
 
   const [error, setError] = useState(false);

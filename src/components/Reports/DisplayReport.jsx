@@ -35,7 +35,7 @@ function DisplayReport(props) {
   const [numPages, setNumPages] = useState(null);
   const [pageNum, setPageNum] = useState(1);
 
-  function renderReport() {
+  const renderReport = () => {
     if ([1, 2, 3, 7, 8, 9, 10, 11].includes(props.selectedReport)) {
       return (
         // option 1: all pages stacked one on top of another
@@ -85,7 +85,7 @@ function DisplayReport(props) {
     } else if ([12, 13].includes(props.selectedReport)) {
       return props.reportValues;
     }
-  }
+  };
   const downloadFile = (blob) => {
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -95,7 +95,7 @@ function DisplayReport(props) {
     link.remove();
   };
 
-  async function downloadReport() {
+  const downloadReport = async () => {
     if ([1, 2, 3, 7, 8, 9, 10, 11].includes(props.selectedReport)) {
       downloadFile(props.reportValues);
     } else if ([12, 13].includes(props.selectedReport)) {
@@ -113,8 +113,11 @@ function DisplayReport(props) {
       //   </Page>
       // </Document>
     }
-  }
-
+  };
+  const generateNewReport = () => {
+    props.setStep(1);
+    window.scrollTo(0, 0);
+  };
   return (
     <>
       <Container textAlign="center">
@@ -135,6 +138,15 @@ function DisplayReport(props) {
         size="large"
         labelPosition="right"
         onClick={() => downloadReport()}
+      />
+      <Button
+        // positive
+        // basic
+        content="Generate New Report"
+        // icon="download"
+        size="large"
+        // labelPosition="right"
+        onClick={generateNewReport}
       />
     </>
   );

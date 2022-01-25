@@ -60,14 +60,13 @@ const TRANSLATIONS = {
       location: "Our Location",
       blog: "Our Blog",
       events: "Our Events",
-      h3: "Company Tagline",
-      subheader:
-        "We offer complex business solutions to keep you on the bleeding edge of technology. We can provide you with consultation that will help grow your audience and profits.",
+      h3: "Au Pied De Cochon",
+      subheader: "Reporting App Built By Lightspeed",
       facebook: "Connect with us on Facebook",
       instagram: "Connect with us on Instagram",
       twitter: "Connect with us on Twitter",
       github: "View our projects on GitHub",
-      copyCompany: "Your Company",
+      copyCompany: "Au Pied De Cochon",
     },
     ACCOUNT: {
       heading: "Account Settings",

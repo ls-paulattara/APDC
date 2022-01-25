@@ -9,7 +9,7 @@ import {
   Segment,
   Icon,
 } from "semantic-ui-react";
-import logo from "../../media/Logo_500.webp";
+// import logo from "../../media/Logo_500.webp";
 import { NavLink } from "react-router-dom";
 
 import { withFirebase } from "../Firebase";
@@ -31,7 +31,7 @@ const PasswordForgetPage = (props) => {
       >
         <Grid.Column style={{ maxWidth: 450 }}>
           <Header as="h2" textAlign="center" inverted={dark}>
-            <Image src={logo} size="tiny" /> Reset Password
+            {/* <Image src={logo} size="tiny" /> Reset Password */}
           </Header>
           <PasswordForgetForm {...props} />
         </Grid.Column>

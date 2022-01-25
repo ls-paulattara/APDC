@@ -12,7 +12,7 @@ import {
   Divider,
   Form,
 } from "semantic-ui-react";
-import logo from "../../media/Logo_500.webp";
+// import logo from "../../media/Logo_500.webp";
 
 import { PasswordForgetLink } from "../PasswordForget";
 import { withFirebase } from "../Firebase";
@@ -21,7 +21,7 @@ import * as ROLES from "../../constants/roles";
 import TRANSLATIONS from "../../constants/translation";
 
 const SignInPage = (props) => {
-  const {language} = props;
+  const { language } = props;
   const { SIGNUP, SIGNIN } = TRANSLATIONS[`${language}`];
   return (
     <Segment basic inverted={props.dark} fluid="true" style={{ margin: 0 }}>
@@ -33,12 +33,12 @@ const SignInPage = (props) => {
         >
           <Grid.Column style={{ maxWidth: 450 }}>
             <Header as="h2" textAlign="center" inverted={props.dark}>
-              <Image src={logo} size="medium" /> {SIGNIN.header}
+              {/* <Image src={logo} size="medium" /> {SIGNIN.header} */}
             </Header>
             <Segment stacked inverted={props.dark}>
-              <SignInForm {...props} SIGNIN={SIGNIN}/>
+              <SignInForm {...props} SIGNIN={SIGNIN} />
               <Divider horizontal inverted={props.dark}>
-              {SIGNIN.or}
+                {SIGNIN.or}
               </Divider>
               <SignInGoogle {...props} SIGNUP={SIGNUP} />
               <Divider hidden inverted={props.dark} horizontal>
@@ -241,7 +241,7 @@ class SignInFormBase extends Component {
           inverted={dark}
           basic={dark}
         >
-         {SIGNIN.header}
+          {SIGNIN.header}
         </Button>
       </Form>
     );
