@@ -15,9 +15,6 @@ import {
 
 import { Document, pdfjs, Page } from "react-pdf";
 import "./display-report-styles.css";
-import $ from "jquery";
-import html2canvas from "html2canvas";
-import PSPDFKit from "./PSPDFKit";
 
 const Papa = require("papaparse");
 const fs = require("fs");

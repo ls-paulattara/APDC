@@ -30,7 +30,9 @@ class Firebase {
     this.googleProvider = new app.auth.GoogleAuthProvider();
     this.analytics = app.analytics();
     this.performance = app.performance();
+    this.orderDB = "orders";
   }
+
   // *** Auth API - Create Account ***
   doCreateUserWithEmailAndPassword = (email, password) =>
     this.auth.createUserWithEmailAndPassword(email, password);
@@ -45,6 +47,8 @@ class Firebase {
 
   // *** AUTH API - Sign In With Google ***
   doSignInWithGoogle = () => this.auth.signInWithPopup(this.googleProvider);
+
+  deleteCurrentSignInAttempt = () => this.auth.currentUser.delete();
 
   // *** Auth API - UpdateUser
   updateProfile = ({ displayName, phoneNumber }) =>
@@ -72,10 +76,24 @@ class Firebase {
       const timeout = (ms) => {
         return new Promise((resolve) => setTimeout(resolve, ms));
       };
+      // console.log(authUser);
+
+      // detect if the sign in was cancelled. If so, then exit
+      // if (authUser == null) {
+      //   return;
+      // }
+
       if (authUser) {
+        const isValid =
+          authUser.email.endsWith("@pieddecochon.ca") ||
+          authUser.email.endsWith("@lightspeedhq.com");
+
+        if (!isValid) {
+          return;
+        }
         const userRef = this.user(authUser.uid);
         await timeout(1000);
-        // console.log('i waited')
+        // console.log("i waited");
         const userGet = await userRef.get();
         const dbUser = await userGet.val();
         if (dbUser === null) {
@@ -105,8 +123,11 @@ class Firebase {
   // *** User API - all Users ***
   users = () => this.db.ref("users");
 
+  // orderDB = "orders";
+  // orderDB = "apdc_orders";
+
   // ORDERS
-  orders = () => this.db.ref("orders");
+  orders = () => this.db.ref(this.orderDB);
 
   storageRef = () => this.storage.ref();
 
@@ -121,7 +142,7 @@ class Firebase {
 
     return this.storage
       .ref()
-      .child("reports/" + file.name)
+      .child("Reports/" + file.name)
       .put(file, metadata)
       .then(function (snapshot) {
         console.log("Uploaded", snapshot.totalBytes, "bytes.");
@@ -165,7 +186,7 @@ class Firebase {
     var jsonvalue = [];
 
     return this.firestore
-      .collection("orders")
+      .collection(this.orderDB)
       .where("createdAt", ">=", start2)
       .where("createdAt", "<=", end2)
       .get()
@@ -200,7 +221,7 @@ class Firebase {
       .toDate();
     var jsonvalue = [];
 
-    let query = this.firestore.collection("orders");
+    let query = this.firestore.collection(this.orderDB);
     if (orderType != "all") {
       query = query.where("type", "==", orderType);
     }
@@ -243,7 +264,7 @@ class Firebase {
       .toDate();
     var jsonvalue = [];
 
-    let query = this.firestore.collection("orders");
+    let query = this.firestore.collection(this.orderDB);
     if (status != "Any") {
       query = query.where("status", "==", status);
     }
@@ -319,7 +340,7 @@ class Firebase {
       .toDate();
     var jsonvalue = [];
 
-    let query = this.firestore.collection("orders");
+    let query = this.firestore.collection(this.orderDB);
     if (orderType != "all") {
       query = query.where("type", "==", orderType);
     }
@@ -379,7 +400,7 @@ class Firebase {
       .toDate();
     var jsonvalue = [];
 
-    let query = this.firestore.collection("orders");
+    let query = this.firestore.collection(this.orderDB);
     if (carrier != "Any") {
       query = query.where("type", "==", carrier);
     }
@@ -453,7 +474,7 @@ class Firebase {
       .toDate();
     var jsonvalue = [];
 
-    let query = this.firestore.collection("orders");
+    let query = this.firestore.collection(this.orderDB);
     if (orderType != "all") {
       query = query.where("type", "==", orderType);
     }

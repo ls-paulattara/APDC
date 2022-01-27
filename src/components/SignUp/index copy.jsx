@@ -18,7 +18,6 @@ import * as ROLES from "../../constants/roles";
 // import logo from "../../media/Logo_500.webp";
 import { SignInGoogle } from "../SignIn";
 import TRANSLATIONS from "../../constants/translation";
-import id from "date-fns/esm/locale/id/index.js";
 
 const SignUpPage = (props) => {
   const { dark, language } = props;
@@ -32,7 +31,7 @@ const SignUpPage = (props) => {
     >
       <Grid
         textAlign="center"
-        // style={{ height: "100vh" }}
+        style={{ height: "100vh" }}
         verticalAlign="middle"
       >
         <Grid.Column style={{ maxWidth: 450 }}>
@@ -40,7 +39,7 @@ const SignUpPage = (props) => {
             {/* <Image src={logo} loading="lazy" size="small" alt="Logo" width="33" height="48" />{SIGNUP.header} */}
           </Header>
           <SignUpForm {...props} />
-          {/* <SignUpLink dark={dark} SIGNUP={SIGNUP} /> */}
+          <SignUpLink dark={dark} SIGNUP={SIGNUP} />
         </Grid.Column>
       </Grid>
     </Segment>
@@ -65,49 +64,13 @@ class SignUpFormBase extends Component {
     this.state = { ...INITIAL_STATE };
   }
 
-  // catherinemd@pieddecochon.ca
-  // info@pieddecochon.ca
-  // boutique@pieddecochon.ca
-  // marcb@pieddecochon.ca
-  // martinp@pieddecochon.ca
-  // vincentdl@pieddecochon.ca
-  // philippel@pieddecochon.ca
-  // livraisons@pieddecochon.ca
-  // comptabilite@pieddecochon.ca
-
   onSubmit = (event) => {
     const { firstName, lastName, email, passwordOne, phoneNumber } = this.state;
     const roles = {};
-    // roles[ROLES.CUSTOMER] = ROLES.CUSTOMER;
-    const adminEmail1 = new RegExp("@lightspeedhq.com");
-    const adminEmail2 = new RegExp("@pieddecochon.ca");
+    roles[ROLES.CUSTOMER] = ROLES.CUSTOMER;
+    const adminEmail = new RegExp("@lightspeedhq.com");
     const displayName = `${firstName} ${lastName}`;
     const isnum = /^\d+$/.test(phoneNumber);
-    const adminEmails = [
-      "catherinemd@pieddecochon.ca",
-      "info@pieddecochon.ca",
-      "marcb@pieddecochon.ca",
-    ];
-    // const isAPDCAccount =
-    //   email.endsWith("@pieddecochon.ca") || email.endsWith("@lightspeedhq.com");
-
-    // console.log("Email is either LS or APDC?", isAPDCAccount);
-
-    // add roles
-    if (adminEmails.includes(email) || email.endsWith("@lightspeedhq.com")) {
-      roles[ROLES.ADMIN] = ROLES.ADMIN;
-    } else if (email.endsWith("@pieddecochon.ca")) {
-      roles[ROLES.STAFF] = ROLES.STAFF;
-    } else {
-      this.setState({
-        error: {
-          message:
-            "Please ensure your email is an email in the following format: '@pieddecochon.ca'",
-        },
-      });
-      return;
-    }
-
     if (!isnum && phoneNumber.length > 0) {
       this.setState({
         error: {
@@ -124,8 +87,8 @@ class SignUpFormBase extends Component {
             displayName,
             phoneNumber,
             email,
-            isAuthorized: adminEmail1.test(email) || adminEmail2.test(email),
-            enabled: adminEmail1.test(email) || adminEmail2.test(email),
+            isAuthorized: adminEmail.test(email),
+            enabled: adminEmail.test(email),
             roles,
           });
         })
@@ -276,8 +239,20 @@ class SignUpFormBase extends Component {
   }
 }
 
+const SignUpLink = (props) => {
+  const { dark, SIGNUP } = props;
+  return (
+    <Message color={dark ? "black" : null}>
+      {SIGNUP.message}
+      <Link to={ROUTES.SIGN_UP} style={{ color: dark ? "#A7A7A7" : "#0051a0" }}>
+        {SIGNUP.signUp}
+      </Link>
+    </Message>
+  );
+};
+
 const SignUpForm = compose(withRouter, withFirebase)(SignUpFormBase);
 
 export default SignUpPage;
 
-export { SignUpForm };
+export { SignUpForm, SignUpLink };

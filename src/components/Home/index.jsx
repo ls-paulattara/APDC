@@ -49,11 +49,11 @@ const Home = (props) => {
           inverted={dark}
           content="APDC Reporting App"
         />
-        <Transition {...props} visible animation="scale">
-          <Container>
-            <Image centered size="large" src={cart_pic} />
-          </Container>
-        </Transition>
+        {/* <Transition {...props} visible animation="scale"> */}
+        {/* <Container> */}
+        <Image centered size="large" src={cart_pic} />
+        {/* </Container> */}
+        {/* </Transition> */}
 
         {/* <Header as='h2' icon textAlign='center'>
       <Icon name='clipboard outline' circular />
@@ -61,7 +61,7 @@ const Home = (props) => {
     </Header> */}
         <AuthUserContext.Consumer>
           {(authUser) => {
-            console.log(!!authUser);
+            // console.log(!!authUser);
             return !!authUser ? (
               <Button
                 as={Link}

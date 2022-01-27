@@ -2,6 +2,7 @@ const { firestore } = require("../admin");
 const axios = require("axios").default;
 const {
   getLSAPICredentials,
+  getLiveLSAPICredentials,
   getCalendlyCredentials,
 } = require("../SecretManager/index");
 
@@ -28,9 +29,13 @@ exports.addOrder = async (req, res) => {
   } else if (shipmentTitle.includes("Default Shipping")) {
     type = "mail";
   }
-  let LS_APD_CREDENTIALS = await getLSAPICredentials();
-  let categories_products_endpoint = `https://${LS_APD_CREDENTIALS}@api.shoplightspeed.com/en/categories/products.json`;
-  let categories_endpoint = `https://${LS_APD_CREDENTIALS}@api.shoplightspeed.com/en/categories`;
+  let orderDB = "apdc_orders";
+  // let orderDB = "orders";
+  let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
+  // let LS_APDC_CREDENTIALS = await getLSAPICredentials();
+
+  let categories_products_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/categories/products.json`;
+  let categories_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/categories`;
   let category_product = [];
 
   await axios({ method: "get", url: categories_products_endpoint })
@@ -78,7 +83,7 @@ exports.addOrder = async (req, res) => {
     type,
   };
   firestore
-    .collection("orders")
+    .collection(orderDB)
     .doc(String(id))
     .set(orderObject, { merge: true })
     .then(() => {
@@ -116,7 +121,7 @@ exports.addCalendlyInfo = async (req, res) => {
     });
 
   firestore
-    .collection("orders")
+    .collection(orderDB)
     .doc(String(orderID))
     .update({
       startTime: new Date(calendlyEventDetails.startTime),

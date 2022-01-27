@@ -6,6 +6,8 @@ import * as ROUTES from "../../constants/routes";
 import * as ROLES from "../../constants/roles";
 import { AuthUserContext } from "../Session";
 import { SignOutMenuItem, SignOutMenuItemButton } from "../SignOut";
+import "./styles.css";
+
 import {
   Button,
   Container,
@@ -23,7 +25,6 @@ import Logo2 from "../../media/logo2.png";
 import Logo3 from "../../media/Logo-Boutique.jpeg";
 import Logo4 from "../../media/small-logo.png";
 import TRANSLATIONS from "../../constants/translation";
-import { Helmet } from "react-helmet";
 
 const DarkButton = (props) => {
   const { dark, toggleDark, fixed } = props;
@@ -140,6 +141,8 @@ const DesktopContainer = (props) => {
                 {/* <HomepageHeading /> */}
                 <Container textAlign="center" fluid={false}>
                   <Menu
+                    // style={{ color: "#d5b98a" }}
+                    // color="gold"
                     // compact
                     fixed={fixed ? "top" : null}
                     // fixed="top"
@@ -202,36 +205,49 @@ const DesktopContainer = (props) => {
                         content={NAVIGATION.admin}
                       />
                     )}
-                    <Menu.Item style={{ marginLeft: "100px" }}>
-                      {authUser ? (
+
+                    {authUser ? (
+                      <Menu.Item
+                      // style={{ marginRight: "40%" }}
+                      // position="right"
+                      >
                         <SignOutMenuItemButton
                           fixed={fixed}
                           language={language}
                         />
-                      ) : (
-                        <React.Fragment>
-                          <Button
-                            basic
-                            as={NavLink}
-                            to={ROUTES.SIGN_UP}
-                            name={NAVIGATION.signUp}
-                            // inverted={!fixed}
-                            icon="signup"
-                            style={{ marginRight: "0.5em" }}
-                            content={NAVIGATION.signUp}
-                          />
-                          <Button
-                            basic
-                            as={NavLink}
-                            to={ROUTES.SIGN_IN}
-                            name={NAVIGATION.signIn}
-                            icon="sign-in"
-                            // inverted={!fixed}
-                            content={NAVIGATION.signIn}
-                          />
-                        </React.Fragment>
-                      )}
-                      {/* {fixed && (
+                      </Menu.Item>
+                    ) : (
+                      <Menu.Item
+                        position="right"
+                        style={{ marginRight: "35%" }}
+                      >
+                        {/* <React.Fragment> */}
+                        <Button
+                          basic
+                          as={NavLink}
+                          to={ROUTES.SIGN_UP}
+                          name={NAVIGATION.signUp}
+                          // inverted={!fixed}
+                          icon="signup"
+                          // style={{ marginRight: "20%" }}
+                          content={NAVIGATION.signUp}
+                          style={{ marginRight: "10px" }}
+                        />
+                        <Button
+                          basic
+                          as={NavLink}
+                          to={ROUTES.SIGN_IN}
+                          name={NAVIGATION.signIn}
+                          icon="sign-in"
+                          // style={{ marginLeft: "20%" }}
+                          // inverted={!fixed}
+                          content={NAVIGATION.signIn}
+                        />
+                        {/* </React.Fragment> */}
+                      </Menu.Item>
+                    )}
+                  </Menu>
+                  {/* {fixed && (
                         <React.Fragment>
                           <Dropdown
                             placeholder={language}
@@ -249,8 +265,6 @@ const DesktopContainer = (props) => {
                           />
                         </React.Fragment>
                       )} */}
-                    </Menu.Item>
-                  </Menu>
                 </Container>
                 {/* <Divider style={{ lineHeight: 1.4 }}></Divider> */}
               </Segment>
@@ -345,6 +359,7 @@ const MobileContainer = (props) => {
                       icon="sign-in"
                       content={NAVIGATION.signIn}
                       onClick={handleSidebarHide}
+                      // position="right"
                     />
                     <Menu.Item
                       as={NavLink}
@@ -354,6 +369,7 @@ const MobileContainer = (props) => {
                       icon="signup"
                       content={NAVIGATION.signUp}
                       onClick={handleSidebarHide}
+                      // position="right"
                     />
                   </React.Fragment>
                 )}

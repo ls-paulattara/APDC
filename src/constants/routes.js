@@ -8,4 +8,4 @@ export const DISPLAY_REPORT = "/display-report/";
 export const ACCOUNT = "/account";
 export const ADMIN = "/admin";
 export const PASSWORD_FORGET = "/forgot-password";
-export const UNAUTHORIZED = '/unauthorized';
+export const UNAUTHORIZED = "/unauthorized";

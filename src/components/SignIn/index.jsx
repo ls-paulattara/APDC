@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import { compose } from "recompose";
 import {
   Button,
@@ -21,7 +21,7 @@ import * as ROLES from "../../constants/roles";
 import TRANSLATIONS from "../../constants/translation";
 
 const SignInPage = (props) => {
-  const { language } = props;
+  const { language, dark } = props;
   const { SIGNUP, SIGNIN } = TRANSLATIONS[`${language}`];
   return (
     <Segment basic inverted={props.dark} fluid="true" style={{ margin: 0 }}>
@@ -45,6 +45,15 @@ const SignInPage = (props) => {
                 {/* <Icon name="circle outline" /> */}
               </Divider>
               <PasswordForgetLink {...props} />
+              <Message color={dark ? "black" : null}>
+                {SIGNUP.message}
+                <Link
+                  to={ROUTES.SIGN_UP}
+                  style={{ color: dark ? "#A7A7A7" : "#0051a0" }}
+                >
+                  {SIGNUP.signUp}
+                </Link>
+              </Message>
             </Segment>
           </Grid.Column>
         </Grid>
@@ -76,19 +85,30 @@ class SignInGoogleBase extends Component {
       const roles = {};
       let isAuthorized = false;
 
-      const whiteListEmails = ["milesbd.ca"];
-      const emailVerify = (email, acceptList) => {
-        const [, domain] = email.split("@");
-        return acceptList.includes(domain);
-      };
-      isAuthorized = emailVerify(socialAuthUser.user.email, whiteListEmails);
+      const adminEmails = [
+        "catherinemd@pieddecochon.ca",
+        "info@pieddecochon.ca",
+        "marcb@pieddecochon.ca",
+      ];
 
-      if (isAuthorized) {
+      // isAuthorized = emailVerify(socialAuthUser.user.email, whiteListEmails);
+      const isNewUser = socialAuthUser.additionalUserInfo.isNewUser;
+      const email = socialAuthUser.user.email;
+      if (adminEmails.includes(email) || email.endsWith("@lightspeedhq.com")) {
+        roles[ROLES.ADMIN] = ROLES.ADMIN;
+      } else if (email.endsWith("@pieddecochon.ca")) {
         roles[ROLES.STAFF] = ROLES.STAFF;
-        enabled = true;
       } else {
-        roles[ROLES.UNAUTHORIZED] = ROLES.UNAUTHORIZED;
+        this.props.firebase.deleteCurrentSignInAttempt();
+        this.setState({
+          error: {
+            message:
+              "Please ensure your email ends in the following format: '@pieddecochon.ca'",
+          },
+        });
+        return;
       }
+
       let index = socialAuthUser.user.displayName.indexOf(" ");
       let NameArray = [
         socialAuthUser.user.displayName.slice(0, index),
@@ -180,6 +200,8 @@ class SignInFormBase extends Component {
   onSubmit = (event) => {
     const { email, password } = this.state;
 
+    // CHECK if valid email before attempting to create account
+
     this.props.firebase
       .doSignInWithEmailAndPassword(email, password)
       .then(() => {
@@ -208,42 +230,49 @@ class SignInFormBase extends Component {
     const isInvalid = password === "" || email === "";
 
     return (
-      <Form error={error} size="large" onSubmit={this.onSubmit} inverted={dark}>
-        {error && <Message error={error} content={error.message} />}
-        <Form.Input
-          fluid
-          icon="mail"
-          iconPosition="left"
-          name="email"
-          value={email}
-          onChange={this.onChange}
-          type="text"
-          placeholder={SIGNIN.email}
-          inverted={dark}
-        />
-        <Form.Input
-          fluid
-          icon="lock"
-          iconPosition="left"
-          name="password"
-          value={password}
-          onChange={this.onChange}
-          placeholder={SIGNIN.password}
-          type="password"
-          inverted={dark}
-        />
-        <Button
-          disabled={isInvalid}
-          color="black"
-          type="submit"
-          fluid
+      <>
+        <Form
+          error={error}
           size="large"
+          onSubmit={this.onSubmit}
           inverted={dark}
-          basic={dark}
         >
-          {SIGNIN.header}
-        </Button>
-      </Form>
+          {error && <Message error={error} content={error.message} />}
+          <Form.Input
+            fluid
+            icon="mail"
+            iconPosition="left"
+            name="email"
+            value={email}
+            onChange={this.onChange}
+            type="text"
+            placeholder={SIGNIN.email}
+            inverted={dark}
+          />
+          <Form.Input
+            fluid
+            icon="lock"
+            iconPosition="left"
+            name="password"
+            value={password}
+            onChange={this.onChange}
+            placeholder={SIGNIN.password}
+            type="password"
+            inverted={dark}
+          />
+          <Button
+            disabled={isInvalid}
+            color="black"
+            type="submit"
+            fluid
+            size="large"
+            inverted={dark}
+            basic={dark}
+          >
+            {SIGNIN.header}
+          </Button>
+        </Form>
+      </>
     );
   }
 }

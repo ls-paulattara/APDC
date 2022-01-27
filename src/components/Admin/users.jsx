@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import _ from "lodash";
 import { withFirebase } from "../Firebase";
 import {
@@ -7,381 +7,334 @@ import {
   Icon,
   Button,
   List,
-  Segment,
-  Popup,
-  Confirm,
+  Checkbox,
+  Modal,
+  Header,
+  Dropdown,
+  Divider,
 } from "semantic-ui-react";
-import { compose } from "recompose";
 import { withAuthorization } from "../Session";
 import * as ROLES from "../../constants/roles";
 
-class UserListPage extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      uid: null,
-      organisation: null,
-      column: null,
-      sorted: null,
-      direction: null,
-      changing: false,
-      error: false,
-      success: false,
-    };
-  }
+const UserListPage = (props) => {
+  const { users, dark, firebase } = props;
+  const [column, setColumn] = React.useState("");
+  const [sorted, setSorted] = React.useState([]);
+  const [direction, setDirection] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [success, setSuccess] = React.useState("");
 
-  onSort = (e, data) => {
-    let name = e.currentTarget.dataset.name;
-    const { users } = this.props;
-    const { column, direction, sorted } = this.state;
+  React.useEffect(() => setSorted(users), [users]);
+
+  const onSort = (e, data) => {
+    const name = e.currentTarget.dataset.name;
     if (column === name) {
-      this.setState({
-        direction: direction === "ascending" ? "descending" : "ascending",
-        sorted: sorted.reverse(),
-      });
-    } else {
-      this.setState({
-        column: name,
-        direction: "ascending",
-        sorted: _.sortBy(users, [name]),
-      });
+      setDirection(direction === "ascending" ? "descending" : "ascending");
+      setSorted(sorted.reverse());
+      return;
     }
+    setColumn(name);
+    setDirection("ascending");
+    setSorted(_.sortBy(users, [name]));
+    return;
   };
-  handleDismiss = () => {
-    this.setState({ success: false });
+  const handleDismiss = () => {
+    setSuccess("");
   };
-  handleDismissError = () => {
-    this.setState({ error: false });
+  const handleDismissError = () => {
+    setError("");
   };
-
-  render() {
-    const { users, dark } = this.props;
-    const { changing, column, direction, error, success } = this.state;
-    let { sorted } = this.state;
-    if (sorted === null) {
-      sorted = users;
-    }
-    return (
-      <React.Fragment>
-        {success && (
-          <Message
-            onDismiss={this.handleDismiss}
-            floating
-            success
-            content={success.message}
-          />
-        )}
-        {error && (
-          <Message
-            onDismiss={this.handleDismissError}
-            floating
-            error
-            content={error.message}
-          />
-        )}
-        <Table sortable celled inverted={dark}>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell
-                sorted={column === "email" ? direction : null}
-                onClick={this.onSort}
-                data-name={"email"}
-              >
-                <Icon name="mail" />
-                E-mail
-              </Table.HeaderCell>
-              <Table.HeaderCell
-                sorted={column === "firstName" ? direction : null}
-                onClick={this.onSort}
-                data-name={"firstName"}
-              >
-                <Icon name="user" />
-                First Name
-              </Table.HeaderCell>
-              <Table.HeaderCell
-                sorted={column === "lastName" ? direction : null}
-                onClick={this.onSort}
-                data-name={"lastName"}
-              >
-                <Icon name="user" />
-                Last Name
-              </Table.HeaderCell>
-              <Table.HeaderCell
-                sorted={column === "roles" ? direction : null}
-                onClick={this.onSort}
-                data-name={"roles"}
-              >
-                <Icon name="key" />
-                Roles
-              </Table.HeaderCell>
-              <Table.HeaderCell data-name={"Manage User"}>
-                <Icon name="id badge outline" />
-                Manage User
-              </Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {sorted.map((user) => (
-              <Table.Row
-                key={user.uid}
-                negative={user.roles["UNAUTHORIZED"] ? true : false}
-                warning={user.roles["UNAUTHORIZED"] ? false : !user.enabled}
-              >
-                <Table.Cell>{user.email}</Table.Cell>
-                <Table.Cell>{user.firstName}</Table.Cell>
-                <Table.Cell>{user.lastName}</Table.Cell>
-                <Table.Cell>
-                  <List>
-                    {Object.keys(user.roles).map((key, index) => (
-                      <List.Item key={key}>{user.roles[key]}</List.Item>
-                    ))}
-                  </List>
-                </Table.Cell>
-                <Table.Cell textAlign="center">
-                  <ManageUser
-                    user={user}
-                    changing={changing}
-                    firebase={this.props.firebase}
-                    dark={dark}
-                    negative={user.roles["UNAUTHORIZED"] ? true : false}
-                    warning={user.roles["UNAUTHORIZED"] ? false : !user.enabled}
-                  />
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
-      </React.Fragment>
-    );
-  }
-}
-
-class ManageUser extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading: false,
-      uid: null,
-      entryRef: null,
-      confirm: false,
-    };
-  }
-  toggleRole = (e, { role, action, user, uid }) => {
-    let updatedUser = user;
-    let errorFlag = false;
-    let newAdmin = false;
-    this.setState({
-      changing: true,
-      uid: uid,
-    });
-    //Logic to decide what to do
-    if (action === "ADD") {
-      updatedUser.roles[role] = role;
-      if (role === "ADMIN") {
-        updatedUser.isAdmin = true;
-        newAdmin = true;
-      }
-    } else {
-      delete updatedUser.roles[role];
-    }
-
-    //   logic to decide whether to place unauthorized role or remove it
-    if (
-      updatedUser.roles["UNAUTHORIZED"] &&
-      Object.keys(updatedUser.roles).length > 1
-    ) {
-      delete updatedUser.roles["UNAUTHORIZED"];
-    } else if (Object.keys(updatedUser.roles).length === 0) {
-      updatedUser.roles["UNAUTHORIZED"] = "UNAUTHORIZED";
-      updatedUser.isAuthorized = false;
-    }
-
-    this.props.firebase
+  const toggleEnabled = (e, { checked, uid }) => {
+    firebase
       .user(uid)
-      .update({ roles: updatedUser.roles }, (error) => {
-        if (error) {
-          console.log(error);
-          errorFlag = error;
-        }
+      .update({ enabled: checked })
+      .then(() => {
+        setSuccess(
+          `User set to  ${checked ? "Enabled" : "Disabled"} Successfully`
+        );
+        setTimeout(() => setSuccess(""), 5000);
+      })
+      .catch((error) => {
+        setError("Error updating document: ", error);
+        setTimeout(() => setError(""), 5000);
       });
-    if (errorFlag) {
-      this.setState({
-        error: errorFlag,
-        changing: false,
-        uid: null,
-      });
-      setTimeout(() => this.setState({ error: false }), 5000);
-    } else {
-      this.setState({
-        changing: false,
-        uid: null,
-        success: {
-          message: `User ${user.email} updated! ${
-            newAdmin ? "The New Admin will need to login again" : ""
-          }`,
-        },
-      });
-      setTimeout(() => this.setState({ success: false }), 5000);
-    }
   };
-
-  toggleEnable = (e, { action, user, uid }) => {
-    let updatedUser = user;
-    let errorFlag = false;
-    this.setState({
-      changing: true,
-      uid: uid,
-      modal: false,
-    });
-    if (action === "DISABLE") {
-      updatedUser.enabled = false;
-    } else {
-      updatedUser.enabled = true;
-    }
-    this.props.firebase
+  const toggleAuthorized = (e, { checked, uid }) => {
+    firebase
       .user(uid)
-      .update({ enabled: updatedUser.enabled }, (error) => {
-        if (error) {
-          console.log(error);
-          errorFlag = error;
-        }
+      .update({ isAuthorized: checked })
+      .then(() => {
+        setSuccess(
+          `User set to ${checked ? "Authorized" : "Unauthorized"} Successfully`
+        );
+        setTimeout(() => setSuccess(""), 5000);
+      })
+      .catch((error) => {
+        setError("Error updating document: ", error);
+        setTimeout(() => setError(""), 5000);
       });
-    if (errorFlag) {
-      this.setState({
-        error: errorFlag,
-        changing: false,
-        uid: null,
+  };
+  const removeRole = (e, data) => {
+    const { content: role, user } = data;
+    const roles = user.roles;
+    delete roles[`${role}`];
+    firebase
+      .user(user.uid)
+      .update({ roles: roles })
+      .then(() => {
+        setSuccess(
+          `Role of ${role} removed from ${user.displayName} Successfully`
+        );
+        setTimeout(() => setSuccess(""), 5000);
+      })
+      .catch((error) => {
+        setError("Error updating document: ", error);
+        setTimeout(() => setError(""), 5000);
       });
-      setTimeout(() => this.setState({ error: false }), 5000);
-    } else {
-      this.setState({
-        changing: false,
-        uid: null,
-        success: {
-          message: `User ${user.email} updated`,
-        },
-      });
-    }
-  };
-  deleteUser = (uid) => {
-    this.setState({
-      changing: true,
-      uid: uid,
-    });
-    this.props.firebase.user(uid).remove();
-  };
-  setEntryRef = (entry) => {
-    this.setState({ entryRef: entry });
-  };
-  openConfirm = (e, data) => {
-    const { uid } = data;
-    this.setEntryRef(uid);
-    this.setState({ confirm: true });
-  };
-  closeConfirm = () => {
-    this.setEntryRef(null);
-    this.setState({ confirm: false });
   };
 
-  handleConfirm = () => {
-    console.log(this.state.entryRef)
-    this.deleteUser();
-    this.closeConfirm();
-  };
-
-  render() {
-    const { user, changing, dark, warning, negative } = this.props;
-    console.log(dark, negative, warning)
-    const { uid, error, success, confirm } = this.state;
-    return (
-      <React.Fragment>
-        <Popup
-          flowing
-          trigger={<Button basic circular icon="edit outline" inverted={dark && (!negative && !warning)} />}
-          hideOnScroll
-          on={["click"]}
-          hoverable
-          inverted={dark}
-        >
-          <Segment
-            basic
-            fluid="true"
-            inverted={dark}
-            style={{ padding: 0 }}
-            loading={uid === user.uid ? true : false}
-          >
-            {error && (
-              <Message
-                error
-                content="Whoops! Something went wrong, please try again"
-              />
-            )}
-            {success && <Message success content={success.message} />}
-            <Button
-              primary
-              uid={user.uid}
-              user={user}
-              disabled={user.uid === uid ? false : changing}
-              // eslint-disable-next-line
-              role="ADMIN"
-              action={user.roles.ADMIN ? "REMOVE" : "ADD"}
-              onClick={this.toggleRole}
-            >
-              {user.roles.ADMIN ? "Remove" : "Make"} Admin
-            </Button>
-
-            <Button
-              secondary
-              uid={user.uid}
-              user={user}
-              disabled={user.uid === uid ? false : changing}
-              // eslint-disable-next-line
-              role="STAFF"
-              action={user.roles.STAFF ? "REMOVE" : "ADD"}
-              onClick={this.toggleRole}
-            >
-              {user.roles.STAFF ? "Remove" : "Make"} Staff
-            </Button>
-
-            <Button
-              color="orange"
-              uid={user.uid}
-              user={user}
-              disabled={user.uid === uid ? false : changing}
-              action={user.enabled ? "DISABLE" : "ENABLE"}
-              onClick={this.toggleEnable}
-            >
-              {user.enabled ? "Disable" : "Enable"} User
-            </Button>
-            <Button
-              negative
-              uid={user.uid}
-              user={user}
-              disabled={user.uid === uid ? false : changing}
-              onClick={this.openConfirm}
-            >
-              Remove User
-            </Button>
-          </Segment>
-        </Popup>
-        <Confirm
-          open={confirm}
-          onCancel={this.closeConfirm}
-          onConfirm={this.handleConfirm}
-          entry={uid}
-          confirmButton="Delete"
-          header="Confirm Export Deletion"
-          content="The export will be permanently deleted."
+  return (
+    <React.Fragment>
+      {Boolean(success.length) && (
+        <Message onDismiss={handleDismiss} floating success content={success} />
+      )}
+      {Boolean(error.length) && (
+        <Message
+          onDismiss={handleDismissError}
+          floating
+          error
+          content={error}
         />
-      </React.Fragment>
-    );
-  }
-}
+      )}
+      <Table sortable celled inverted={dark}>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell
+              sorted={column === "email" ? direction : null}
+              onClick={onSort}
+              data-name={"email"}
+            >
+              <Icon name="mail" />
+              E-mail
+            </Table.HeaderCell>
+            <Table.HeaderCell
+              sorted={column === "firstName" ? direction : null}
+              onClick={onSort}
+              data-name={"firstName"}
+            >
+              <Icon name="user" />
+              First Name
+            </Table.HeaderCell>
+            <Table.HeaderCell
+              sorted={column === "lastName" ? direction : null}
+              onClick={onSort}
+              data-name={"lastName"}
+            >
+              <Icon name="user" />
+              Last Name
+            </Table.HeaderCell>
+            <Table.HeaderCell
+              sorted={column === " enabled" ? direction : null}
+              data-name={"enabled"}
+            >
+              <Icon name="power" />
+              Enabled
+            </Table.HeaderCell>
+            <Table.HeaderCell
+              sorted={column === " enabled" ? direction : null}
+              data-name={"enabled"}
+            >
+              <Icon name="key" />
+              Authorized
+            </Table.HeaderCell>
+            <Table.HeaderCell
+              sorted={column === "roles" ? direction : null}
+              data-name={"roles"}
+            >
+              <Icon name="id badge" />
+              Roles
+            </Table.HeaderCell>
+            <Table.HeaderCell data-name={"Remove User"}>
+              <Icon name="remove user" />
+              Remove User
+            </Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {sorted.map((user) => (
+            <Table.Row
+              key={user.uid}
+              negative={user.roles["UNAUTHORIZED"] ? true : false}
+              warning={user.roles["UNAUTHORIZED"] ? false : !user.enabled}
+            >
+              <Table.Cell content={user.email} />
+              <Table.Cell content={user.firstName} />
+              <Table.Cell content={user.lastName} />
+              <Table.Cell
+                textAlign="center"
+                content={
+                  <Checkbox
+                    toggle
+                    uid={user.uid}
+                    checked={user.enabled}
+                    onChange={toggleEnabled}
+                  />
+                }
+              />
+              <Table.Cell
+                textAlign="center"
+                content={
+                  <Checkbox
+                    toggle
+                    uid={user.uid}
+                    checked={user.isAuthorized}
+                    onChange={toggleAuthorized}
+                  />
+                }
+              />
+              <Table.Cell>
+                <List>
+                  {Object.keys(user.roles).map((key, index) => (
+                    <List.Item key={key}>
+                      <Button
+                        icon="remove"
+                        labelPosition="left"
+                        basic
+                        user={user}
+                        content={user.roles[key]}
+                        onClick={removeRole}
+                      />
+                    </List.Item>
+                  ))}
+                  <Divider />
+                  <List.Item key={user.uid}>
+                    <AddRole
+                      dark={dark}
+                      firebase={firebase}
+                      user={user}
+                      setError={setError}
+                      setSuccess={setSuccess}
+                    />
+                  </List.Item>
+                </List>
+              </Table.Cell>
+              <Table.Cell textAlign="center">
+                <DeleteUser
+                  dark={dark}
+                  firebase={firebase}
+                  user={user}
+                  setError={setError}
+                  setSuccess={setSuccess}
+                />
+              </Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table>
+    </React.Fragment>
+  );
+};
+
+const DeleteUser = (props) => {
+  const { dark, user, firebase, setError, setSuccess } = props;
+  const [open, setOpen] = React.useState(false);
+  const removeUser = (e, data) => {
+    console.log(e, data, user);
+    firebase
+      .user(user.uid)
+      .remove()
+      .then(() => {
+        setSuccess(`User ${user.displayName} Removed`);
+        setTimeout(() => setSuccess(""), 5000);
+      })
+      .catch((error) => {
+        setError("Error updating document: ", error);
+        setTimeout(() => setError(""), 5000);
+      });
+    setOpen(false);
+  };
+  return (
+    <Modal
+      basic
+      onClose={() => setOpen(false)}
+      onOpen={() => setOpen(true)}
+      open={open}
+      size="small"
+      trigger={<Button icon="remove user" basic circular inverted={dark} />}
+    >
+      <Header icon>
+        <Icon name="warning sign" />
+        Remove User
+      </Header>
+      <Modal.Content>
+        <p>
+          Are you sure you want to remove <strong>{user.displayName}</strong>{" "}
+          <em>({user.email})</em> ?
+        </p>
+        <p>
+          <strong>This Cannot be undone!</strong>
+        </p>
+      </Modal.Content>
+      <Modal.Actions>
+        <Button basic color="red" inverted onClick={() => setOpen(false)}>
+          <Icon name="cancel" /> Cancel
+        </Button>
+        <Button color="green" inverted onClick={removeUser}>
+          <Icon name="checkmark" /> Remove User
+        </Button>
+      </Modal.Actions>
+    </Modal>
+  );
+};
+
+const AddRole = (props) => {
+  const { user, firebase, setError, setSuccess } = props;
+  const availableRoles = Object.keys(ROLES).filter(
+    (r) => !Object.keys(user.roles).includes(r)
+  );
+  const changeRole = (e, data) => {
+    const { text: role } = data;
+    console.log("neweeewewe", role);
+    firebase
+      .user(user.uid)
+      .update({ [`roles/${role}`]: role })
+      .then(() => {
+        setSuccess(`Role of ${role} added to ${user.displayName} Successfully`);
+        setTimeout(() => setSuccess(""), 5000);
+      })
+      .catch((error) => {
+        setError("Error updating document: ", error);
+        setTimeout(() => setError(""), 5000);
+      });
+  };
+  return (
+    <Dropdown
+      button
+      basic
+      labeled
+      floating
+      className="icon"
+      icon="add"
+      text="Add Role"
+    >
+      <Dropdown.Menu>
+        {availableRoles.length > 0 ? (
+          availableRoles.map((r, i) => {
+            return <Dropdown.Item text={r} key={i} onClick={changeRole} />;
+          })
+        ) : (
+          <Dropdown.Item
+            text="NO ROLES AVAILABLE"
+            key="No roles"
+            onClick={() => alert("No roles available")}
+          />
+        )}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+};
 
 const condition = (authUser) =>
   authUser && !!authUser.roles[ROLES.ADMIN] && !!authUser.enabled;
 
-export default compose(
-  withAuthorization(condition),
-  withFirebase
-)(UserListPage);
+export default withAuthorization(condition)(withFirebase(UserListPage));

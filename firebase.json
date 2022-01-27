@@ -6,12 +6,9 @@
     "source": "functions"
   },
   "hosting": {
+    "site": "au-pied-de-cochon",
     "public": "build",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
         "source": "**",

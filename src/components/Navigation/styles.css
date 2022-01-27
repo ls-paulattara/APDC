@@ -1,0 +1,12 @@
+/* Peach */
+.ui.inverted.menu .peach.active.item,
+.ui.inverted.peach.menu {
+  background-color: "#d5b98a";
+}
+.ui.inverted.peach.menu .item:before {
+  background-color: "#d5b98a";
+}
+
+.ui.inverted.peach.menu .active.item {
+  background-color: "#d5b98a";
+}

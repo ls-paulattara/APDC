@@ -11,4 +11,5 @@ app.use(cors());
 app.post("/orders", addOrder);
 app.post("/calendly", addCalendlyInfo);
 
-exports.apcd_api = functions.https.onRequest(app);
+// exports.apcd_api = functions.https.onRequest(app);
+exports.apdc_api = functions.https.onRequest(app);
