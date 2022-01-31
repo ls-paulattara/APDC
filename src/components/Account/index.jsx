@@ -6,7 +6,7 @@ import { ChangeEmailandName } from "./changeUserDetails";
 import LoginManagement from "./loginManagement";
 import TRANSLATIONS from "../../constants/translation";
 
-import { Header, Icon, Segment, Divider, Image } from "semantic-ui-react";
+import { Header, Icon, Segment, Divider, Container } from "semantic-ui-react";
 
 const INITIAL_STATE = {
   loading: false,
@@ -35,44 +35,52 @@ class AccountBase extends Component {
         {(authUser) => {
           return (
             <React.Fragment>
-              <Segment
-                style={{ padding: "0", minHeight: "95vh", margin: 0 }}
-                textAlign="center"
-                loading={loading}
-                basic
-                inverted={dark}
-              >
-                <PageHeader {...this.props} ACCOUNT={ACCOUNT} />
-                <Divider inverted={dark} />
-                <Segment basic inverted={dark}>
-                  <PageSubHeader
-                    authUser={authUser}
-                    ACCOUNT={ACCOUNT}
-                    dark={dark}
-                  />
-                </Segment>
-                <Segment basic inverted={dark} style={{ marginBottom: 0 }}>
-                  <Segment.Group>
-                    <ChangeEmailandName
+              <Container>
+                <Segment
+                  padded
+                  style={{
+                    // minHeight: "95vh",
+                    margin: "0",
+                    //   // marginLeft: "100",
+                    //   // marginRight: "100",
+                  }}
+                  textAlign="center"
+                  loading={loading}
+                  basic
+                  inverted={dark}
+                >
+                  <PageHeader {...this.props} ACCOUNT={ACCOUNT} />
+                  <Divider inverted={dark} />
+                  <Segment basic inverted={dark}>
+                    <PageSubHeader
                       authUser={authUser}
-                      {...this.props}
                       ACCOUNT={ACCOUNT}
+                      dark={dark}
                     />
-                    <ChangePassword
-                      authUser={authUser}
-                      {...this.props}
-                      ACCOUNT={ACCOUNT}
-                    />
-                    {authUser.email && (
-                      <LoginManagement
+                  </Segment>
+                  <Segment basic inverted={dark} style={{ marginBottom: 0 }}>
+                    <Segment.Group>
+                      <ChangeEmailandName
                         authUser={authUser}
                         {...this.props}
                         ACCOUNT={ACCOUNT}
                       />
-                    )}
-                  </Segment.Group>
+                      <ChangePassword
+                        authUser={authUser}
+                        {...this.props}
+                        ACCOUNT={ACCOUNT}
+                      />
+                      {authUser.email && (
+                        <LoginManagement
+                          authUser={authUser}
+                          {...this.props}
+                          ACCOUNT={ACCOUNT}
+                        />
+                      )}
+                    </Segment.Group>
+                  </Segment>
                 </Segment>
-              </Segment>
+              </Container>
             </React.Fragment>
           );
         }}
@@ -98,8 +106,8 @@ const PageHeader = (props) => {
 const PageSubHeader = ({ authUser, dark, ACCOUNT }) => {
   const photoURL = authUser.providerData.photoURL;
   return (
-    <Header as="h3" textAlign="left" inverted={dark}>
-      {photoURL && <Image src={photoURL} size="large" circular />}
+    <Header as="h3" textAlign="center" inverted={dark}>
+      {/* {photoURL && <Image src={photoURL} size="large" circular />} */}
 
       <Header.Content>
         {ACCOUNT.welcome}

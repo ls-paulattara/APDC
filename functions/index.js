@@ -1,5 +1,8 @@
-exports.roleUpdate = require("./Realtime/roleUpdate");
+const { newUser, roleUpdate } = require("./Realtime/roleUpdate");
+exports.newUser = newUser;
+exports.roleUpdate = roleUpdate;
 exports.deleteUser = require("./Realtime/deleteUser");
+
 const { addOrder, addCalendlyInfo } = require("./Firestore/order");
 const functions = require("firebase-functions");
 
@@ -11,5 +14,5 @@ app.use(cors());
 app.post("/orders", addOrder);
 app.post("/calendly", addCalendlyInfo);
 
-// exports.apcd_api = functions.https.onRequest(app);
-exports.apdc_api = functions.https.onRequest(app);
+exports.apcd_api = functions.https.onRequest(app);
+// exports.apdc_api = functions.https.onRequest(app);

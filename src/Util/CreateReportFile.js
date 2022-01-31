@@ -221,6 +221,9 @@ export const getReport1or2FileOLD = async (data, reportNumber) => {
   blob.name = exportedFilename;
   return blob;
 };
+const round = (num) => {
+  return Math.round(num * 100) / 100;
+};
 
 export const getReport3File = async (data, reportValues) => {
   var dict = {
@@ -291,12 +294,13 @@ export const getReport3File = async (data, reportValues) => {
       let prices = 0;
       let count = 0;
       for (let zone of value[key]) {
-        const { totalPrice } = zone;
+        let totalPrice = round(zone.totalPrice);
+
         prices += totalPrice;
         count += 1;
         switch (type) {
           case "delivery":
-            deliveryTotal[1] += totalPrice;
+            deliveryTotal[1] += round(totalPrice);
             deliveryTotal[2] += 1;
             break;
           case "pickup":
@@ -311,7 +315,7 @@ export const getReport3File = async (data, reportValues) => {
       }
       //  grandTotal[1] += prices;
       //  grandTotal[2] += 1;
-      value[key] = [prices, count];
+      value[key] = [round(prices), count];
     });
   };
 
@@ -325,9 +329,8 @@ export const getReport3File = async (data, reportValues) => {
         break;
       case "Mail":
         // getPrices(value, "mail");
-        let prices = 0;
         dict["Mail"].forEach((item) => {
-          const price = item.totalPrice;
+          const price = round(item.totalPrice);
           mailTotal[1] += price;
           mailTotal[2] += 1;
           // grandTotal[1] += prices;
@@ -342,7 +345,7 @@ export const getReport3File = async (data, reportValues) => {
 
   const deliveryTable = Object.entries(dict["Delivery"]).map((item) => [
     item[0],
-    item[1][0],
+    round(item[1][0]),
     item[1][1],
   ]);
   const pickupTable = Object.entries(dict["Pickup"]).map((item) => [

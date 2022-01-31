@@ -65,16 +65,6 @@ class SignUpFormBase extends Component {
     this.state = { ...INITIAL_STATE };
   }
 
-  // catherinemd@pieddecochon.ca
-  // info@pieddecochon.ca
-  // boutique@pieddecochon.ca
-  // marcb@pieddecochon.ca
-  // martinp@pieddecochon.ca
-  // vincentdl@pieddecochon.ca
-  // philippel@pieddecochon.ca
-  // livraisons@pieddecochon.ca
-  // comptabilite@pieddecochon.ca
-
   onSubmit = (event) => {
     const { firstName, lastName, email, passwordOne, phoneNumber } = this.state;
     const roles = {};
@@ -138,6 +128,9 @@ class SignUpFormBase extends Component {
         .then(() => {
           this.setState({ ...INITIAL_STATE });
           this.props.history.push(ROUTES.ACCOUNT);
+          window.alert(
+            "Admin Sign Up Successful. You need to sign out and sign back in to receive admin permissions and access the account page."
+          );
         })
         .catch((error) => {
           this.setState({ error });

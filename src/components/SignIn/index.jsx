@@ -179,6 +179,7 @@ class SignInGoogleBase extends Component {
           <Icon name="google" />
           {SIGNUP.google}
         </Button>
+        {/* testt */}
         {error && <Message error content={error.message} />}
       </React.Fragment>
     );

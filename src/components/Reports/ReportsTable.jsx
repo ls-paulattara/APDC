@@ -29,10 +29,12 @@ function ReportsTable(props) {
 
     let documentArray = [];
 
-    const storageRef = props.firebase.storageRef().child("reports");
+    const storageRef = props.firebase.storageRef().child("Reports");
 
     const getStorageItems = async (storageRef) => {
       const list = await storageRef.listAll();
+      if (list.items.length == 0) {
+      }
       let promises = [];
       list.items.forEach((itemRef) => {
         promises.push(
@@ -121,7 +123,13 @@ function ReportsTable(props) {
 
   const DocumentTable = (props) => {
     const { sorted, dark, column, onSort, direction, downloadFile } = props;
-    return (
+    return documents.length == 0 ? (
+      <Container textAlign="center">
+        <Header color="red">
+          No reports. <br></br>Add one to get started
+        </Header>
+      </Container>
+    ) : (
       <Table sortable celled unstackable inverted={dark}>
         <Table.Header>
           <Table.Row>

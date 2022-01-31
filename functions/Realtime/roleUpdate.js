@@ -31,3 +31,23 @@ exports.roleUpdate = functions.database
       return response;
     }
   });
+
+exports.newUser = functions.database
+  .ref(Ref + "/{UID}")
+  .onCreate((snap, context) => {
+    const user = snap.val();
+    if (user.roles.ADMIN) {
+      let UID = context.params.UID;
+      return admin
+        .auth()
+        .setCustomUserClaims(UID, {
+          admin: true,
+        })
+        .then(() => {
+          return console.log("Admin role Added");
+        });
+    }
+
+    const response = Promise.resolve(SUCCESS_CODE);
+    return response;
+  });

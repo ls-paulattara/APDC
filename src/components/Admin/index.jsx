@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { withFirebase } from "../Firebase";
-import { Segment } from "semantic-ui-react";
+import { Container, Segment } from "semantic-ui-react";
 import { compose } from "recompose";
 import { withAuthorization } from "../Session";
 import * as ROLES from "../../constants/roles";
@@ -29,6 +29,7 @@ class AdminPage extends Component {
         ...usersObject[key],
         uid: key,
       }));
+      console.log(usersList);
       this.setState({
         users: usersList,
         loading: false,
@@ -41,16 +42,18 @@ class AdminPage extends Component {
   }
   render() {
     const { users, loading } = this.state;
-    const {dark} = this.props;
-    return(
-      <Segment
-        style={{ marginTop:0, paddingBottom: 0, minHeight: "95vh" }}
-        basic
-        inverted={dark}
-        loading={loading}
-      >
-        <UserListPage users={users} dark={dark}/>
-      </Segment>
+    const { dark } = this.props;
+    return (
+      <Container>
+        <Segment
+          style={{ marginTop: 0, paddingBottom: 0, minHeight: "95vh" }}
+          basic
+          inverted={dark}
+          loading={loading}
+        >
+          <UserListPage users={users} dark={dark} />
+        </Segment>
+      </Container>
     );
   }
 }

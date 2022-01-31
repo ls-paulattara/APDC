@@ -29,10 +29,10 @@ exports.addOrder = async (req, res) => {
   } else if (shipmentTitle.includes("Default Shipping")) {
     type = "mail";
   }
-  let orderDB = "apdc_orders";
-  // let orderDB = "orders";
-  let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
-  // let LS_APDC_CREDENTIALS = await getLSAPICredentials();
+  // let orderDB = "apdc_orders";
+  let orderDB = "orders";
+  // let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
+  let LS_APDC_CREDENTIALS = await getLSAPICredentials();
 
   let categories_products_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/categories/products.json`;
   let categories_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/categories`;

@@ -1,7 +1,14 @@
 import React from "react";
 import { withFirebase } from "../Firebase";
 import { withAuthorization } from "../Session";
-import { Header, Segment, Icon, Button, Divider } from "semantic-ui-react";
+import {
+  Header,
+  Segment,
+  Icon,
+  Button,
+  Divider,
+  Container,
+} from "semantic-ui-react";
 import { Link } from "react-router-dom";
 import ReportsTable from "./ReportsTable";
 // import TRANSLATIONS from "../../constants/translation";
@@ -35,7 +42,9 @@ function Reports(props) {
       </Header>
     </Segment> */}
       <Divider />
-      <ReportsTable {...props} dark={dark} />
+      <Container>
+        <ReportsTable {...props} dark={dark} />
+      </Container>
     </Segment>
   );
 }
