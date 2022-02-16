@@ -52,7 +52,7 @@ function Report9(props) {
       setSuccess(true);
       setError(false);
       const file = await getReport7or9or10File(orderData, "9", report9Values);
-      props.firebase.saveReportToFirebase(file);
+      // props.firebase.saveReportToFirebase(file);
       props.setReportValues(file);
       props.nextStep();
     } else {

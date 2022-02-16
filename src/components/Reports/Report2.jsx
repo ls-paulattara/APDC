@@ -3,15 +3,7 @@ import TRANSLATIONS from "../../constants/translation";
 import SemanticDatepicker from "react-semantic-ui-datepickers";
 import "react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css";
 
-import {
-  Header,
-  Grid,
-  Divider,
-  Button,
-  Dropdown,
-  Message,
-  Icon,
-} from "semantic-ui-react";
+import { Header, Grid, Divider, Button, Dropdown, Message, Icon } from "semantic-ui-react";
 
 const { getInitialDate } = require("../../Util/HelperFunctions");
 const { getReport1or2File } = require("../../Util/CreateReportFile");
@@ -42,7 +34,8 @@ function Report2(props) {
       report2Values.endDate,
       report2Values.orderStatus,
       "pickup",
-      "Any"
+      // "Any"
+      report2Values.pickupPoint
     );
     console.log(orderData);
     if (orderData.length) {
@@ -70,16 +63,7 @@ function Report2(props) {
     console.log(report2Values);
   }, [report2Values]);
 
-  const getErrorMessage = () =>
-    error ? (
-      <Message
-        negative
-        header="No results"
-        content="No results were found. Try again"
-      />
-    ) : (
-      ""
-    );
+  const getErrorMessage = () => (error ? <Message negative header="No results" content="No results were found. Try again" /> : "");
   const getSuccessMessage = () =>
     success ? (
       <Message icon>
@@ -109,43 +93,14 @@ function Report2(props) {
       />
 
       <Header as="h3">Pickup Point</Header>
-      <Dropdown
-        placeholder="Pickup Point"
-        name="pickupPoint"
-        label="Pickup Point"
-        selection
-        size="large"
-        options={REPORTS.pickupPointWithoutAny}
-        value={report2Values.pickupPoint}
-        onChange={onChange}
-      />
+      <Dropdown placeholder="Pickup Point" name="pickupPoint" label="Pickup Point" selection size="large" options={REPORTS.pickupPointWithoutAny} value={report2Values.pickupPoint} onChange={onChange} />
       <Header as="h3">Date Range of Pickup</Header>
       <Grid style={{ marginTop: "0", marginBottom: "0" }}>
-        <SemanticDatepicker
-          showToday
-          autoComplete="off"
-          name="startDate"
-          size="large"
-          onChange={onChange}
-          value={getInitialDate(report2Values.startDate)}
-        />
-        <SemanticDatepicker
-          showToday
-          autoComplete="off"
-          name="endDate"
-          size="large"
-          onChange={onChange}
-          value={getInitialDate(report2Values.endDate)}
-        />
+        <SemanticDatepicker showToday autoComplete="off" name="startDate" size="large" onChange={onChange} value={getInitialDate(report2Values.startDate)} />
+        <SemanticDatepicker showToday autoComplete="off" name="endDate" size="large" onChange={onChange} value={getInitialDate(report2Values.endDate)} />
       </Grid>
       <Divider />
-      <Button
-        content="Back"
-        icon="left arrow"
-        size="large"
-        labelPosition="left"
-        onClick={() => props.prevStep()}
-      />
+      <Button content="Back" icon="left arrow" size="large" labelPosition="left" onClick={() => props.prevStep()} />
       <Button
         positive
         content="Next"
@@ -153,12 +108,7 @@ function Report2(props) {
         size="large"
         labelPosition="right"
         onClick={() => onSubmit()}
-        disabled={
-          !report2Values.pickupPoint ||
-          !report2Values.orderStatus ||
-          report2Values.startDate == null ||
-          report2Values.endDate == null
-        }
+        disabled={!report2Values.pickupPoint || !report2Values.orderStatus || report2Values.startDate == null || report2Values.endDate == null}
       />
       {getErrorMessage()}
       {getSuccessMessage()}

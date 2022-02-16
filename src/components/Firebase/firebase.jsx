@@ -6,6 +6,7 @@ import "firebase/compat/analytics";
 import "firebase/compat/performance";
 import "firebase/compat/firestore";
 import moment from "moment";
+import { writeBatch, doc } from "firebase/firestore";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -31,19 +32,17 @@ class Firebase {
     this.analytics = app.analytics();
     this.performance = app.performance();
     this.orderDB = "orders";
+    this.routificDB = "apdc_routific_data";
   }
 
   // *** Auth API - Create Account ***
-  doCreateUserWithEmailAndPassword = (email, password) =>
-    this.auth.createUserWithEmailAndPassword(email, password);
+  doCreateUserWithEmailAndPassword = (email, password) => this.auth.createUserWithEmailAndPassword(email, password);
 
   // *** Auth API - EmailAuthProvider ***
-  EmailAuthProviderCredential = (email, password) =>
-    this.emailAuthProvider.credential(email, password);
+  EmailAuthProviderCredential = (email, password) => this.emailAuthProvider.credential(email, password);
 
   // *** Auth API - Sign In ***
-  doSignInWithEmailAndPassword = (email, password) =>
-    this.auth.signInWithEmailAndPassword(email, password);
+  doSignInWithEmailAndPassword = (email, password) => this.auth.signInWithEmailAndPassword(email, password);
 
   // *** AUTH API - Sign In With Google ***
   doSignInWithGoogle = () => this.auth.signInWithPopup(this.googleProvider);
@@ -67,8 +66,7 @@ class Firebase {
   doPasswordReset = (email) => this.auth.sendPasswordResetEmail(email);
 
   // *** Auth API - Password Update ***
-  doPasswordUpdate = (password) =>
-    this.auth.currentUser.updatePassword(password);
+  doPasswordUpdate = (password) => this.auth.currentUser.updatePassword(password);
 
   // *** Merge Auth and DB User API *** //
   onAuthUserListener = (next, fallback) =>
@@ -84,9 +82,7 @@ class Firebase {
       // }
 
       if (authUser) {
-        const isValid =
-          authUser.email.endsWith("@pieddecochon.ca") ||
-          authUser.email.endsWith("@lightspeedhq.com");
+        const isValid = authUser.email.endsWith("@pieddecochon.ca") || authUser.email.endsWith("@lightspeedhq.com");
 
         if (!isValid) {
           return;
@@ -175,14 +171,8 @@ class Firebase {
     var myTimestamp = app.firestore.Timestamp.fromDate(new Date());
     // console.log(myTimestamp)
 
-    let start2 = moment(start)
-      .utcOffset("2021-07-22T11:23:15-04:00")
-      .startOf("day")
-      .toDate();
-    let end2 = moment(end)
-      .utcOffset("2021-07-22T11:23:15-04:00")
-      .endOf("day")
-      .toDate();
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
     var jsonvalue = [];
 
     return this.firestore
@@ -201,24 +191,12 @@ class Firebase {
         console.log(error);
       });
   };
-  // report 1 and 2
-  getAllFirebaseOrdersByDateAndStatus = async (
-    start,
-    end,
-    status,
-    orderType,
-    location
-  ) => {
+  // report 1,2,4
+  getAllFirebaseOrdersByDateAndStatus = async (start, end, status, orderType, location) => {
     var myTimestamp = app.firestore.Timestamp.fromDate(new Date());
 
-    let start2 = moment(start)
-      .utcOffset("2021-07-22T11:23:15-04:00")
-      .startOf("day")
-      .toDate();
-    let end2 = moment(end)
-      .utcOffset("2021-07-22T11:23:15-04:00")
-      .endOf("day")
-      .toDate();
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
     var jsonvalue = [];
 
     let query = this.firestore.collection(this.orderDB);
@@ -240,28 +218,17 @@ class Firebase {
         snapshot.forEach((docs) => {
           jsonvalue.push(docs.data());
         });
-        console.log(jsonvalue);
+        // console.log(jsonvalue);
         return jsonvalue;
       })
       .catch((error) => {
         console.log(error);
       }));
   };
-  // report 7 and 8
-  getAllFirebaseOrdersByDateAndCategoryAndStatus = async (
-    start,
-    end,
-    status,
-    category
-  ) => {
-    let start2 = moment(start)
-      .utcOffset("2021-07-22T11:23:15-04:00")
-      .startOf("day")
-      .toDate();
-    let end2 = moment(end)
-      .utcOffset("2021-07-22T11:23:15-04:00")
-      .endOf("day")
-      .toDate();
+
+  getAllFirebaseOrdersByDateAndCategoryAndStatus = async (start, end, status, category) => {
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
     var jsonvalue = [];
 
     let query = this.firestore.collection(this.orderDB);
@@ -289,10 +256,7 @@ class Firebase {
           let order = docs.data();
 
           if (category !== "Any") {
-            filteredProducts = order.products.filter(
-              (prod) =>
-                /*prod.category !== undefined &&*/ prod.category == category
-            );
+            filteredProducts = order.products.filter((prod) => /*prod.category !== undefined &&*/ prod.category == category);
             // console.log(order.number, filteredProducts)
             order.products = filteredProducts;
             // console.log(order.number, order)
@@ -321,23 +285,10 @@ class Firebase {
       }));
   };
 
-  // report 9 and 10
-  getAllFirebaseOrdersByDateAndCategoryAndStatusAndLocation = async (
-    start,
-    end,
-    status,
-    category,
-    orderType,
-    location
-  ) => {
-    let start2 = moment(start)
-      .utcOffset("2021-07-22T11:23:15-04:00")
-      .startOf("day")
-      .toDate();
-    let end2 = moment(end)
-      .utcOffset("2021-07-22T11:23:15-04:00")
-      .endOf("day")
-      .toDate();
+  // report 6, 9 and 10
+  getAllFirebaseOrdersByDateAndCategoryAndStatusAndLocation = async (start, end, status, category, orderType, location) => {
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
     var jsonvalue = [];
 
     let query = this.firestore.collection(this.orderDB);
@@ -349,6 +300,7 @@ class Firebase {
     }
     if (location != "Any") {
       query = query.where("shipmentTitle", "==", location);
+      // query = query.where("shipmentTitle", ">=", location).where("shipmentTitle", "<=", location + "\uf8ff"); // this line checks for substring of location. So if location is rive sud zone 2, searching only rive sud will match https://stackoverflow.com/questions/46568142/google-firestore-query-on-substring-of-a-property-value-text-search#comment80093410_46568525
     }
     let filteredProducts;
 
@@ -361,10 +313,7 @@ class Firebase {
           let order = docs.data();
 
           if (category !== "Any") {
-            filteredProducts = order.products.filter(
-              (prod) =>
-                /*prod.category !== undefined &&*/ prod.category == category
-            );
+            filteredProducts = order.products.filter((prod) => /*prod.category !== undefined &&*/ prod.category == category);
             // console.log(order.number, filteredProducts)
             order.products = filteredProducts;
             // console.log(order.number, order)
@@ -383,21 +332,9 @@ class Firebase {
   };
 
   // report 11
-  getAllFirebaseOrdersByOrderDateAndCategoryAndStatusAndCarrier = async (
-    start,
-    end,
-    status,
-    category,
-    carrier
-  ) => {
-    let start2 = moment(start)
-      .utcOffset("2021-07-22T11:23:15-04:00")
-      .startOf("day")
-      .toDate();
-    let end2 = moment(end)
-      .utcOffset("2021-07-22T11:23:15-04:00")
-      .endOf("day")
-      .toDate();
+  getAllFirebaseOrdersByOrderDateAndCategoryAndStatusAndCarrier = async (start, end, status, category, carrier) => {
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
     var jsonvalue = [];
 
     let query = this.firestore.collection(this.orderDB);
@@ -424,10 +361,7 @@ class Firebase {
           let order = docs.data();
 
           if (category !== "Any") {
-            filteredProducts = order.products.filter(
-              (prod) =>
-                /*prod.category !== undefined &&*/ prod.category == category
-            );
+            filteredProducts = order.products.filter((prod) => /*prod.category !== undefined &&*/ prod.category == category);
             // console.log(order.number, filteredProducts)
             order.products = filteredProducts;
             // console.log(order.number, order)
@@ -455,23 +389,11 @@ class Firebase {
         console.log(error);
       }));
   };
-  getAllFirebaseOrdersByDateAndStatusAndNumber = async (
-    start,
-    end,
-    status,
-    orderType,
-    location
-  ) => {
+  getAllFirebaseOrdersByDateAndStatusAndNumber = async (start, end, status, orderType, location) => {
     var myTimestamp = app.firestore.Timestamp.fromDate(new Date());
 
-    let start2 = moment(start)
-      .utcOffset("2021-07-22T11:23:15-04:00")
-      .startOf("day")
-      .toDate();
-    let end2 = moment(end)
-      .utcOffset("2021-07-22T11:23:15-04:00")
-      .endOf("day")
-      .toDate();
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
     var jsonvalue = [];
 
     let query = this.firestore.collection(this.orderDB);
@@ -493,12 +415,106 @@ class Firebase {
         snapshot.forEach((docs) => {
           jsonvalue.push(docs.data());
         });
-        console.log(jsonvalue);
+        // console.log(jsonvalue);
         return jsonvalue;
       })
       .catch((error) => {
         console.log(error);
       }));
+  };
+
+  selectProps = (...props) => {
+    return function (obj) {
+      const newObj = {};
+      props.forEach((name) => {
+        newObj[name] = obj[name];
+      });
+
+      return newObj;
+    };
+  };
+
+  pushRoutificRoutes = async (date, routificData) => {
+    const propertiesKept = ["Visit Name", "Driver Name", "Stop Number"];
+    let trimmedArray = routificData.map(this.selectProps(...propertiesKept));
+    trimmedArray = trimmedArray.filter((item) => {
+      return item["Visit Name"] !== "" && item["Stop Number"] > 0 && item["Driver Name"] !== "";
+    });
+
+    console.log(trimmedArray);
+    let formattedDate = moment(date).format("YYYY-MM-DD");
+    console.log(formattedDate);
+    this.firestore
+      .collection(this.routificDB)
+      .doc(formattedDate)
+      .set({ ...trimmedArray })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  pushRoutificRoutesToOrders = async (routificData) => {
+    const propertiesKept = ["Visit Name", "Driver Name", "Stop Number"];
+    let trimmedArray = routificData.map(this.selectProps(...propertiesKept));
+    trimmedArray = trimmedArray.filter((item) => {
+      return item["Visit Name"] !== "" && item["Stop Number"] > 0 && item["Driver Name"] !== "";
+    });
+    // need return false
+    console.log(trimmedArray);
+    let foundAtLeastOne = false;
+    for (const item of trimmedArray) {
+      // let id = (await this.firestore.collection(this.orderDB).where("number", "==", item["Visit Name"]).get()).docs[0].id;
+      console.log("processing", item);
+      await this.firestore
+        .collection(this.orderDB)
+        .where("number", "==", item["Visit Name"])
+        .get()
+        .then((snap) => {
+          console.log(snap);
+          if (snap.docs[0].exists) {
+            item.ID = snap.docs[0].id;
+            foundAtLeastOne = true;
+            console.log(item.ID);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+    if (!foundAtLeastOne) {
+      console.log("false");
+      return false;
+    }
+    console.log("new trim", trimmedArray);
+
+    // Get a new write batch
+    const db = this.firestore;
+    const batch = writeBatch(db);
+
+    trimmedArray.forEach((entry) => {
+      let ref = doc(db, this.orderDB, String(entry.ID));
+      if (entry.ID) {
+        console.log("setting", entry.ID);
+        batch.set(ref, { driver: entry["Driver Name"], stopNumber: entry["Stop Number"] }, { merge: true });
+      }
+    });
+
+    // Commit the batch
+    await batch.commit();
+    return true;
+  };
+
+  getRoutificRoutesByDate = async (date) => {
+    // return all routes
+    // split them by drivers
+    let formattedDate = moment(date).format("YYYY-MM-DD");
+    console.log(formattedDate, typeof formattedDate);
+    const doc = await this.firestore.collection(this.routificDB).doc(formattedDate).get();
+    if (!doc.exists) {
+      console.log("No such document!");
+    } else {
+      return doc.data();
+    }
   };
 }
 

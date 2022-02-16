@@ -175,7 +175,7 @@ const DesktopContainer = (props) => {
                     {!!authUser && (
                       <Menu.Item
                         as={NavLink}
-                        to={ROUTES.REPORTS}
+                        to={ROUTES.GENERATE_REPORT}
                         name={NAVIGATION.reports}
                         exact
                         content={NAVIGATION.reports}

@@ -1,25 +1,14 @@
 const { firestore } = require("../admin");
 const axios = require("axios").default;
-const {
-  getLSAPICredentials,
-  getLiveLSAPICredentials,
-  getCalendlyCredentials,
-} = require("../SecretManager/index");
+const { getLSAPICredentials, getLiveLSAPICredentials, getCalendlyCredentials } = require("../SecretManager/index");
+
+// let orderDB = "apdc_orders";
+let orderDB = "orders";
 
 exports.addOrder = async (req, res) => {
-  let {
-    id,
-    number,
-    status,
-    priceIncl,
-    email,
-    firstname,
-    lastname,
-    updatedAt,
-    createdAt,
-    products,
-    shipmentTitle,
-  } = req.body.order;
+  res.status(200).send();
+
+  let { id, number, status, priceIncl, email, firstname, lastname, updatedAt, createdAt, products, shipmentTitle, addressShippingStreet, addressShippingStreet2, addressShippingZipcode, addressShippingRegion, phone } = req.body.order;
   let type;
 
   if (shipmentTitle.includes("Pickup")) {
@@ -29,8 +18,7 @@ exports.addOrder = async (req, res) => {
   } else if (shipmentTitle.includes("Default Shipping")) {
     type = "mail";
   }
-  // let orderDB = "apdc_orders";
-  let orderDB = "orders";
+
   // let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
   let LS_APDC_CREDENTIALS = await getLSAPICredentials();
 
@@ -49,9 +37,7 @@ exports.addOrder = async (req, res) => {
   products = products.resource.embedded;
 
   for (const product of products) {
-    const found = category_product.find(
-      (element) => element.product.resource.id == product.product.resource.id
-    );
+    const found = category_product.find((element) => element.product.resource.id == product.product.resource.id);
     if (found) {
       let categoryID = found.category.resource.id;
       await axios({
@@ -81,14 +67,17 @@ exports.addOrder = async (req, res) => {
     products,
     shipmentTitle,
     type,
+    phone,
+    address: `${addressShippingStreet} ${addressShippingStreet2}, ${addressShippingRegion}, ${addressShippingZipcode}`,
   };
+
   firestore
     .collection(orderDB)
     .doc(String(id))
     .set(orderObject, { merge: true })
-    .then(() => {
-      return res.json(orderObject);
-    })
+    // .then(() => {
+    //   return res.json(orderObject);
+    // })
     .catch((err) => {
       console.error(err);
       return res.status(500).json({ error: "Something went wrong" });
@@ -96,10 +85,23 @@ exports.addOrder = async (req, res) => {
 };
 
 exports.addCalendlyInfo = async (req, res) => {
+  // acknowledge received webhook early to avoid getting client blocked
   res.status(200).send();
 
+  // get order id and note
+  let orderID;
+  let addedCustomerNote = "";
+
+  req.body.payload.questions_and_answers.forEach((question) => {
+    if (question.question === "Order ID") {
+      orderID = question.answer;
+    } else {
+      addedCustomerNote = question.answer;
+    }
+  });
+
   const eventIdURL = req.body.payload.event;
-  const orderID = req.body.payload.questions_and_answers[0]["answer"];
+  // const orderID = req.body.payload.questions_and_answers[0]["answer"];
 
   const calendlyEventDetails = {
     startTime: "",
@@ -116,7 +118,8 @@ exports.addCalendlyInfo = async (req, res) => {
       calendlyEventDetails.startTime = response.data.resource.start_time;
       calendlyEventDetails.locationName = response.data.resource.name;
     })
-    .catch(() => {
+    .catch((err) => {
+      console.log(err);
       return;
     });
 
@@ -127,10 +130,47 @@ exports.addCalendlyInfo = async (req, res) => {
       startTime: new Date(calendlyEventDetails.startTime),
       locationName: calendlyEventDetails.locationName,
     });
-  // .then(() => {
-  //     return res.status(200).send("Modified order " + orderID + " sucessfully!");
-  // }).catch(err => {
-  //     console.error(err);
-  //     return res.status(500).json({ error: 'Something went wrong' });
-  // })
+
+  let LS_APDC_CREDENTIALS = await getLSAPICredentials();
+  let getOrderEndpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/orders/${orderID}.json`;
+  await axios({
+    method: "get",
+    url: getOrderEndpoint,
+  })
+    .then(async (response) => {
+      let currentOrderMemo = "";
+      // let currentCustomerMemo = "";
+      currentOrderMemo = response.data.order.memo;
+      // currentCustomerMemo = response.data.order.customer.memo;
+
+      // we always want to do the following, since this function gets triggered by an added date scheduled and we want to keep track of this in the order
+      currentOrderMemo = currentOrderMemo + "\n" + "Pickup/Delivery Date: " + new Date(calendlyEventDetails.startTime).toLocaleString("en-us", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+      // we only append the following if there was a note entered that was detected
+      if (addedCustomerNote.length > 1) {
+        // currentCustomerMemo = currentCustomerMemo + "\n" + "Note from customer: " + addedCustomerNote;
+        currentOrderMemo = currentOrderMemo + "\n" + "Note from customer: " + addedCustomerNote;
+      }
+
+      await axios({
+        method: "put",
+        url: getOrderEndpoint,
+        data: {
+          order: {
+            memo: currentOrderMemo,
+            // customer: {
+            //   resource: {
+            //     embedded: {
+            //       memo: currentCustomerMemo,
+            //     },
+            //   },
+            // },
+          },
+        },
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      return;
+    });
 };

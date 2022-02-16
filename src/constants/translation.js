@@ -53,8 +53,7 @@ const TRANSLATIONS = {
       helpCenter: "Help Center",
       mail: "help@milesbd.ca",
       mailTitle: "email help@milesbd.ca",
-      mailHref:
-        "mailto:help@milesbd.ca?subject=Question about Firebase/React/Semantic UI template site",
+      mailHref: "mailto:help@milesbd.ca?subject=Question about Firebase/React/Semantic UI template site",
       company: "Company",
       about: "About Us",
       location: "Our Location",
@@ -83,8 +82,7 @@ const TRANSLATIONS = {
       newPassword: "New Password",
       confirmNewPassword: "Confirm New Password",
       infoHeader: "Your Account is connected using Google",
-      infoMessage:
-        "Password Updates for accounts connected through Google must be done in your Google Account",
+      infoMessage: "Password Updates for accounts connected through Google must be done in your Google Account",
     },
     SIGNUP: {
       header: "Sign up for an account",
@@ -134,59 +132,59 @@ const TRANSLATIONS = {
         { key: "9", text: "Completed Picked Up", value: "completed_picked_up" },
         { key: "10", text: "Cancelled", value: "cancelled" },
       ],
+      deliveryZoneWithoutAny: [
+        {
+          key: "2",
+          text: "Zone 1: Montréal-Centre",
+          value: "Delivery at Home in Montréal-Centre Zone 1",
+        },
+        {
+          key: "3",
+          text: "Zone 2: Rive-Sud",
+          value: "Delivery at Home in Rive-Sud Zone 2",
+        },
+        {
+          key: "4",
+          text: "Zone 3: Montréal Est",
+          value: "Delivery at Home in Montréal Est Zone 3",
+        },
+        {
+          key: "5",
+          text: "Zone 4: Couronne-Nord",
+          value: "Delivery at home in Couronne-Nord Zone 4",
+        },
+        {
+          key: "6",
+          text: "Zone 5: Montréal Ouest",
+          value: "Delivery at home in Montreal Ouest Zone 5",
+        },
+      ],
       deliveryZone: [
         { key: "1", text: "Any", value: "Any" },
         {
           key: "2",
           text: "Zone 1: Montréal-Centre",
-          value: "Delivery at Home in Montréal-Centre",
+          value: "Delivery at Home in Montréal-Centre Zone 1",
         },
         {
           key: "3",
           text: "Zone 2: Rive-Sud",
-          value: "Delivery at Home in Rive-Sud",
+          value: "Delivery at Home in Rive-Sud Zone 2",
         },
         {
           key: "4",
           text: "Zone 3: Montréal Est",
-          value: "Delivery at Home in Montréal Est",
+          value: "Delivery at Home in Montréal Est Zone 3",
         },
         {
           key: "5",
           text: "Zone 4: Couronne-Nord",
-          value: "Delivery at home in Couronne-Nord",
+          value: "Delivery at home in Couronne-Nord Zone 4",
         },
         {
           key: "6",
           text: "Zone 5: Montréal Ouest",
-          value: "Delivery at home in Montreal Ouest",
-        },
-      ],
-      deliveryZoneWithoutAny: [
-        {
-          key: "2",
-          text: "Zone 1: Montréal-Centre",
-          value: "Delivery at Home in Montréal-Centre",
-        },
-        {
-          key: "3",
-          text: "Zone 2: Rive-Sud",
-          value: "Delivery at Home in Rive-Sud",
-        },
-        {
-          key: "4",
-          text: "Zone 3: Montréal Est",
-          value: "Delivery at Home in Montréal Est",
-        },
-        {
-          key: "5",
-          text: "Zone 4: Couronne-Nord",
-          value: "Delivery at home in Couronne-Nord",
-        },
-        {
-          key: "6",
-          text: "Zone 5: Montréal Ouest",
-          value: "Delivery at home in Montreal Ouest",
+          value: "Delivery at home in Montreal Ouest Zone 5",
         },
       ],
       pickupPoint: [
@@ -386,16 +384,14 @@ const TRANSLATIONS = {
       helpCenter: "Center d'aide",
       mail: "help@milesbd.ca",
       mailTitle: "Envoyer un courriel à help@milesbd.ca",
-      mailHref:
-        "mailto:help@milesbd.ca?subject=Question à propos du site template Firebase/React/Semantic UI",
+      mailHref: "mailto:help@milesbd.ca?subject=Question à propos du site template Firebase/React/Semantic UI",
       company: "Entreprise",
       about: "À Propos",
       location: "Nos Locations",
       blog: "Notre Blogue",
       events: "Nos Événements",
       h3: "Mots de l'entreprise",
-      subheader:
-        "Nous proposons des solutions commerciales complexes pour vous permettre de rester à la pointe de la technologie. Nous pouvons vous fournir des conseils qui vous aideront à étendre votre influence public et vos profits.",
+      subheader: "Nous proposons des solutions commerciales complexes pour vous permettre de rester à la pointe de la technologie. Nous pouvons vous fournir des conseils qui vous aideront à étendre votre influence public et vos profits.",
       facebook: "Suivez-nous sur Facebook",
       instagram: "Suivez-nous sur Instagram",
       twitter: "Suivez-nous sur Twitter",
@@ -417,8 +413,7 @@ const TRANSLATIONS = {
       newPassword: "Nouveau mot de passe",
       confirmNewPassword: "Confirmer Nouveau mot de passe",
       infoHeader: "Votre compte est connecté avec votre usager Google",
-      infoMessage:
-        "La mise à jour des mots de passe pour les comptes connectés via Google doit être effectuée dans votre compte Google.",
+      infoMessage: "La mise à jour des mots de passe pour les comptes connectés via Google doit être effectuée dans votre compte Google.",
     },
     SIGNUP: {
       header: "S'inscrire pour un compte",

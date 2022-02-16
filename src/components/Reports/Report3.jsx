@@ -43,7 +43,7 @@ function Report3(props) {
       setSuccess(true);
       setError(false);
       const file = await getReport3File(orderData, report3Values);
-      const url = await props.firebase.saveReportToFirebase(file);
+      // const url = await props.firebase.saveReportToFirebase(file);
       props.setReportValues(file);
       props.nextStep();
     } else {

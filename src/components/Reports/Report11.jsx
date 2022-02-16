@@ -3,15 +3,7 @@ import TRANSLATIONS from "../../constants/translation";
 import SemanticDatepicker from "react-semantic-ui-datepickers";
 import "react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css";
 
-import {
-  Header,
-  Grid,
-  Divider,
-  Button,
-  Dropdown,
-  Message,
-  Icon,
-} from "semantic-ui-react";
+import { Header, Grid, Divider, Button, Dropdown, Message, Icon } from "semantic-ui-react";
 
 const { getInitialDate } = require("../../Util/HelperFunctions");
 const { getReport8or11File } = require("../../Util/CreateReportFile");
@@ -38,20 +30,13 @@ function Report11(props) {
   const onSubmit = async () => {
     console.log(report11Values);
 
-    const orderData =
-      await props.firebase.getAllFirebaseOrdersByOrderDateAndCategoryAndStatusAndCarrier(
-        report11Values.startDate,
-        report11Values.endDate,
-        report11Values.orderStatus,
-        report11Values.category,
-        report11Values.carrier
-      );
+    const orderData = await props.firebase.getAllFirebaseOrdersByOrderDateAndCategoryAndStatusAndCarrier(report11Values.startDate, report11Values.endDate, report11Values.orderStatus, report11Values.category, report11Values.carrier);
     console.log(orderData);
     if (orderData.length) {
       setSuccess(true);
       setError(false);
       const file = await getReport8or11File(orderData, "11", report11Values);
-      props.firebase.saveReportToFirebase(file);
+      // props.firebase.saveReportToFirebase(file);
       props.setReportValues(file);
       props.nextStep();
     } else {
@@ -70,16 +55,7 @@ function Report11(props) {
     localStorage.setItem("report11Values", JSON.stringify(report11Values));
   }, [report11Values]);
 
-  const getErrorMessage = () =>
-    error ? (
-      <Message
-        negative
-        header="No results"
-        content="No results were found. Try again"
-      />
-    ) : (
-      ""
-    );
+  const getErrorMessage = () => (error ? <Message negative header="No results" content="No results were found. Try again" /> : "");
   const getSuccessMessage = () =>
     success ? (
       <Message icon>
@@ -133,31 +109,11 @@ function Report11(props) {
       />
       <Header as="h3">Date Range of Order</Header>
       <Grid style={{ marginTop: "0", marginBottom: "0" }}>
-        <SemanticDatepicker
-          showToday
-          autoComplete="off"
-          name="startDate"
-          size="large"
-          onChange={onChange}
-          value={getInitialDate(report11Values.startDate)}
-        />
-        <SemanticDatepicker
-          showToday
-          autoComplete="off"
-          name="endDate"
-          size="large"
-          onChange={onChange}
-          value={getInitialDate(report11Values.endDate)}
-        />
+        <SemanticDatepicker showToday autoComplete="off" name="startDate" size="large" onChange={onChange} value={getInitialDate(report11Values.startDate)} />
+        <SemanticDatepicker showToday autoComplete="off" name="endDate" size="large" onChange={onChange} value={getInitialDate(report11Values.endDate)} />
       </Grid>
       <Divider />
-      <Button
-        content="Back"
-        icon="left arrow"
-        size="large"
-        labelPosition="left"
-        onClick={() => props.prevStep()}
-      />
+      <Button content="Back" icon="left arrow" size="large" labelPosition="left" onClick={() => props.prevStep()} />
       <Button
         positive
         content="Next"
@@ -165,13 +121,7 @@ function Report11(props) {
         size="large"
         labelPosition="right"
         onClick={() => onSubmit()}
-        disabled={
-          !report11Values.category ||
-          !report11Values.orderStatus ||
-          !report11Values.carrier ||
-          report11Values.startDate == null ||
-          report11Values.endDate == null
-        }
+        disabled={!report11Values.category || !report11Values.orderStatus || !report11Values.carrier || report11Values.startDate == null || report11Values.endDate == null}
       />
       {getErrorMessage()}
       {getSuccessMessage()}

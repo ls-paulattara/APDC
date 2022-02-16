@@ -4,7 +4,9 @@ import qc_logo from "../media/qc-logo.png";
 import cochon_cart from "../media/cochon-cart.jpeg";
 import TRANSLATIONS from "../constants/translation";
 import moment from "moment";
+import * as html2canvas from "html2canvas";
 
+// const { html2canvas } = require("html2canvas");
 const { jsPDF } = require("jspdf");
 const jspdfautotable = require("jspdf-autotable");
 const Papa = require("papaparse");
@@ -25,14 +27,7 @@ export const getReport1or2File = async (data, reportNumber, reportValues) => {
   //   doc.text("Pickup Point: " + data[0].shipmentTitle, 14, 29);
   // }
   doc.text(data[0].shipmentTitle, 14, 29);
-  doc.text(
-    "Date Range: " +
-      moment(reportValues.startDate).format("YYYY-MM-DD") +
-      " / " +
-      moment(reportValues.endDate).format("YYYY-MM-DD"),
-    14,
-    35
-  );
+  doc.text("Date Range: " + moment(reportValues.startDate).format("YYYY-MM-DD") + " / " + moment(reportValues.endDate).format("YYYY-MM-DD"), 14, 35);
 
   doc.line(14, 40, 200, 40);
 
@@ -43,17 +38,7 @@ export const getReport1or2File = async (data, reportNumber, reportValues) => {
 
   data.forEach((item) => {
     let outerCurr;
-    let {
-      id,
-      number,
-      createdAt,
-      firstname,
-      lastname,
-      status,
-      totalPrice,
-      shipmentTitle,
-      startTime,
-    } = item;
+    let { id, number, createdAt, firstname, lastname, status, totalPrice, shipmentTitle, startTime } = item;
     createdAt = createdAt.toDate().toLocaleDateString(); //+ '-' + createdAt.toDate().toLocaleTimeString()
     startTime = startTime.toDate().toLocaleDateString();
     let name = firstname + " " + lastname;
@@ -61,9 +46,7 @@ export const getReport1or2File = async (data, reportNumber, reportValues) => {
     outerCurr = [[number, createdAt, startTime, name, totalPrice, status]];
     doc.autoTable({
       // head: !startFlag ? [["Number","Date Ordered","Delivery Date","Name","Total", "Status"]] : [],
-      head: [
-        ["Number", "Date Ordered", "Delivery Date", "Name", "Total", "Status"],
-      ],
+      head: [["Number", "Date Ordered", "Delivery Date", "Name", "Total", "Status"]],
       body: outerCurr,
       // theme: ''
       styles: {
@@ -132,17 +115,7 @@ export const getReport1or2FileOLD = async (data, reportNumber) => {
 
   data.forEach((item) => {
     item.products.forEach((subitem) => {
-      const {
-        id,
-        number,
-        createdAt,
-        firstname,
-        lastname,
-        status,
-        totalPrice,
-        shipmentTitle,
-        startTime,
-      } = item;
+      const { id, number, createdAt, firstname, lastname, status, totalPrice, shipmentTitle, startTime } = item;
       outer.push({
         id,
         number,
@@ -164,10 +137,7 @@ export const getReport1or2FileOLD = async (data, reportNumber) => {
     const entry = {
       ID: item.id,
       Number: item.number,
-      "Date Ordered":
-        item.createdAt.toDate().toLocaleDateString() +
-        "-" +
-        item.createdAt.toDate().toLocaleTimeString(),
+      "Date Ordered": item.createdAt.toDate().toLocaleDateString() + "-" + item.createdAt.toDate().toLocaleTimeString(),
       "Delivery Date": item.startTime.toDate().toLocaleDateString(),
       "Delivery Zone": item.shipmentTitle,
       "First Name": item.firstname,
@@ -193,10 +163,7 @@ export const getReport1or2FileOLD = async (data, reportNumber) => {
 
   var csv = Papa.unparse(finalResults, csvConfig);
   let date = new Date();
-  let current = date
-    .toLocaleDateString()
-    .concat("_", date.toLocaleTimeString("en-GB").replaceAll(":", "-"))
-    .replaceAll("/", "-");
+  let current = date.toLocaleDateString().concat("_", date.toLocaleTimeString("en-GB").replaceAll(":", "-")).replaceAll("/", "-");
   const exportedFilename = `Report${reportNumber}_${current}.csv`;
   const blob = new Blob([csv], {
     type: "text/csv;charset=utf-8;",
@@ -343,16 +310,8 @@ export const getReport3File = async (data, reportValues) => {
 
   console.log("dict", dict);
 
-  const deliveryTable = Object.entries(dict["Delivery"]).map((item) => [
-    item[0],
-    round(item[1][0]),
-    item[1][1],
-  ]);
-  const pickupTable = Object.entries(dict["Pickup"]).map((item) => [
-    item[0],
-    item[1][0],
-    item[1][1],
-  ]);
+  const deliveryTable = Object.entries(dict["Delivery"]).map((item) => [item[0], round(item[1][0]), item[1][1]]);
+  const pickupTable = Object.entries(dict["Pickup"]).map((item) => [item[0], item[1][0], item[1][1]]);
   const mailTable = [["Purolator", mailTotal[1], mailTotal[2]], mailTotal];
 
   // deliveryTotal = deliveryTotal[1].toFixed(2);
@@ -373,14 +332,7 @@ export const getReport3File = async (data, reportValues) => {
   doc.text(HOME["report3"], 14, 20);
   doc.setTextColor(85, 85, 85);
   doc.setFontSize(14);
-  doc.text(
-    "Date Range: " +
-      moment(reportValues.startDate).format("YYYY-MM-DD") +
-      " / " +
-      moment(reportValues.endDate).format("YYYY-MM-DD"),
-    14,
-    29
-  );
+  doc.text("Date Range: " + moment(reportValues.startDate).format("YYYY-MM-DD") + " / " + moment(reportValues.endDate).format("YYYY-MM-DD"), 14, 29);
 
   var width = doc.internal.pageSize.getWidth() - 28.0222222;
   // let wantedTableWidth = 100;
@@ -478,23 +430,233 @@ export const getReport3File = async (data, reportValues) => {
   doc.save(fileName);
   blob.name = fileName;
 
-  return blob;
-
   // ------------- TO OPEN THE FILE IN NEW WINDOW --------------------------
-  // var string = doc.output('datauristring');
-  // var embed = "<embed width='100%' height='100%' src='" + string + "'/>"
-  // var x = window.open();
+  var string = doc.output("dataurlnewwindow");
+  var embed = "<embed width='100%' height='100%' src='" + string + "'/>";
+  var x = window.open();
   // x.document.open();
   // x.document.write(embed);
   // x.document.close();
+
+  return blob;
+};
+export const getReport4File = async (data) => {
+  const finalResults = data.flat().map((item) => {
+    const entry = {
+      Number: item.number,
+      Address: item.address,
+      Phone: item.phone,
+      Email: item.email,
+      Status: item.status,
+    };
+    return entry;
+  });
+
+  const csvConfig = {
+    quotes: false, //or array of booleans
+    quoteChar: '"',
+    escapeChar: '"',
+    delimiter: ",",
+    header: true,
+    newline: "\r\n",
+    skipEmptyLines: false, //or 'greedy',
+    columns: null, //or array of strings
+  };
+
+  var csv = Papa.unparse(finalResults, csvConfig);
+  let date = new Date();
+  let current = date.toLocaleDateString().concat("_", date.toLocaleTimeString("en-GB").replaceAll(":", "-")).replaceAll("/", "-");
+  const exportedFilename = `Report4_${current}.csv`;
+  const blob = new Blob([csv], {
+    type: "text/csv;charset=utf-8;",
+  });
+  if (navigator.msSaveBlob) {
+    // IE 10+
+    navigator.msSaveBlob(blob, exportedFilename);
+  } else {
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      // feature detection
+      // Browsers that support HTML5 download attribute
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", exportedFilename);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+  blob.name = exportedFilename;
+  return blob;
+};
+
+export const getReport6File = async (orderData, reportValues) => {
+  console.log(orderData);
+
+  const doc = new jsPDF();
+  doc.setFontSize(22);
+  doc.setFont("ArialMS");
+  doc.setTextColor(64, 64, 64);
+  doc.text(HOME["report6"], 14, 20);
+  doc.setTextColor(85, 85, 85);
+  doc.setFontSize(14);
+  doc.text("Date: " + moment(reportValues.startDate).format("YYYY-MM-DD"), 14, 29);
+  doc.text("Order Status: " + reportValues.orderStatus, 14, 35);
+  doc.text("Category: " + reportValues.category, 14, 41);
+  // doc.line(14, 47, 200, 47);
+  doc.text(reportValues.deliveryZone, 14, 47);
+  doc.line(14, 52, 200, 52);
+  let startY = 62;
+
+  // split drivers
+  let drivers = {};
+  let firstTablePosted = false;
+  orderData.forEach((order) => {
+    if (drivers[order.driver]) {
+      drivers[order.driver].push(order);
+    } else {
+      drivers[order.driver] = [order];
+    }
+  });
+  console.log(drivers);
+
+  for (const [driver, orders] of Object.entries(drivers)) {
+    console.log(driver, orders);
+
+    let outer = [];
+    orders.forEach((order) => {
+      order.products.forEach((product) => {
+        const { quantityOrdered, productTitle } = product;
+        outer.push({
+          title: productTitle,
+          qty: quantityOrdered,
+          date: order.startTime.toDate().toLocaleDateString("en-US", { day: "numeric", month: "numeric" }).replaceAll("/", "-"),
+        });
+      });
+    });
+
+    console.log(outer);
+
+    let header = [];
+    let dict = {};
+
+    let dates = [];
+    let items = [];
+
+    outer.forEach((item) => {
+      dates.push(item.date);
+      items.push(item.title);
+    });
+
+    dates = [...new Set(dates)];
+    items = [...new Set(items)];
+    header.push("Product", ...dates, "Total");
+
+    outer.forEach((item) => {
+      if (!dict[item.title]) {
+        dict[item.title] = [item];
+      } else {
+        dict[item.title].push(item);
+      }
+    });
+
+    console.log(dict);
+
+    // count the items for that day
+    const getCellCount = (i, j) => {
+      let count = 0;
+      dict[items[i]].forEach((item) => {
+        if (item.date == dates[j]) {
+          count += item.qty;
+        }
+      });
+      return count;
+    };
+
+    // build 2D array
+    let full = createArray(items.length, dates.length + 1);
+
+    // populate the array with the counts for the items
+    for (let i = 0; i < full.length; i++) {
+      for (let j = 0; j < full[i].length; j++) {
+        if (j == 0) {
+          full[i][j] = items[i];
+        } else {
+          full[i][j] = getCellCount(i, j - 1);
+        }
+      }
+    }
+
+    // add totals per row
+    for (let i = 0; i < full.length; i++) {
+      let count = 0;
+      for (let j = 1; j < full[i].length; j++) {
+        count += full[i][j];
+      }
+      full[i].push(count);
+    }
+    let totalLastRow = ["Total"];
+
+    console.log(full);
+
+    // add totals per column
+    for (let i = 1; i < full[0].length; i++) {
+      //error here
+      let count = 0;
+      for (let j = 0; j < full.length; j++) {
+        count += full[j][i];
+      }
+      totalLastRow.push(count);
+    }
+
+    full.push(totalLastRow);
+    if (firstTablePosted) {
+      startY = doc.lastAutoTable.finalY + 10;
+    }
+    doc.text("Livreur: " + driver, 14, startY);
+
+    doc.autoTable({
+      head: [header],
+      body: full,
+      startY: startY + 5,
+      // doc.lastAutoTable.finalY + 5,
+      didParseCell: function (data) {
+        var rows = data.table.body;
+        if (data.row.index === rows.length - 1 && rows.length > 1) {
+          // data.cell.styles.fillColor = [211, 211, 211];
+          data.cell.styles.fontStyle = "bold";
+        }
+      },
+    });
+    firstTablePosted = true;
+
+    // doc.autoTable({
+    //   head: [header],
+    //   body: full,
+    //   startY: startYTable,
+    //   didParseCell: function (data) {
+    //     var rows = data.table.body;
+    //     if (data.row.index === rows.length - 1 && rows.length > 1) {
+    //       // data.cell.styles.fillColor = [211, 211, 211];
+    //       data.cell.styles.fontStyle = "bold";
+    //     }
+    //   },
+    // });
+  }
+
+  var blob = doc.output("blob");
+
+  const fileName = getFilenameByDate("6", "pdf");
+  doc.save(fileName);
+  blob.name = fileName;
+
+  return blob;
 };
 
 const getFilenameByDate = (report, type) => {
   let date = new Date();
-  let current = date
-    .toLocaleDateString()
-    .concat("_", date.toLocaleTimeString("en-GB").replaceAll(":", "-"))
-    .replaceAll("/", "-");
+  let current = date.toLocaleDateString().concat("_", date.toLocaleTimeString("en-GB").replaceAll(":", "-")).replaceAll("/", "-");
   return `Report${report}_${current}.${type}`;
 };
 
@@ -510,11 +672,7 @@ function createArray(length) {
   return arr;
 }
 
-export const getReport7or9or10File = async (
-  data,
-  reportNumber,
-  reportValues
-) => {
+export const getReport7or9or10File = async (data, reportNumber, reportValues) => {
   let outer = [];
   data.forEach((order) => {
     order.products.forEach((product) => {
@@ -522,10 +680,7 @@ export const getReport7or9or10File = async (
       outer.push({
         title: productTitle,
         qty: quantityOrdered,
-        date: order.startTime
-          .toDate()
-          .toLocaleDateString("en-US", { day: "numeric", month: "numeric" })
-          .replaceAll("/", "-"),
+        date: order.startTime.toDate().toLocaleDateString("en-US", { day: "numeric", month: "numeric" }).replaceAll("/", "-"),
       });
     });
   });
@@ -615,14 +770,7 @@ export const getReport7or9or10File = async (
 
   doc.setFontSize(14);
 
-  doc.text(
-    "Date Range: " +
-      moment(reportValues.startDate).format("YYYY-MM-DD") +
-      " / " +
-      moment(reportValues.endDate).format("YYYY-MM-DD"),
-    14,
-    29
-  );
+  doc.text("Date Range: " + moment(reportValues.startDate).format("YYYY-MM-DD") + " / " + moment(reportValues.endDate).format("YYYY-MM-DD"), 14, 29);
 
   doc.text("Order Status: " + reportValues.orderStatus, 14, 35);
   doc.text("Category: " + reportValues.category, 14, 41);
@@ -719,14 +867,7 @@ export const getReport8or11File = async (data, reportNumber, reportValues) => {
 
   doc.setFontSize(14);
 
-  doc.text(
-    "Date Range: " +
-      moment(reportValues.startDate).format("YYYY-MM-DD") +
-      " / " +
-      moment(reportValues.endDate).format("YYYY-MM-DD"),
-    14,
-    29
-  );
+  doc.text("Date Range: " + moment(reportValues.startDate).format("YYYY-MM-DD") + " / " + moment(reportValues.endDate).format("YYYY-MM-DD"), 14, 29);
 
   doc.text("Order Status: " + reportValues.orderStatus, 14, 35);
   doc.text("Category: " + reportValues.category, 14, 41);
@@ -763,14 +904,16 @@ export const getReport8or11File = async (data, reportNumber, reportValues) => {
 
   return blob;
 };
+
 export const getReport12File = (data) => {
   // let mainDiv = document.createElement('div');
   // mainDiv.id = "mainDIV";
   let outerDiv = [];
-
+  let htmlContent;
   // let innerDiv = []
   data.forEach((orderDetails) => {
     outerDiv.push(getReport12SinglePage(orderDetails));
+    htmlContent = getReport12SinglePage(orderDetails);
     //   console.log(getReport12SinglePage(orderDetails))
     //   let temp = document.createElement("div");
     //   mainDiv.appendChild(document.createTextNode(getReport12SinglePage(orderDetails)));
@@ -778,16 +921,29 @@ export const getReport12File = (data) => {
     // mainDiv.appendChild(getReport12SinglePage(orderDetails));
     // innerDiv.push(getReport12SinglePage(orderDetails))
   });
-  console.log(outerDiv[0]);
+  // console.log(outerDiv[0]);
   // outerDiv.push(innerDiv)
-
+  // console.log(htmlContent);
+  // html2canvas(document.querySelector("#rep9541445")).then((canvas) => {
+  //   document.body.appendChild(canvas);
+  // });
+  // // "#9541445": function (element, renderer) {
+  // const input = document.getElementById("rep9541445");
+  // html2canvas(input).then((canvas) => {
+  //   const imgData = canvas.toDataURL("image/png");
+  //   const pdf = new jsPDF();
+  //   pdf.addImage(imgData, "JPEG", 0, 0);
+  //   // pdf.output('dataurlnewwindow');
+  //   pdf.save("download.pdf");
+  // });
+  // return htmlContent;
   return outerDiv; //.map((pageDiv) => pageDiv);
 };
 
 export const getReport12SinglePage = (orderDetails) => {
   return (
     <div
-      id={orderDetails.id}
+      id={"rep" + orderDetails.id}
       key={orderDetails.id}
       style={{
         height: 792,
@@ -799,13 +955,11 @@ export const getReport12SinglePage = (orderDetails) => {
         overflowX: "hidden",
         overflowY: "hidden",
         position: "relative",
+        textAlign: "left",
       }}
     >
       {/* <p style={{marginTop:'20px', textAlign:'center', fontFamily:"cursive", fontSize:'50px'}}>Au Pied De Cochon</p> */}
-      <img
-        style={{ marginTop: "30px", width: "600px" }}
-        src={apdc_logo_banner}
-      ></img>
+      <img style={{ marginTop: "30px", width: "600px" }} src={apdc_logo_banner}></img>
       {/* <img style={{marginTop:'20px'}} src={apdc_logo}></img> */}
       {/* <hr style={{marginTop:'20px',height: '0.1px', marginLeft: "90px",width:'70%',textAlign:'left'}}></hr>
     <h2 style={{marginTop:'-10px', textAlign: 'center'}}><pre>A U  P I E D  D E  C O C H O N</pre></h2>
@@ -840,10 +994,7 @@ export const getReport12SinglePage = (orderDetails) => {
             <span> phone number</span>
           </div>
           <div style={{ display: "block", float: "right" }}>
-            <img
-              style={{ width: "130px", height: "130px" }}
-              src={cochon_cart}
-            ></img>
+            <img style={{ width: "130px", height: "130px" }} src={cochon_cart}></img>
           </div>
         </div>
         <br></br>
@@ -885,9 +1036,7 @@ export const getReport12SinglePage = (orderDetails) => {
         >
           <div style={{ float: "left", width: "33.33%" }}>commande #</div>
           <div style={{ float: "left", width: "33.33%" }}>date commande</div>
-          <div style={{ float: "left", width: "33.33%" }}>
-            Livraison/Delivery
-          </div>
+          <div style={{ float: "left", width: "33.33%" }}>Livraison/Delivery</div>
         </div>
         <hr style={{ width: "88%", textAlign: "left", marginLeft: "0" }}></hr>
 
@@ -931,9 +1080,7 @@ export const getReport12SinglePage = (orderDetails) => {
         </div>
         <hr style={{ width: "88%", textAlign: "left", marginLeft: "0" }}></hr>
         {/* <br></br> */}
-        <div
-          style={{ width: "400px", height: "60px", border: "1px solid #000" }}
-        >
+        <div style={{ width: "400px", height: "60px", border: "1px solid #000" }}>
           Payment type
           <br></br>
           Total CAD $
@@ -973,25 +1120,19 @@ export const getReport12SinglePage = (orderDetails) => {
                 <b>Au Pied De Cochon - Cabanne à sucre</b>
               </span>
               <div style={{ marginTop: "-10px" }}></div>
-              <span style={{ fontSize: "8px" }}>
-                11382 Rang de la Fresnière, St-Benoît de Mirabel, QC J7N 2R9
-              </span>
+              <span style={{ fontSize: "8px" }}>11382 Rang de la Fresnière, St-Benoît de Mirabel, QC J7N 2R9</span>
             </div>
             <div style={{ float: "left", width: "50%" }}>
               <span style={{ fontSize: "8px", marginLeft: "15px" }}>
                 <b>Au Pied De Cochon - Restaurant</b>
               </span>
               <div style={{ marginTop: "-10px" }}></div>
-              <span style={{ fontSize: "8px" }}>
-                536 Av. Duluth Est, Montréal, QC, H2L 1A9
-              </span>
+              <span style={{ fontSize: "8px" }}>536 Av. Duluth Est, Montréal, QC, H2L 1A9</span>
             </div>
           </div>
           <div style={{ marginRight: "100px", textAlign: "center" }}>
             <span style={{ width: "100%", fontSize: "6px", marginLeft: "0px" }}>
-              Ce projet a été financé par le ministère de l’Agriculture, des
-              Pêcheries et de l’Alimentation, dans le cadre du programme
-              Transformation alimentaire : robotisation et système de qualité.
+              Ce projet a été financé par le ministère de l’Agriculture, des Pêcheries et de l’Alimentation, dans le cadre du programme Transformation alimentaire : robotisation et système de qualité.
             </span>
             <br></br>
             <img

@@ -66,11 +66,11 @@ const Home = (props) => {
               <Button
                 as={Link}
                 size="big"
-                to="/reports"
+                to="/generate-report"
                 // disabled={!authUser}
                 positive
               >
-                Go to Reports
+                Generate Report
               </Button>
             ) : (
               <Button
