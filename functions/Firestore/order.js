@@ -8,7 +8,37 @@ let orderDB = "orders";
 exports.addOrder = async (req, res) => {
   res.status(200).send();
 
-  let { id, number, status, priceIncl, email, firstname, lastname, updatedAt, createdAt, products, shipmentTitle, addressShippingStreet, addressShippingStreet2, addressShippingZipcode, addressShippingRegion, phone } = req.body.order;
+  let {
+    id,
+    number,
+    status,
+    priceIncl,
+    email,
+    firstname,
+    lastname,
+    updatedAt,
+    createdAt,
+    products,
+    shipmentTitle,
+    addressBillingName,
+    addressBillingStreet,
+    addressBillingStreet2,
+    addressBillingNumber,
+    addressBillingZipcode,
+    addressBillingRegion,
+    addressBillingCountry,
+    addressShippingName,
+    addressShippingStreet,
+    addressShippingStreet2,
+    addressShippingNumber,
+    addressShippingZipcode,
+    addressShippingRegion,
+    addressShippingCountry,
+    phone,
+    paymentId,
+    paymentTitle,
+    paymentData,
+  } = req.body.order;
   let type;
 
   if (shipmentTitle.includes("Pickup")) {
@@ -68,7 +98,30 @@ exports.addOrder = async (req, res) => {
     shipmentTitle,
     type,
     phone,
-    address: `${addressShippingStreet} ${addressShippingStreet2}, ${addressShippingRegion}, ${addressShippingZipcode}`,
+    // address: `${addressShippingStreet} ${addressShippingStreet2}, ${addressShippingRegion}, ${addressShippingZipcode}`,
+    shippingAddress: {
+      name: addressShippingName,
+      street: addressShippingStreet,
+      street2: addressShippingStreet2,
+      number: addressShippingNumber,
+      zipcode: addressShippingZipcode,
+      region: addressShippingRegion,
+      country: addressShippingCountry.title,
+    },
+    billingAddress: {
+      name: addressBillingName,
+      street: addressBillingStreet,
+      street2: addressBillingStreet2,
+      number: addressBillingNumber,
+      zipcode: addressBillingZipcode,
+      region: addressBillingRegion,
+      country: addressBillingCountry.title,
+    },
+    payment: {
+      id: paymentId,
+      title: paymentTitle,
+      data: paymentData,
+    },
   };
 
   firestore
@@ -101,7 +154,6 @@ exports.addCalendlyInfo = async (req, res) => {
   });
 
   const eventIdURL = req.body.payload.event;
-  // const orderID = req.body.payload.questions_and_answers[0]["answer"];
 
   const calendlyEventDetails = {
     startTime: "",
@@ -116,7 +168,7 @@ exports.addCalendlyInfo = async (req, res) => {
   })
     .then((response) => {
       calendlyEventDetails.startTime = response.data.resource.start_time;
-      calendlyEventDetails.locationName = response.data.resource.name;
+      calendlyEventDetails.calendlyLocationName = response.data.resource.name;
     })
     .catch((err) => {
       console.log(err);

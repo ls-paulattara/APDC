@@ -6,14 +6,14 @@ import "react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css";
 import { Header, Grid, Divider, Button, Dropdown, Message, Icon } from "semantic-ui-react";
 
 const { getInitialDate } = require("../../Util/HelperFunctions");
-const { getReport12File } = require("../../Util/CreateReportFile");
+const { getReport13File } = require("../../Util/CreateReportFile");
 
-function Report12(props) {
+function Report13(props) {
   const { dark, language } = props;
   const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
 
-  const [report12Values, setReport12Values] = useState({
-    deliveryZone: "",
+  const [report13Values, setReport13Values] = useState({
+    pickupPoint: "",
     orderStatus: "",
     startDate: null,
     endDate: null,
@@ -25,24 +25,24 @@ function Report12(props) {
 
   const onChange = (event, data) => {
     let { name, value } = data;
-    setReport12Values((prevState) => ({ ...prevState, [name]: value }));
+    setReport13Values((prevState) => ({ ...prevState, [name]: value }));
   };
 
   const onSubmit = async () => {
-    console.log(report12Values);
+    console.log(report13Values);
     setError(false);
     setSuccess(false);
     setLoading(true);
 
-    let orderData = await props.firebase.getAllFirebaseOrdersByDateAndStatus(report12Values.startDate, report12Values.endDate, report12Values.orderStatus, "delivery", report12Values.deliveryZone);
+    let orderData = await props.firebase.getAllFirebaseOrdersByDateAndStatus(report13Values.startDate, report13Values.endDate, report13Values.orderStatus, "pickup", report13Values.pickupPoint);
     console.log(orderData);
 
     // Keep only entries with Drivers
-    orderData = orderData.filter((order) => order.hasOwnProperty("driver"));
-    console.log("new order data", orderData);
+    // orderData = orderData.filter((order) => order.hasOwnProperty("driver"));
+    // console.log("new order data", orderData);
     // try {
     if (orderData.length) {
-      const res = getReport12File(orderData);
+      const res = getReport13File(orderData);
       if (res) {
         setLoading(false);
         setSuccess(true);
@@ -64,17 +64,17 @@ function Report12(props) {
   };
 
   useEffect(() => {
-    const report12Values = JSON.parse(localStorage.getItem("report12Values"));
-    console.log(report12Values);
-    if (report12Values) {
-      setReport12Values(report12Values);
+    const report13Values = JSON.parse(localStorage.getItem("report13Values"));
+    console.log(report13Values);
+    if (report13Values) {
+      setReport13Values(report13Values);
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("report12Values", JSON.stringify(report12Values));
-    console.log(report12Values);
-  }, [report12Values]);
+    localStorage.setItem("report13Values", JSON.stringify(report13Values));
+    console.log(report13Values);
+  }, [report13Values]);
 
   const getErrorMessage = () => (error ? <Message negative header="No results" content="No results were found. Try again" /> : "");
   const getSuccessMessage = () =>
@@ -117,16 +117,16 @@ function Report12(props) {
         size="large"
         options={REPORTS.orderStatus}
         // icon="clipboard outline"
-        value={report12Values.orderStatus}
+        value={report13Values.orderStatus}
         onChange={onChange}
       />
 
-      <Header as="h3">Delivery Zone</Header>
-      <Dropdown placeholder="Delivery Zone" name="deliveryZone" label="Delivery Zone" selection size="large" options={REPORTS.deliveryZone} value={report12Values.deliveryZone} onChange={onChange} />
+      <Header as="h3">Pickup Point</Header>
+      <Dropdown placeholder="Pickup Point" name="pickupPoint" label="Pickup Point" selection size="large" options={REPORTS.pickupPoint} value={report13Values.pickupPoint} onChange={onChange} />
       <Header as="h3">Date Range of Pickup</Header>
       <Grid style={{ marginTop: "0", marginBottom: "0" }}>
-        <SemanticDatepicker showToday autoComplete="off" name="startDate" size="large" onChange={onChange} value={getInitialDate(report12Values.startDate)} />
-        <SemanticDatepicker showToday autoComplete="off" name="endDate" size="large" onChange={onChange} value={getInitialDate(report12Values.endDate)} />
+        <SemanticDatepicker showToday autoComplete="off" name="startDate" size="large" onChange={onChange} value={getInitialDate(report13Values.startDate)} />
+        <SemanticDatepicker showToday autoComplete="off" name="endDate" size="large" onChange={onChange} value={getInitialDate(report13Values.endDate)} />
       </Grid>
       <Divider />
       <Button content="Back" icon="left arrow" size="large" labelPosition="left" onClick={() => props.prevStep()} />
@@ -137,7 +137,7 @@ function Report12(props) {
         size="large"
         labelPosition="right"
         onClick={() => onSubmit()}
-        disabled={!report12Values.deliveryZone || !report12Values.orderStatus || report12Values.startDate == null || report12Values.endDate == null}
+        disabled={!report13Values.pickupPoint || !report13Values.orderStatus || report13Values.startDate == null || report13Values.endDate == null}
       />
       <Button
         // positive
@@ -155,4 +155,4 @@ function Report12(props) {
   );
 }
 
-export default Report12;
+export default Report13;

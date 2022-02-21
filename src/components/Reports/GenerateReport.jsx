@@ -15,6 +15,7 @@ import Report9 from "./Report9";
 import Report10 from "./Report10";
 import Report11 from "./Report11";
 import Report12 from "./Report12";
+import Report13 from "./Report13";
 import ListOfReports from "./ListOfReports";
 import DisplayReport from "./DisplayReport";
 import { Segment, Container, Icon, Step, Header, Divider } from "semantic-ui-react";
@@ -161,7 +162,15 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report12}</Header>
                 <Divider />
-                <Report12 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
+                <Report12 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} setStep={setStep} dark={dark} />
+              </>
+            );
+          case 13:
+            return (
+              <>
+                <Header as="h2">{HOME.report13}</Header>
+                <Divider />
+                <Report13 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} setStep={setStep} dark={dark} />
               </>
             );
         }
@@ -203,7 +212,7 @@ function GenerateReport(props) {
               </Step.Content>
             </Step>
 
-            <Step active={step === 3} disabled={selectedReport === 5 && step === 2}>
+            <Step active={step === 3} disabled={(selectedReport === 5 || selectedReport == 12 || selectedReport == 13) && step === 2}>
               <Icon name="numbered list" />
               <Step.Content>
                 <Step.Title>Step 3: View Report</Step.Title>

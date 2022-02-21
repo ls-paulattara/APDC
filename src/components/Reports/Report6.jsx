@@ -29,19 +29,13 @@ function Report6(props) {
 
   const onSubmit = async () => {
     console.log(report6Values);
-    // const routificStops = await props.firebase.getRoutificRoutesByDate(report6Values.startDate);
-    // console.log("stops", routificStops);
-    // if (!routificStops.length) {
-    // setError(true);
-    // return;
-    // }
     let orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatusAndLocation(report6Values.startDate, report6Values.startDate, report6Values.orderStatus, report6Values.category, "delivery", report6Values.deliveryZone);
     console.log(orderData);
+
     // Keep only entries with Drivers
-    // if (orderData.length) {
     orderData = orderData.filter((order) => order.hasOwnProperty("driver"));
     console.log("new order data", orderData);
-    // }
+
     if (orderData.length) {
       setSuccess(true);
       setError(false);

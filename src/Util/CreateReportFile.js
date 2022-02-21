@@ -1,6 +1,7 @@
 import apdc_logo_banner from "../media/logo.png";
 import apdc_logo from "../media/apdc-font-logo.png";
 import qc_logo from "../media/qc-logo.png";
+import boutique_banner from "../media/boutique-banner-1.png";
 import cochon_cart from "../media/cochon-cart.jpeg";
 import TRANSLATIONS from "../constants/translation";
 import moment from "moment";
@@ -12,6 +13,11 @@ const jspdfautotable = require("jspdf-autotable");
 const Papa = require("papaparse");
 const { REPORTS, HOME } = TRANSLATIONS[`EN`];
 
+// const setTableColor = (jspdf) => {
+jsPDF.autoTableSetDefaults({
+  headStyles: { fillColor: "#696969" },
+});
+// };
 export const getReport1or2File = async (data, reportNumber, reportValues) => {
   console.log("before", data);
   const doc = new jsPDF();
@@ -44,6 +50,7 @@ export const getReport1or2File = async (data, reportNumber, reportValues) => {
     let name = firstname + " " + lastname;
 
     outerCurr = [[number, createdAt, startTime, name, totalPrice, status]];
+
     doc.autoTable({
       // head: !startFlag ? [["Number","Date Ordered","Delivery Date","Name","Total", "Status"]] : [],
       head: [["Number", "Date Ordered", "Delivery Date", "Name", "Total", "Status"]],
@@ -504,7 +511,6 @@ export const getReport6File = async (orderData, reportValues) => {
   doc.text("Date: " + moment(reportValues.startDate).format("YYYY-MM-DD"), 14, 29);
   doc.text("Order Status: " + reportValues.orderStatus, 14, 35);
   doc.text("Category: " + reportValues.category, 14, 41);
-  // doc.line(14, 47, 200, 47);
   doc.text(reportValues.deliveryZone, 14, 47);
   doc.line(14, 52, 200, 52);
   let startY = 62;
@@ -630,19 +636,6 @@ export const getReport6File = async (orderData, reportValues) => {
       },
     });
     firstTablePosted = true;
-
-    // doc.autoTable({
-    //   head: [header],
-    //   body: full,
-    //   startY: startYTable,
-    //   didParseCell: function (data) {
-    //     var rows = data.table.body;
-    //     if (data.row.index === rows.length - 1 && rows.length > 1) {
-    //       // data.cell.styles.fillColor = [211, 211, 211];
-    //       data.cell.styles.fontStyle = "bold";
-    //     }
-    //   },
-    // });
   }
 
   var blob = doc.output("blob");
@@ -905,42 +898,369 @@ export const getReport8or11File = async (data, reportNumber, reportValues) => {
   return blob;
 };
 
-export const getReport12File = (data) => {
-  // let mainDiv = document.createElement('div');
-  // mainDiv.id = "mainDIV";
-  let outerDiv = [];
-  let htmlContent;
-  // let innerDiv = []
-  data.forEach((orderDetails) => {
-    outerDiv.push(getReport12SinglePage(orderDetails));
-    htmlContent = getReport12SinglePage(orderDetails);
-    //   console.log(getReport12SinglePage(orderDetails))
-    //   let temp = document.createElement("div");
-    //   mainDiv.appendChild(document.createTextNode(getReport12SinglePage(orderDetails)));
-    //   console.log(temp)
-    // mainDiv.appendChild(getReport12SinglePage(orderDetails));
-    // innerDiv.push(getReport12SinglePage(orderDetails))
+export const getReport12SingleOrder = (doc, order) => {
+  // const doc = new jsPDF({ orientation: "p", lineHeight: 1.5 });
+
+  let pageWidth = doc.internal.pageSize.width;
+  let img = new Image();
+  img.src = apdc_logo_banner;
+  doc.addImage(img, "png", 22, 16, pageWidth - 40, 15);
+  let img0 = new Image();
+  img0.src = boutique_banner;
+  // doc.addImage(img0, "png", 64, 27, 90, 15);
+  doc.setFont("ArialMS");
+  doc.setTextColor(64, 64, 64);
+  doc.setFontSize(12);
+  let img2 = new Image();
+  img2.src = cochon_cart;
+  doc.addImage(img2, "png", 150, 45, 40, 40);
+  let ship = order.shippingAddress;
+  let bill = order.billingAddress;
+  let wantedTableWidth = 130;
+  let margin = (pageWidth - wantedTableWidth) / 2;
+  let outer = [];
+  let formattedStreetShip = ship.street + " " + ship.street2 + " " + ship.number;
+  let formattedStreetBill = bill.street + " " + bill.street2 + " " + ship.number;
+  let formattedRegionShip = `${ship.region}, ${ship.zipcode}, ${ship.country}`;
+  let formattedRegionBill = `${bill.region}, ${bill.zipcode}, ${bill.country}`;
+
+  outer.push([ship.name + "\n" + formattedStreetShip + "\n" + formattedRegionShip + "\n" + order.phone, bill.name + "\n" + formattedStreetBill + "\n" + formattedRegionBill + "\n" + order.phone]);
+  // outer.push([ship.name, bill.name]);
+  // outer.push([formattedStreetShip, formattedStreetBill]);
+  // outer.push([formattedRegionShip, formattedRegionBill]);
+  // outer.push([order.phone, order.phone]);
+  doc.autoTable({
+    head: [["Addresse de Livraison", "Addresse de Facturation"]],
+    body: outer,
+    startY: 50,
+    theme: "plain",
+    margin: { left: margin - 20, right: margin + 20 },
+    styles: {
+      minCellHeight: 0,
+      rowHeight: 0,
+    },
+    headStyles: { fillColor: false, textColor: [64, 64, 64] },
   });
-  // console.log(outerDiv[0]);
-  // outerDiv.push(innerDiv)
-  // console.log(htmlContent);
-  // html2canvas(document.querySelector("#rep9541445")).then((canvas) => {
-  //   document.body.appendChild(canvas);
-  // });
-  // // "#9541445": function (element, renderer) {
-  // const input = document.getElementById("rep9541445");
-  // html2canvas(input).then((canvas) => {
-  //   const imgData = canvas.toDataURL("image/png");
-  //   const pdf = new jsPDF();
-  //   pdf.addImage(imgData, "JPEG", 0, 0);
-  //   // pdf.output('dataurlnewwindow');
-  //   pdf.save("download.pdf");
-  // });
-  // return htmlContent;
-  return outerDiv; //.map((pageDiv) => pageDiv);
+  let type = "";
+  switch (order.type) {
+    case "delivery":
+      type = "Livraison/Delivery";
+      break;
+    case "pickup":
+      type = "Pour Emporter/Pickup";
+  }
+  doc.line(20, doc.lastAutoTable.finalY + 8, 180, doc.lastAutoTable.finalY + 8);
+  var adjustedData = moment.unix(order.createdAt.seconds).format("MM/DD/YYYY");
+  doc.autoTable({
+    head: [["Référence de commande", "Date de commande", "Transporteur"]],
+    body: [[order.number, adjustedData, type]],
+    startY: doc.lastAutoTable.finalY + 10,
+    theme: "plain",
+    margin: { left: margin - 20 },
+    styles: {
+      minCellHeight: 0,
+      rowHeight: 0,
+    },
+    headStyles: { fillColor: false, textColor: [64, 64, 64] },
+  });
+
+  doc.line(20, doc.lastAutoTable.finalY + 3, 180, doc.lastAutoTable.finalY + 3);
+
+  // get All products and quantities
+  let inner = [];
+  order.products.forEach((item) => {
+    inner.push([item.productTitle, item.quantityOrdered]);
+  });
+
+  doc.autoTable({
+    head: [["Produit", "Quantité"]],
+    body: inner,
+    startY: doc.lastAutoTable.finalY + 15,
+    // theme: "plain",
+    margin: { left: margin, right: margin },
+    styles: {
+      minCellHeight: 0,
+      rowHeight: 0,
+      halign: "center",
+    },
+  });
+  let last = doc.lastAutoTable.finalY;
+
+  const checkLastLocation = () => {
+    // console.log("curr", last);
+    if (last > 245) {
+      console.log("in fun", last);
+      doc.addPage();
+      last = 20;
+    }
+  };
+  // console.log(last);
+  last += 12;
+  checkLastLocation();
+  // console.log("2", last);
+
+  doc.rect(20, last, 110, 15, "S");
+  last += 6;
+  doc.text(22, last, order.payment.title + "\n" + order.payment.data.method);
+  doc.text(95, last, "$" + order.totalPrice + " CAD");
+  last += 18;
+  checkLastLocation();
+  doc.setFont(undefined, "bold").text("Zone de Livraison", 20, last).setFont(undefined, "normal");
+  last += 5;
+  doc.text(20, last, "Zone: " + order.shipmentTitle);
+  last += 7;
+  checkLastLocation();
+  doc.setFont(undefined, "bold").text("Livreur", 20, last).setFont(undefined, "normal");
+  last += 5;
+  doc.text(20, last, order.driver + " / #" + order.stopNumber);
+  last += 7;
+  checkLastLocation();
+  doc.setFont(undefined, "bold").text("Votre date de livraison", 20, last).setFont(undefined, "normal");
+  last += 5;
+  doc.text(20, last, moment.unix(order.startTime.seconds).format("MM/DD/YYYY"));
 };
 
-export const getReport12SinglePage = (orderDetails) => {
+export const getReport13SingleOrder = (doc, order) => {
+  // const doc = new jsPDF({ orientation: "p", lineHeight: 1.5 });
+
+  let pageWidth = doc.internal.pageSize.width;
+  let img = new Image();
+  img.src = apdc_logo_banner;
+  doc.addImage(img, "png", 22, 16, pageWidth - 40, 15);
+  let img0 = new Image();
+  img0.src = boutique_banner;
+  // doc.addImage(img0, "png", 64, 27, 90, 15);
+  doc.setFont("ArialMS");
+  doc.setTextColor(64, 64, 64);
+  doc.setFontSize(12);
+  let img2 = new Image();
+  img2.src = cochon_cart;
+  doc.addImage(img2, "png", 150, 45, 40, 40);
+  let ship = order.shippingAddress;
+  let bill = order.billingAddress;
+  let wantedTableWidth = 130;
+  let margin = (pageWidth - wantedTableWidth) / 2;
+  let outer = [];
+  let formattedStreetShip = ship.street + " " + ship.street2 + " " + ship.number;
+  let formattedStreetBill = bill.street + " " + bill.street2 + " " + ship.number;
+  let formattedRegionShip = `${ship.region}, ${ship.zipcode}, ${ship.country}`;
+  let formattedRegionBill = `${bill.region}, ${bill.zipcode}, ${bill.country}`;
+
+  outer.push([ship.name + "\n" + formattedStreetShip + "\n" + formattedRegionShip + "\n" + order.phone, bill.name + "\n" + formattedStreetBill + "\n" + formattedRegionBill + "\n" + order.phone]);
+  // outer.push([ship.name, bill.name]);
+  // outer.push([formattedStreetShip, formattedStreetBill]);
+  // outer.push([formattedRegionShip, formattedRegionBill]);
+  // outer.push([order.phone, order.phone]);
+  doc.autoTable({
+    head: [["Addresse de Livraison", "Addresse de Facturation"]],
+    body: outer,
+    startY: 50,
+    theme: "plain",
+    margin: { left: margin - 20, right: margin + 20 },
+    styles: {
+      minCellHeight: 0,
+      rowHeight: 0,
+    },
+    headStyles: { fillColor: false, textColor: [64, 64, 64] },
+  });
+  let type = "";
+  switch (order.type) {
+    case "delivery":
+      type = "Livraison/Delivery";
+      break;
+    case "pickup":
+      type = "Pour Emporter/Pickup";
+  }
+  doc.line(20, doc.lastAutoTable.finalY + 8, 180, doc.lastAutoTable.finalY + 8);
+  var adjustedData = moment.unix(order.createdAt.seconds).format("MM/DD/YYYY");
+  doc.autoTable({
+    head: [["Référence de commande", "Date de commande", "Transporteur"]],
+    body: [[order.number, adjustedData, type]],
+    startY: doc.lastAutoTable.finalY + 10,
+    theme: "plain",
+    margin: { left: margin - 20 },
+    styles: {
+      minCellHeight: 0,
+      rowHeight: 0,
+    },
+    headStyles: { fillColor: false, textColor: [64, 64, 64] },
+  });
+
+  doc.line(20, doc.lastAutoTable.finalY + 3, 180, doc.lastAutoTable.finalY + 3);
+
+  // get All products and quantities
+  let inner = [];
+  order.products.forEach((item) => {
+    inner.push([item.productTitle, item.quantityOrdered]);
+  });
+
+  doc.autoTable({
+    head: [["Produit", "Quantité"]],
+    body: inner,
+    startY: doc.lastAutoTable.finalY + 15,
+    // theme: "plain",
+    margin: { left: margin, right: margin },
+    styles: {
+      minCellHeight: 0,
+      rowHeight: 0,
+      halign: "center",
+    },
+  });
+  let last = doc.lastAutoTable.finalY;
+
+  const checkLastLocation = () => {
+    // console.log("curr", last);
+    if (last > 245) {
+      console.log("in fun", last);
+      doc.addPage();
+      last = 20;
+    }
+  };
+  // console.log(last);
+  last += 12;
+  checkLastLocation();
+  // console.log("2", last);
+
+  doc.rect(20, last, 110, 15, "S");
+  last += 6;
+  doc.text(22, last, order.payment.title + "\n" + order.payment.data.method);
+  doc.text(95, last, "$" + order.totalPrice + " CAD");
+  last += 18;
+  checkLastLocation();
+  doc.setFont(undefined, "bold").text("Point de Chute", 20, last).setFont(undefined, "normal");
+  last += 5;
+  doc.text(20, last, order.shipmentTitle);
+  // last += 7;
+  // checkLastLocation();
+  // doc.setFont(undefined, "bold").text("Livreur", 20, last).setFont(undefined, "normal");
+  // last += 5;
+  // doc.text(20, last, order.driver + " / #" + order.stopNumber);
+  last += 7;
+  checkLastLocation();
+  doc.setFont(undefined, "bold").text("Votre date de récupération", 20, last).setFont(undefined, "normal");
+  last += 5;
+  doc.text(20, last, moment.unix(order.startTime.seconds).format("MM/DD/YYYY"));
+};
+
+const getCenteredXCoordinate = (text, doc) => {
+  var textWidth = (doc.getStringUnitWidth(text) * doc.internal.getFontSize()) / doc.internal.scaleFactor;
+  var textOffset = (doc.internal.pageSize.width - textWidth) / 2;
+  return textOffset;
+};
+const addFooter = (doc) => {
+  // FOOTER START
+  doc.autoTable({
+    // head: [["Au Pied De Cochon - Cabanne à sucre", "Au Pied De Cochon - Restaurant"]],
+    body: [
+      ["Au Pied De Cochon - Cabanne à sucre\n11382 Rang de la Fresnière, St-Benoît de Mirabel, QC J7N 2R9", "Au Pied De Cochon - Restaurant\n536 Av. Duluth Est, Montréal, QC, H2L 1A9"],
+      // ["11382 Rang de la Fresnière, St-Benoît de Mirabel, QC J7N 2R9", "536 Av. Duluth Est, Montréal, QC, H2L 1A9"],
+    ],
+    startY: 252, //last + 116,
+    theme: "plain",
+    styles: {
+      halign: "center",
+      fontSize: 6,
+    },
+    headStyles: { fillColor: false, textColor: [64, 64, 64] },
+    // didParseCell: function (data) {
+    //   if (data.row.index === 0) {
+    //     data.cell.styles.fontStyle = "bold";
+    //   }
+    // },
+  });
+
+  let footerText = "Ce projet a été financé par le ministère de l’Agriculture, des Pêcheries et de l’Alimentation, dans le cadre du programme Transformation alimentaire : robotisation et système de qualité.";
+  doc.setFontSize(7);
+  doc.text(getCenteredXCoordinate(footerText, doc), 262, footerText);
+  let img3 = new Image();
+  img3.src = qc_logo;
+  doc.addImage(img3, "png", 90, 264, 25, 5);
+};
+
+export const getReport12File = (orders) => {
+  const doc = new jsPDF("portait", "mm", "letter");
+  // var doc = new jsPDF("p", "mm", "a4");
+
+  for (const [i, order] of orders.entries()) {
+    if (i === orders.length - 1) {
+      getReport12SingleOrder(doc, order);
+    } else {
+      // only add a page if there are remaining orders
+      getReport12SingleOrder(doc, order);
+      doc.addPage();
+    }
+  }
+
+  // To test large amount of orders
+  // for (let step = 0; step < 1000; step++) {
+  //   getReport12SingleOrder(doc, orders[step % orders.length]);
+  //   doc.addPage();
+  // }
+
+  // To add multiple products to an order
+  // let ord = orders[1].products;
+  // let ord1 = orders[1].products[0];
+  // for (let step = 0; step < 3; step++) {
+  //   ord1.quantityOrdered = ord.length + 1;
+  //   ord.push(ord1);
+  // }
+  // console.log(ord);
+  // getReport12SingleOrder(doc, orders[1]);
+
+  const pageCount = doc.internal.getNumberOfPages();
+
+  // doc.setFont("helvetica", "italic");
+  for (var i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    addFooter(doc);
+    // doc.text(
+    //   String(i) + "/" + String(pageCount),
+    //   195,
+    //   270
+    //   // {align: "center",    }
+    // );
+  }
+
+  var blob = doc.output("blob");
+  const fileName = getFilenameByDate("12", "pdf");
+  doc.save(fileName);
+  blob.name = fileName;
+
+  window.open(URL.createObjectURL(blob));
+
+  return true;
+};
+export const getReport13File = (orders) => {
+  const doc = new jsPDF("portait", "mm", "letter");
+
+  for (const [i, order] of orders.entries()) {
+    if (i === orders.length - 1) {
+      getReport13SingleOrder(doc, order);
+    } else {
+      // only add a page if there are remaining orders
+      getReport13SingleOrder(doc, order);
+      doc.addPage();
+    }
+  }
+
+  const pageCount = doc.internal.getNumberOfPages();
+
+  for (var i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    addFooter(doc);
+  }
+
+  var blob = doc.output("blob");
+  const fileName = getFilenameByDate("13", "pdf");
+  doc.save(fileName);
+  blob.name = fileName;
+
+  window.open(URL.createObjectURL(blob));
+
+  return true;
+};
+
+export const getReport12SinglePageOLDHTML = (orderDetails) => {
   return (
     <div
       id={"rep" + orderDetails.id}

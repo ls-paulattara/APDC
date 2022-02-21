@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import TRANSLATIONS from "../../constants/translation";
 import SemanticDatepicker from "react-semantic-ui-datepickers";
 import "react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css";
@@ -15,7 +15,8 @@ function Report5(props) {
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
   const [data, setData] = useState([]);
-  const [columns, setColumns] = useState([]);
+  const [filename, setFilename] = useState("");
+  const fileInputRef = useRef(null);
 
   const onSubmit = async () => {
     setError(false);
@@ -72,15 +73,13 @@ function Report5(props) {
         }
       }
     }
-
-    // prepare columns list from headers
-    const columns = headers.map((c) => ({
-      name: c,
-      selector: (row) => row[c],
-    }));
-
     setData(list);
-    setColumns(columns);
+  };
+
+  const clearFile = () => {
+    setFilename("");
+    setData([]);
+    fileInputRef.current.value = "";
   };
 
   // handle file upload
@@ -102,6 +101,23 @@ function Report5(props) {
     reader.readAsBinaryString(file);
   };
 
+  const fileChange = (e) => {
+    const file = e.target.files[0];
+    setFilename(file.name);
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      /* Parse data */
+      const bstr = evt.target.result;
+      const wb = XLSX.read(bstr, { type: "binary" });
+      /* Get first worksheet */
+      const wsname = wb.SheetNames[0];
+      const ws = wb.Sheets[wsname];
+      /* Convert array of arrays */
+      const data = XLSX.utils.sheet_to_csv(ws, { header: 1 });
+      processData(data);
+    };
+    reader.readAsBinaryString(file);
+  };
   const generateNewReport = () => {
     props.setStep(1);
     window.scrollTo(0, 0);
@@ -110,18 +126,24 @@ function Report5(props) {
   return (
     <>
       <Header as="h3">Routific Report Upload</Header>
-      <Input type="file" accept=".csv,.xlsx,.xls" onChange={handleFileUpload} onClick={(e) => (e.target.value = null)} />
+      {/* <Input type="file" accept=".csv" onChange={handleFileUpload} onClick={(e) => (e.target.value = null)} /> */}
+
+      <Button size="large" content="Choose CSV File" labelPosition="left" icon="file" onClick={() => fileInputRef.current.click()} />
+      <input accept=".csv" ref={fileInputRef} type="file" hidden onChange={fileChange} />
+      <Button size="large" content="Clear" labelPosition="right" icon="delete" onClick={clearFile} />
+      <Header as="h3">{filename}</Header>
+
       <Divider />
       <Button content="Back" icon="left arrow" size="large" labelPosition="left" onClick={() => props.prevStep()} />
-      <Button positive content="Upload" icon="right arrow" size="large" labelPosition="right" onClick={() => onSubmit()} disabled={data.length === 0} />
+      <Button positive content="Upload" icon="upload" size="large" labelPosition="right" onClick={() => onSubmit()} disabled={data.length === 0} />
       <Button
         // positive
         // basic
         content="Generate New Report"
-        // icon="download"
         size="large"
         // labelPosition="right"
         onClick={generateNewReport}
+        icon="add"
       />
       {getErrorMessage()}
       {getSuccessMessage()}

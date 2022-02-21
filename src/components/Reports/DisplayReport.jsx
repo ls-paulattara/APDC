@@ -1,20 +1,13 @@
 import React, { useState } from "react";
 import TRANSLATIONS from "../../constants/translation";
-import { Page, Text, View, Document, StyleSheet, PDFDownloadLink } from "@react-pdf/renderer";
-import { Header, Grid, Divider, Button, Input, Dropdown, Label, Segment, Container } from "semantic-ui-react";
+import { Divider, Button, Label, Container } from "semantic-ui-react";
 import * as XLSX from "xlsx";
 
 import { Document as Doc, pdfjs, Page as Pag } from "react-pdf";
 import "./display-report-styles.css";
-import html2canvas from "html2canvas";
 import DataTable from "react-data-table-component";
 
-import $ from "jquery";
-const { getReport12File } = require("../../Util/CreateReportFile");
-
 const Papa = require("papaparse");
-const fs = require("fs");
-const { jsPDF } = require("jspdf");
 
 const axios = require("axios").default;
 
@@ -22,50 +15,12 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 
 function DisplayReport(props) {
   const { dark, language } = props;
-  const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
-  let pdf;
 
   const [numPages, setNumPages] = useState(null);
   const [pageNum, setPageNum] = useState(1);
   const [columns, setColumns] = useState([]);
   const [data, setData] = useState([]);
-  const printRef = React.useRef();
 
-  const styles = StyleSheet.create({
-    page: {
-      flexDirection: "row",
-      backgroundColor: "#E4E4E4",
-    },
-    section: {
-      margin: 10,
-      padding: 10,
-      flexGrow: 1,
-    },
-  });
-
-  const MyDoc = () => (
-    <Document>
-      <View>
-        <Page pageNumber={pageNum} size="A4">
-          {props.reportValues}
-        </Page>
-      </View>
-    </Document>
-  );
-
-  const MyDoc2 = () => (
-    <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.section}>
-          <Text>Section #1</Text>
-          {props.reportValues}
-        </View>
-        <View style={styles.section}>
-          <Text>Section #2</Text>
-        </View>
-      </Page>
-    </Document>
-  );
   // process CSV data
   const processData = (dataString) => {
     const dataStringLines = dataString.split(/\r\n|\n/);
@@ -105,9 +60,7 @@ function DisplayReport(props) {
   };
 
   // handle file upload
-  const handleFileUpload2 = (file) => {
-    // const file = e.target.files[0];
-
+  const readCSVFile = (file) => {
     const reader = new FileReader();
     reader.onload = (evt) => {
       /* Parse data */
@@ -124,20 +77,8 @@ function DisplayReport(props) {
   };
 
   const renderReport = () => {
-    if ([1, 2, 3, 6, 7, 8, 9, 10, 11].includes(props.selectedReport)) {
+    if ([1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13].includes(props.selectedReport)) {
       return (
-        // option 1: all pages stacked one on top of another
-        // <Document
-        //   key="test"
-        //   file={props.reportValues}
-        //   onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-        // >
-
-        //     {Array.apply(null, Array(numPages))
-        //       .map((x, i) => i+1)
-        //       .map(page => <Page pageNumber={page}/>)}
-
-        // </Document>
         <>
           <Doc file={props.reportValues} onLoadSuccess={({ numPages }) => setNumPages(numPages)}>
             <Pag pageNumber={pageNum} />
@@ -154,25 +95,10 @@ function DisplayReport(props) {
         </>
       );
     } else if ([4].includes(props.selectedReport)) {
-      // handleFileUpload(props.reportValues);
+      readCSVFile(props.reportValues);
       return (
         <>
-          {handleFileUpload2(props.reportValues)}
-          {/* <Input type="file" accept=".csv,.xlsx,.xls" onChange={handleFileUpload2} /> */}
           <DataTable pagination highlightOnHover columns={columns} data={data} />
-        </>
-      );
-    } else if ([12, 13].includes(props.selectedReport)) {
-      return <div ref={printRef}>I will be in the PDF.</div>;
-
-      return props.reportValues;
-      return (
-        <>
-          {/* <div> */}
-          <PDFDownloadLink document={<MyDoc2 />} fileName="somename.pdf">
-            {({ blob, url, loading, error }) => (loading ? "Loading document..." : "Download now!")}
-          </PDFDownloadLink>
-          {/* </div> */}
         </>
       );
     }
@@ -187,51 +113,10 @@ function DisplayReport(props) {
     link.remove();
   };
 
-  const handleDownloadPdf = async () => {
-    const element = printRef.current;
-    const canvas = await html2canvas(element);
-    const data = canvas.toDataURL("image/png");
-
-    const pdf = new jsPDF();
-    const imgProperties = pdf.getImageProperties(data);
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width;
-
-    pdf.addImage(data, "PNG", 0, 0, pdfWidth, pdfHeight);
-    pdf.save("print.pdf");
-  };
-
   const downloadReport = async () => {
-    if ([1, 2, 3, 7, 8, 9, 10, 11].includes(props.selectedReport)) {
+    if ([1, 2, 3, 4, 7, 8, 9, 10, 11].includes(props.selectedReport)) {
       downloadFile(props.reportValues);
     } else if ([12, 13].includes(props.selectedReport)) {
-      handleDownloadPdf();
-      // getReport12File(props.reportValues);
-      // const input = document.getElementById("rep9541445");
-      // const input2 = $("#rep9541445")[0];
-      // html2canvas(input2).then(function (canvas) {
-      //   $("#element-out").append(canvas);
-      // });
-      // html2canvas(input2).then((canvas) => {
-      //   const imgData = canvas.toDataURL("image/png");
-      //   const pdf = new jsPDF();
-      //   // pdf.addImage(imgData, "JPEG", 0, 0);
-      //   // pdf.output('dataurlnewwindow');
-      //   pdf.save("download.pdf");
-      // });
-      //     <ReactToPdf targetRef={ref} filename="code-example.pdf">
-      //   {({ toPdf }) => <button onClick={toPdf}>Generate Pdf</button>}
-      //  </ReactToPdf>
-      //   <Document>
-      //   <Page size="A4" style={styles.page}>
-      //     <View style={styles.section}>
-      //       <Text>Hello World!</Text>
-      //     </View>
-      //     <View style={styles.section}>
-      //       <Text>We're inside a PDF!</Text>
-      //     </View>
-      //   </Page>
-      // </Document>
     }
   };
 
@@ -247,12 +132,12 @@ function DisplayReport(props) {
         <Divider />
       </Container>
       <Button content="Back" icon="left arrow" size="large" labelPosition="left" onClick={() => props.prevStep()} />
-      <Button positive content="Download" icon="download" size="large" labelPosition="right" onClick={() => downloadReport()} />
+      <Button positive content="Download" icon="download" size="large" labelPosition="right" onClick={() => downloadFile(props.reportValues)} />
       <Button
         // positive
         // basic
         content="Generate New Report"
-        // icon="download"
+        icon="add"
         size="large"
         // labelPosition="right"
         onClick={generateNewReport}
