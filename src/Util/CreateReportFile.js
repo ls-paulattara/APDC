@@ -436,15 +436,6 @@ export const getReport3File = async (data, reportValues) => {
   const fileName = getFilenameByDate("3", "pdf");
   doc.save(fileName);
   blob.name = fileName;
-
-  // ------------- TO OPEN THE FILE IN NEW WINDOW --------------------------
-  var string = doc.output("dataurlnewwindow");
-  var embed = "<embed width='100%' height='100%' src='" + string + "'/>";
-  var x = window.open();
-  // x.document.open();
-  // x.document.write(embed);
-  // x.document.close();
-
   return blob;
 };
 export const getReport4File = async (data) => {
