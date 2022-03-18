@@ -9,8 +9,8 @@ const { getInitialDate } = require("../../Util/HelperFunctions");
 const { getReport4File } = require("../../Util/CreateReportFile");
 
 function Report4(props) {
-  const { dark, language } = props;
-  const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
+  const { language } = props;
+  const { REPORTS } = TRANSLATIONS[`${language}`];
 
   const [report4Values, setreport4Values] = useState({
     deliveryZone: "",
@@ -39,14 +39,17 @@ function Report4(props) {
       report4Values.deliveryZone
     );
     console.log(orderData);
+
     if (orderData.length) {
-      setSuccess(true);
-      setError(false);
       const file = await getReport4File(orderData);
       console.log(file);
+      if (file) {
+        setSuccess(true);
+        setError(false);
+      }
       // await props.firebase.saveReportToFirebase(file);
-      props.setReportValues(file);
-      props.nextStep();
+      // props.setReportValues(file);
+      // props.nextStep();
     } else {
       setError(true);
     }
@@ -68,15 +71,20 @@ function Report4(props) {
   const getSuccessMessage = () =>
     success ? (
       <Message icon>
-        <Icon name="circle notched" loading />
+        <Icon name="check" />
         <Message.Content>
-          <Message.Header>Just one second</Message.Header>
-          Generating your report
+          <Message.Header>Success</Message.Header>
+          Your download should have started!
         </Message.Content>
       </Message>
     ) : (
       ""
     );
+
+  const generateNewReport = () => {
+    props.setStep(1);
+    window.scrollTo(0, 0);
+  };
 
   return (
     <>
@@ -89,19 +97,28 @@ function Report4(props) {
         label="Order Status"
         selection
         size="large"
-        options={REPORTS.orderStatus}
+        options={props.orderStatusOptions}
         // icon="clipboard outline"
         value={report4Values.orderStatus}
         onChange={onChange}
       />
       <Header as="h3">Delivery Zone</Header>
 
-      <Dropdown placeholder="Delivery Zone" name="deliveryZone" label="Delivery Zone" selection size="large" options={REPORTS.deliveryZoneWithoutAny} value={report4Values.deliveryZone} onChange={onChange} />
+      <Dropdown placeholder="Delivery Zone" name="deliveryZone" label="Delivery Zone" selection size="large" options={props.deliveryZoneOptions} value={report4Values.deliveryZone} onChange={onChange} />
       <Header as="h3">Date of Delivery</Header>
       <SemanticDatepicker showToday autoComplete="off" name="startDate" size="large" onChange={onChange} value={getInitialDate(report4Values.startDate)} />
       <Divider />
       <Button content="Back" icon="left arrow" size="large" labelPosition="left" onClick={() => props.prevStep()} />
-      <Button positive content="Next" icon="right arrow" size="large" labelPosition="right" onClick={() => onSubmit()} disabled={!report4Values.deliveryZone || !report4Values.orderStatus || report4Values.startDate == null} />
+      <Button positive content="Download" icon="right arrow" size="large" labelPosition="right" onClick={() => onSubmit()} disabled={!report4Values.deliveryZone || !report4Values.orderStatus || report4Values.startDate == null} />
+      <Button
+        // positive
+        // basic
+        content="Generate New Report"
+        size="large"
+        // labelPosition="right"
+        onClick={generateNewReport}
+        icon="add"
+      />
       {getErrorMessage()}
       {getSuccessMessage()}
     </>

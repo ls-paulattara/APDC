@@ -182,7 +182,7 @@ const addOrder = async () => {
   console.log(category_product[0]);
 };
 const addMemo = async () => {
-  let orderID = 10699949;
+  let orderID = 11473413;
   let LS_APDC_CREDENTIALS = await getLSAPICredentials();
   let getOrderEndpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/orders/${orderID}.json`;
   //   let editOrderEndpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/orders/${orderID}.json`;
@@ -192,7 +192,7 @@ const addMemo = async () => {
     url: getOrderEndpoint,
   })
     .then((response) => {
-      currentMemo = response.data.order.customer.resource.embedded.memo;
+      currentMemo = response.data.order.memo;
       console.log(currentMemo);
     })
     .then(async () => {
@@ -201,10 +201,10 @@ const addMemo = async () => {
         url: getOrderEndpoint,
         data: {
           order: {
+            memo: currentMemo + "\nline12",
+            // customer: {
             // memo: currentMemo + "\nline2",
-            customer: {
-              memo: "test",
-            },
+            // },
           },
         },
       }).then((response) => {
@@ -215,5 +215,42 @@ const addMemo = async () => {
       return;
     });
 };
+
+const getCategories = async () => {
+  let orderID = 10699949;
+  let LS_APDC_CREDENTIALS = await getLSAPICredentials();
+  let getCarEndpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/categories.json`;
+  await axios({ method: "get", url: getCarEndpoint })
+    .then((response) => {
+      let allCat = [];
+      let categories = response.data.categories;
+      categories.forEach((cat) => {
+        allCat.push(cat.title);
+      });
+      console.log(allCat);
+    })
+    .catch((e) => {
+      console.log(e.message);
+    });
+};
+
+const getOrderStatus = async () => {
+  let LS_APDC_CREDENTIALS = await getLSAPICredentials();
+  let getStatusEndpoints = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/orders/customstatuses.json`;
+  await axios({ method: "get", url: getStatusEndpoints })
+    .then((response) => {
+      let allStatutes = [];
+      response.data.customStatuses.forEach((status) => {
+        allStatutes.push(status.title);
+      });
+      console.log(allStatutes);
+    })
+    .catch((e) => {
+      console.log(e.message);
+    });
+};
+
 // addOrder();
-addMemo();
+// getCategories();
+// addMemo();
+getOrderStatus();

@@ -1,46 +1,21 @@
 import React, { Component } from "react";
-import { Link, withRouter } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import { compose } from "recompose";
-import {
-  Button,
-  Form,
-  Grid,
-  Header,
-  Image,
-  Message,
-  Segment,
-  Divider,
-  Container,
-} from "semantic-ui-react";
+import { Button, Form, Grid, Header, Message, Segment, Divider, Container } from "semantic-ui-react";
 import { withFirebase } from "../Firebase";
 import * as ROUTES from "../../constants/routes";
 import * as ROLES from "../../constants/roles";
-// import logo from "../../media/Logo_500.webp";
 import { SignInGoogle } from "../SignIn";
 import TRANSLATIONS from "../../constants/translation";
-import id from "date-fns/esm/locale/id/index.js";
 
 const SignUpPage = (props) => {
-  const { dark, language } = props;
-  const { SIGNUP } = TRANSLATIONS[`${language}`];
+  const { dark } = props;
   return (
-    <Segment
-      inverted={dark}
-      basic
-      fluid="true"
-      style={{ marginTop: 0, marginBottom: 0 }}
-    >
-      <Grid
-        textAlign="center"
-        // style={{ height: "100vh" }}
-        verticalAlign="middle"
-      >
+    <Segment inverted={dark} basic fluid="true" style={{ marginTop: 0, marginBottom: 0 }}>
+      <Grid textAlign="center" verticalAlign="middle">
         <Grid.Column style={{ maxWidth: 450 }}>
-          <Header as="h2" textAlign="center" inverted={dark}>
-            {/* <Image src={logo} loading="lazy" size="small" alt="Logo" width="33" height="48" />{SIGNUP.header} */}
-          </Header>
+          <Header as="h2" textAlign="center" inverted={dark}></Header>
           <SignUpForm {...props} />
-          {/* <SignUpLink dark={dark} SIGNUP={SIGNUP} /> */}
         </Grid.Column>
       </Grid>
     </Segment>
@@ -73,11 +48,7 @@ class SignUpFormBase extends Component {
     const adminEmail2 = new RegExp("@pieddecochon.ca");
     const displayName = `${firstName} ${lastName}`;
     const isnum = /^\d+$/.test(phoneNumber);
-    const adminEmails = [
-      "catherinemd@pieddecochon.ca",
-      "info@pieddecochon.ca",
-      "marcb@pieddecochon.ca",
-    ];
+    const adminEmails = ["catherinemd@pieddecochon.ca", "info@pieddecochon.ca", "marcb@pieddecochon.ca"];
     // const isAPDCAccount =
     //   email.endsWith("@pieddecochon.ca") || email.endsWith("@lightspeedhq.com");
 
@@ -91,8 +62,7 @@ class SignUpFormBase extends Component {
     } else {
       this.setState({
         error: {
-          message:
-            "Please ensure your email is an email in the following format: '@pieddecochon.ca'",
+          message: "Please ensure your email is an email in the following format: '@pieddecochon.ca'",
         },
       });
       return;
@@ -128,9 +98,7 @@ class SignUpFormBase extends Component {
         .then(() => {
           this.setState({ ...INITIAL_STATE });
           this.props.history.push(ROUTES.ACCOUNT);
-          window.alert(
-            "Admin Sign Up Successful. You need to sign out and sign back in to receive admin permissions and access the account page."
-          );
+          window.alert("Admin Sign Up Successful. You need to sign out and sign back in to receive admin permissions and access the account page.");
         })
         .catch((error) => {
           this.setState({ error });
@@ -149,115 +117,22 @@ class SignUpFormBase extends Component {
   };
 
   render() {
-    const {
-      firstName,
-      lastName,
-      email,
-      passwordOne,
-      passwordTwo,
-      phoneNumber,
-      error,
-    } = this.state;
-    const isInvalid =
-      passwordOne !== passwordTwo ||
-      passwordOne === "" ||
-      email === "" ||
-      firstName === "" ||
-      lastName === "";
+    const { firstName, lastName, email, passwordOne, passwordTwo, phoneNumber, error } = this.state;
+    const isInvalid = passwordOne !== passwordTwo || passwordOne === "" || email === "" || firstName === "" || lastName === "";
     const { dark, language } = this.props;
     const { SIGNUP } = TRANSLATIONS[`${language}`];
     return (
       <Container fluid>
-        <Form
-          error={error ? true : false}
-          size="large"
-          onSubmit={this.onSubmit}
-          inverted={dark}
-        >
+        <Form error={error ? true : false} size="large" onSubmit={this.onSubmit} inverted={dark}>
           <Segment stacked inverted={dark}>
             {error && <Message error content={error.message} />}
-            <Form.Input
-              fluid
-              icon="user"
-              iconPosition="left"
-              placeholder={SIGNUP.firstName}
-              name="firstName"
-              value={firstName}
-              onChange={this.onChange}
-              type="text"
-              required
-              inverted={dark}
-            />
-            <Form.Input
-              fluid
-              icon="user"
-              iconPosition="left"
-              placeholder={SIGNUP.lastName}
-              name="lastName"
-              value={lastName}
-              onChange={this.onChange}
-              type="text"
-              required
-              inverted={dark}
-            />
-            <Form.Input
-              fluid
-              icon="mail"
-              iconPosition="left"
-              name="email"
-              value={email}
-              onChange={this.onChange}
-              type="text"
-              placeholder={SIGNUP.email}
-              required
-              inverted={dark}
-            />
-            <Form.Input
-              fluid
-              icon="phone"
-              iconPosition="left"
-              name="phoneNumber"
-              value={phoneNumber}
-              onChange={this.onChange}
-              type="text"
-              maxLength={10}
-              placeholder={SIGNUP.phone}
-              inverted={dark}
-            />
-            <Form.Input
-              fluid
-              icon="lock"
-              iconPosition="left"
-              name="passwordOne"
-              value={passwordOne}
-              onChange={this.onChange}
-              placeholder={SIGNUP.passwordOne}
-              type="password"
-              required
-              inverted={dark}
-            />
-            <Form.Input
-              fluid
-              icon="lock"
-              iconPosition="left"
-              name="passwordTwo"
-              value={passwordTwo}
-              onChange={this.onChange}
-              type="password"
-              placeholder={SIGNUP.passwordTwo}
-              required
-              inverted={dark}
-            />
-            <Button
-              disabled={isInvalid}
-              color="black"
-              type="submit"
-              fluid
-              size="large"
-              inverted={dark}
-              basic={dark}
-              content={SIGNUP.signUp}
-            />
+            <Form.Input fluid icon="user" iconPosition="left" placeholder={SIGNUP.firstName} name="firstName" value={firstName} onChange={this.onChange} type="text" required inverted={dark} />
+            <Form.Input fluid icon="user" iconPosition="left" placeholder={SIGNUP.lastName} name="lastName" value={lastName} onChange={this.onChange} type="text" required inverted={dark} />
+            <Form.Input fluid icon="mail" iconPosition="left" name="email" value={email} onChange={this.onChange} type="text" placeholder={SIGNUP.email} required inverted={dark} />
+            <Form.Input fluid icon="phone" iconPosition="left" name="phoneNumber" value={phoneNumber} onChange={this.onChange} type="text" maxLength={10} placeholder={SIGNUP.phone} inverted={dark} />
+            <Form.Input fluid icon="lock" iconPosition="left" name="passwordOne" value={passwordOne} onChange={this.onChange} placeholder={SIGNUP.passwordOne} type="password" required inverted={dark} />
+            <Form.Input fluid icon="lock" iconPosition="left" name="passwordTwo" value={passwordTwo} onChange={this.onChange} type="password" placeholder={SIGNUP.passwordTwo} required inverted={dark} />
+            <Button disabled={isInvalid} color="black" type="submit" fluid size="large" inverted={dark} basic={dark} content={SIGNUP.signUp} />
             <Divider horizontal inverted={dark}>
               {SIGNUP.or}
             </Divider>

@@ -9,15 +9,14 @@ const { getInitialDate } = require("../../Util/HelperFunctions");
 const { getReport1or2File } = require("../../Util/CreateReportFile");
 
 function Report1(props) {
-  const { dark, language } = props;
-  const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
+  const { language } = props;
+  const { REPORTS } = TRANSLATIONS[`${language}`];
 
   const [report1Values, setreport1Values] = useState({
     deliveryZone: "",
     orderStatus: "",
     startDate: null,
     endDate: null,
-    deliveryZoneOptions: [],
   });
 
   const [error, setError] = useState(false);
@@ -54,14 +53,6 @@ function Report1(props) {
   };
 
   useEffect(() => {
-    // let options = [...REPORTS.deliveryZone]; //.shift();
-    // console.log(options);
-    // // setreport1Values({ deliveryZoneOptions: options });
-    // setreport1Values((prevState) => ({
-    //   ...prevState,
-    //   deliveryZoneOptions: options,
-    // }));
-
     const report1Values = JSON.parse(localStorage.getItem("report1Values"));
     if (report1Values) {
       setreport1Values(report1Values);
@@ -98,7 +89,7 @@ function Report1(props) {
         label="Order Status"
         selection
         size="large"
-        options={REPORTS.orderStatus}
+        options={props.orderStatusOptions}
         // icon="clipboard outline"
         value={report1Values.orderStatus}
         onChange={onChange}
@@ -112,7 +103,7 @@ function Report1(props) {
         icon="truck"
         onChange={onChange}
       /> */}
-      <Dropdown placeholder="Delivery Zone" name="deliveryZone" label="Delivery Zone" selection size="large" options={REPORTS.deliveryZoneWithoutAny} value={report1Values.deliveryZone} onChange={onChange} />
+      <Dropdown placeholder="Delivery Zone" name="deliveryZone" label="Delivery Zone" selection size="large" options={props.deliveryZoneOptions.slice(1, props.deliveryZoneOptions.length)} value={report1Values.deliveryZone} onChange={onChange} />
       <Header as="h3">Date Range of Delivery</Header>
       <Grid style={{ marginTop: "0", marginBottom: "0" }}>
         <SemanticDatepicker showToday autoComplete="off" name="startDate" size="large" onChange={onChange} value={getInitialDate(report1Values.startDate)} />

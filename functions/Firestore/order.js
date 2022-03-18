@@ -3,7 +3,8 @@ const axios = require("axios").default;
 const { getLSAPICredentials, getLiveLSAPICredentials, getCalendlyCredentials } = require("../SecretManager/index");
 
 // let orderDB = "apdc_orders";
-let orderDB = "orders";
+const orderDB = "orders";
+const locationsDB = "apdc_locations";
 
 exports.addOrder = async (req, res) => {
   res.status(200).send();
@@ -45,9 +46,12 @@ exports.addOrder = async (req, res) => {
     type = "pickup";
   } else if (shipmentTitle.includes("Delivery")) {
     type = "delivery";
-  } else if (shipmentTitle.includes("Default Shipping")) {
+  } else {
     type = "mail";
   }
+  // else if (shipmentTitle.includes("Default Shipping")) {
+  //   type = "mail";
+  // }
 
   // let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
   let LS_APDC_CREDENTIALS = await getLSAPICredentials();
@@ -84,7 +88,6 @@ exports.addOrder = async (req, res) => {
   }
 
   const orderObject = {
-    // id: orderCollection.id,
     id,
     number,
     status,
@@ -98,6 +101,7 @@ exports.addOrder = async (req, res) => {
     shipmentTitle,
     type,
     phone,
+
     // address: `${addressShippingStreet} ${addressShippingStreet2}, ${addressShippingRegion}, ${addressShippingZipcode}`,
     shippingAddress: {
       name: addressShippingName,
@@ -143,17 +147,15 @@ exports.addCalendlyInfo = async (req, res) => {
 
   // get order id and note
   let orderID;
-  let addedCustomerNote = "";
+  let addedCalendlyCustomerNote = "";
 
   req.body.payload.questions_and_answers.forEach((question) => {
     if (question.question === "Order ID") {
       orderID = question.answer;
     } else {
-      addedCustomerNote = question.answer;
+      addedCalendlyCustomerNote = question.answer;
     }
   });
-
-  const eventIdURL = req.body.payload.event;
 
   const calendlyEventDetails = {
     startTime: "",
@@ -161,6 +163,9 @@ exports.addCalendlyInfo = async (req, res) => {
   };
   const calendly_token = await getCalendlyCredentials();
 
+  const eventIdURL = req.body.payload.event;
+
+  // get the details of the calendly booking
   await axios({
     method: "get",
     url: eventIdURL,
@@ -168,40 +173,49 @@ exports.addCalendlyInfo = async (req, res) => {
   })
     .then((response) => {
       calendlyEventDetails.startTime = response.data.resource.start_time;
-      calendlyEventDetails.calendlyLocationName = response.data.resource.name;
+      calendlyEventDetails.locationName = response.data.resource.name;
     })
     .catch((err) => {
       console.log(err);
       return;
     });
 
+  // add a delay in the case where firestore takes time to save the document. Without this delay, it is possible that the update fails since the document was never uploaded to firestore
+
+  const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+  await delay(2000);
+
+  // update order object with calendly booking details
   firestore
     .collection(orderDB)
     .doc(String(orderID))
     .update({
       startTime: new Date(calendlyEventDetails.startTime),
-      locationName: calendlyEventDetails.locationName,
+      calendlyBookinLocationName: calendlyEventDetails.locationName,
     });
 
+  // write calendly booking details on Lightspeed order to be able to view the booking. To do this, first fetch current note and then send a post to append to the note
   let LS_APDC_CREDENTIALS = await getLSAPICredentials();
   let getOrderEndpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/orders/${orderID}.json`;
+  let initialCustomerComment = "";
   await axios({
     method: "get",
     url: getOrderEndpoint,
   })
     .then(async (response) => {
-      let currentOrderMemo = "";
-      // let currentCustomerMemo = "";
-      currentOrderMemo = response.data.order.memo;
-      // currentCustomerMemo = response.data.order.customer.memo;
+      let currentOrderMemo = response.data.order.memo;
+      initialCustomerComment = response.data.order.comment;
 
       // we always want to do the following, since this function gets triggered by an added date scheduled and we want to keep track of this in the order
-      currentOrderMemo = currentOrderMemo + "\n" + "Pickup/Delivery Date: " + new Date(calendlyEventDetails.startTime).toLocaleString("en-us", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+      currentOrderMemo +=
+        "\n" +
+        "Pickup/Delivery Date: " +
+        new Date(calendlyEventDetails.startTime).toLocaleString("en-us", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "America/New_York" });
 
       // we only append the following if there was a note entered that was detected
-      if (addedCustomerNote.length > 1) {
-        // currentCustomerMemo = currentCustomerMemo + "\n" + "Note from customer: " + addedCustomerNote;
-        currentOrderMemo = currentOrderMemo + "\n" + "Note from customer: " + addedCustomerNote;
+      if (addedCalendlyCustomerNote.length > 1) {
+        // currentCustomerMemo = currentCustomerMemo + "\n" + "Note from customer: " + addedCalendlyCustomerNote;
+        currentOrderMemo += "\n" + "Additional Calendly Note from customer: " + addedCalendlyCustomerNote;
       }
 
       await axios({
@@ -210,13 +224,6 @@ exports.addCalendlyInfo = async (req, res) => {
         data: {
           order: {
             memo: currentOrderMemo,
-            // customer: {
-            //   resource: {
-            //     embedded: {
-            //       memo: currentCustomerMemo,
-            //     },
-            //   },
-            // },
           },
         },
       });
@@ -224,5 +231,49 @@ exports.addCalendlyInfo = async (req, res) => {
     .catch((err) => {
       console.log(err);
       return;
+    });
+  if ((initialCustomerComment + addedCalendlyCustomerNote).length > 0) {
+    firestore
+      .collection(orderDB)
+      .doc(String(orderID))
+      .update({
+        fullCustomerNote: initialCustomerComment + "\n" + addedCalendlyCustomerNote,
+      });
+  }
+};
+
+exports.getCalendlyLinks = async (req, res) => {
+  let allLinks = [];
+  firestore
+    .collection(locationsDB)
+    .get()
+    .then((snapshot) => {
+      snapshot.forEach((docs) => {
+        if (docs.id === "Delivery" || docs.id === "Pickup") {
+          allLinks.push(docs.data());
+        }
+      });
+      // convert to array
+      allLinks = [...Object.keys(allLinks[0]).map((key) => allLinks[0][key]), ...Object.keys(allLinks[1]).map((key) => allLinks[1][key])];
+      res.status(200).send(allLinks);
+    })
+    .catch((err) => {
+      res.send(err.message);
+      console.log(err.message);
+    });
+};
+
+exports.isBooked = async (req, res) => {
+  const orderID = req.params.orderID;
+  firestore
+    .collection(orderDB)
+    .doc(String(orderID))
+    .get()
+    .then((snapshot) => {
+      res.send(snapshot.data().hasOwnProperty("startTime"));
+    })
+    .catch((err) => {
+      res.send(err.message);
+      console.log(err.message);
     });
 };

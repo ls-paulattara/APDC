@@ -2,7 +2,7 @@
 
 ### Welcome
 
-The web app is deployed using Firebase hosting [Navigate here.](https://au-pied-de-cochon.web.app/).
+The web app is deployed using Firebase hosting [Navigate here](https://au-pied-de-cochon.web.app/).
 
 This site was created using Firebase as a back-end for authentication, user db, cloud functions, and hosting. O the front-end, React, along with [Semantic UI for React](https://react.semantic-ui.com/)
 

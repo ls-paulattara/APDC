@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
 import { createMedia } from "@artsy/fresnel";
 import { NavLink } from "react-router-dom";
 import * as ROUTES from "../../constants/routes";
@@ -8,38 +7,9 @@ import { AuthUserContext } from "../Session";
 import { SignOutMenuItem, SignOutMenuItemButton } from "../SignOut";
 import "./styles.css";
 
-import {
-  Button,
-  Container,
-  Icon,
-  Image,
-  Menu,
-  Dropdown,
-  Segment,
-  Sidebar,
-  Visibility,
-  Divider,
-} from "semantic-ui-react";
+import { Button, Container, Icon, Image, Menu, Segment, Sidebar, Visibility } from "semantic-ui-react";
 import Logo from "../../media/logo.png";
-import Logo2 from "../../media/logo2.png";
-import Logo3 from "../../media/Logo-Boutique.jpeg";
-import Logo4 from "../../media/small-logo.png";
 import TRANSLATIONS from "../../constants/translation";
-
-const DarkButton = (props) => {
-  const { dark, toggleDark, fixed } = props;
-  const { GLOBAL } = TRANSLATIONS.EN;
-  return (
-    <Button
-      basic
-      circular
-      icon={dark ? "moon" : "moon outline"}
-      onClick={toggleDark}
-      inverted={!fixed}
-      aria-label={GLOBAL.ariaDark}
-    />
-  );
-};
 
 /* eslint-disable max-classes-per-file */
 /* eslint-disable react/no-multi-comp */
@@ -57,26 +27,15 @@ const { MediaContextProvider, Media } = createMedia({
  */
 const HomepageHeading = () => {
   const { NAVIGATION } = TRANSLATIONS.EN;
-  return (
-    <Image
-      src={Logo}
-      size="massive"
-      centered
-      alt={NAVIGATION.imageAlt}
-      width="150"
-      height="150"
-    />
-  );
+  return <Image src={Logo} size="massive" centered alt={NAVIGATION.imageAlt} width="150" height="150" />;
 };
 
 const DesktopContainer = (props) => {
-  const { dark, toggleDark, language, children, options, changeLanguage } =
-    props;
+  const { language, children } = props;
   const { NAVIGATION } = TRANSLATIONS[`${language}`];
   const [fixed, setFixed] = useState(false);
   const hideFixedMenu = () => setFixed(false);
   const showFixedMenu = () => setFixed(true);
-  const location = useLocation();
   return (
     // <Helmet>
     // <style>{" background-color: red; "}</style>
@@ -130,14 +89,7 @@ const DesktopContainer = (props) => {
               {/* </Menu> */}
               {/* </Segment> */}
               <Segment raised>
-                <Image
-                  src={Logo}
-                  size="massive"
-                  centered
-                  alt={NAVIGATION.imageAlt}
-                  width="150"
-                  height="150"
-                />
+                <Image src={Logo} size="massive" centered alt={NAVIGATION.imageAlt} width="150" height="150" />
                 {/* <HomepageHeading /> */}
                 <Container textAlign="center" fluid={false}>
                   <Menu
@@ -178,49 +130,24 @@ const DesktopContainer = (props) => {
                         to={ROUTES.GENERATE_REPORT}
                         name={NAVIGATION.reports}
                         exact
+                        // TODO: when click on reports tab, bring to step 1
                         content={NAVIGATION.reports}
                         style={{ marginLeft: "1em" }}
-                        active={
-                          location.pathname == "/generate-report" ||
-                          location.pathname == "/reports"
-                        }
+                        // active={location.pathname == "/generate-report" || location.pathname == "/reports"}
                       />
                     )}
-                    {!!authUser && (
-                      <Menu.Item
-                        as={NavLink}
-                        to={ROUTES.ACCOUNT}
-                        name={NAVIGATION.account}
-                        exact
-                        content={NAVIGATION.account}
-                      />
-                    )}
-                    {ISADMIN && (
-                      <Menu.Item
-                        as={NavLink}
-                        to={ROUTES.ADMIN}
-                        name={NAVIGATION.admin}
-                        exact
-                        icon="cog"
-                        content={NAVIGATION.admin}
-                      />
-                    )}
+                    {!!authUser && <Menu.Item as={NavLink} to={ROUTES.ACCOUNT} name={NAVIGATION.account} exact content={NAVIGATION.account} />}
+                    {ISADMIN && <Menu.Item as={NavLink} to={ROUTES.ADMIN} name={NAVIGATION.admin} exact icon="cog" content={NAVIGATION.admin} />}
 
                     {authUser ? (
                       <Menu.Item
                       // style={{ marginRight: "40%" }}
                       // position="right"
                       >
-                        <SignOutMenuItemButton
-                          fixed={fixed}
-                          language={language}
-                        />
+                        <SignOutMenuItemButton fixed={fixed} language={language} />
                       </Menu.Item>
                     ) : (
-                      <Menu.Item
-                        position="right"
-                        style={{ marginRight: "35%" }}
-                      >
+                      <Menu.Item position="right" style={{ marginRight: "35%" }}>
                         {/* <React.Fragment> */}
                         <Button
                           basic
@@ -280,8 +207,7 @@ const DesktopContainer = (props) => {
 };
 
 const MobileContainer = (props) => {
-  const { dark, toggleDark, language, children, options, changeLanguage } =
-    props;
+  const { language, children } = props;
   const [open, setOpen] = useState(false);
   const { NAVIGATION } = TRANSLATIONS[`${language}`];
 
@@ -295,57 +221,11 @@ const MobileContainer = (props) => {
         return (
           <Media as={Sidebar.Pushable} at="mobile">
             <Sidebar.Pushable>
-              <Sidebar
-                as={Menu}
-                animation="push"
-                inverted
-                onHide={handleSidebarHide}
-                vertical
-                width="thin"
-                visible={open}
-              >
-                <Menu.Item
-                  as={NavLink}
-                  to={ROUTES.HOME}
-                  name={NAVIGATION.home}
-                  exact
-                  icon="home"
-                  content={NAVIGATION.home}
-                  onClick={handleSidebarHide}
-                />
-                {!!authUser && (
-                  <Menu.Item
-                    as={NavLink}
-                    to={ROUTES.REPORTS}
-                    name={NAVIGATION.reports}
-                    exact
-                    icon="chart line"
-                    content={NAVIGATION.reports}
-                    onClick={handleSidebarHide}
-                  />
-                )}
-                {!!authUser && (
-                  <Menu.Item
-                    as={NavLink}
-                    to={ROUTES.ACCOUNT}
-                    name={NAVIGATION.account}
-                    exact
-                    icon="user"
-                    content={NAVIGATION.account}
-                    onClick={handleSidebarHide}
-                  />
-                )}
-                {ISADMIN && (
-                  <Menu.Item
-                    as={NavLink}
-                    to={ROUTES.ADMIN}
-                    name={NAVIGATION.admin}
-                    exact
-                    icon="cog"
-                    content={NAVIGATION.admin}
-                    onClick={handleSidebarHide}
-                  />
-                )}
+              <Sidebar as={Menu} animation="push" inverted onHide={handleSidebarHide} vertical width="thin" visible={open}>
+                <Menu.Item as={NavLink} to={ROUTES.HOME} name={NAVIGATION.home} exact icon="home" content={NAVIGATION.home} onClick={handleSidebarHide} />
+                {!!authUser && <Menu.Item as={NavLink} to={ROUTES.GENERATE_REPORT} name={NAVIGATION.reports} exact icon="chart line" content={NAVIGATION.reports} onClick={handleSidebarHide} />}
+                {!!authUser && <Menu.Item as={NavLink} to={ROUTES.ACCOUNT} name={NAVIGATION.account} exact icon="user" content={NAVIGATION.account} onClick={handleSidebarHide} />}
+                {ISADMIN && <Menu.Item as={NavLink} to={ROUTES.ADMIN} name={NAVIGATION.admin} exact icon="cog" content={NAVIGATION.admin} onClick={handleSidebarHide} />}
 
                 {authUser ? (
                   <SignOutMenuItem language={language} />

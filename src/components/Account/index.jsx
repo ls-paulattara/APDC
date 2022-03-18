@@ -52,31 +52,13 @@ class AccountBase extends Component {
                   <PageHeader {...this.props} ACCOUNT={ACCOUNT} />
                   <Divider inverted={dark} />
                   <Segment basic inverted={dark}>
-                    <PageSubHeader
-                      authUser={authUser}
-                      ACCOUNT={ACCOUNT}
-                      dark={dark}
-                    />
+                    <PageSubHeader authUser={authUser} ACCOUNT={ACCOUNT} dark={dark} />
                   </Segment>
                   <Segment basic inverted={dark} style={{ marginBottom: 0 }}>
                     <Segment.Group>
-                      <ChangeEmailandName
-                        authUser={authUser}
-                        {...this.props}
-                        ACCOUNT={ACCOUNT}
-                      />
-                      <ChangePassword
-                        authUser={authUser}
-                        {...this.props}
-                        ACCOUNT={ACCOUNT}
-                      />
-                      {authUser.email && (
-                        <LoginManagement
-                          authUser={authUser}
-                          {...this.props}
-                          ACCOUNT={ACCOUNT}
-                        />
-                      )}
+                      <ChangeEmailandName authUser={authUser} {...this.props} ACCOUNT={ACCOUNT} />
+                      <ChangePassword authUser={authUser} {...this.props} ACCOUNT={ACCOUNT} />
+                      {authUser.email && <LoginManagement authUser={authUser} {...this.props} ACCOUNT={ACCOUNT} />}
                     </Segment.Group>
                   </Segment>
                 </Segment>
@@ -104,20 +86,12 @@ const PageHeader = (props) => {
 };
 
 const PageSubHeader = ({ authUser, dark, ACCOUNT }) => {
-  const photoURL = authUser.providerData.photoURL;
   return (
     <Header as="h3" textAlign="center" inverted={dark}>
-      {/* {photoURL && <Image src={photoURL} size="large" circular />} */}
-
       <Header.Content>
         {ACCOUNT.welcome}
         {authUser.displayName ? authUser.displayName : authUser.email}
-        <Header.Subheader
-          content={
-            ACCOUNT.memberSince +
-            new Date(Date.parse(authUser.metadata.creationTime)).toDateString()
-          }
-        />
+        <Header.Subheader content={ACCOUNT.memberSince + new Date(Date.parse(authUser.metadata.creationTime)).toDateString()} />
       </Header.Content>
     </Header>
   );

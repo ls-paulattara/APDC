@@ -18,7 +18,7 @@ const SignOutMenuItemBase = (props) => {
 };
 
 const SignOutMenuItemButtonBase = (props) => {
-  const { firebase, fixed, language } = props;
+  const { firebase, language } = props;
   const { NAVIGATION } = TRANSLATIONS[`${language}`];
   return (
     <Button

@@ -6,7 +6,7 @@ import "firebase/compat/analytics";
 import "firebase/compat/performance";
 import "firebase/compat/firestore";
 import moment from "moment";
-import { writeBatch, doc } from "firebase/firestore";
+import { writeBatch, doc, getDoc } from "firebase/firestore";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -32,7 +32,7 @@ class Firebase {
     this.analytics = app.analytics();
     this.performance = app.performance();
     this.orderDB = "orders";
-    this.routificDB = "apdc_routific_data";
+    this.locationsDB = "apdc_locations";
   }
 
   // *** Auth API - Create Account ***
@@ -116,6 +116,8 @@ class Firebase {
   // *** User API - UID Ref ***
   user = (uid) => this.db.ref(`users/${uid}`);
 
+  locations = () => this.firestore.collection(this.locationsDB);
+
   // *** User API - all Users ***
   users = () => this.db.ref("users");
 
@@ -168,9 +170,6 @@ class Firebase {
 
   // report 3
   getAllFirebaseOrdersByDate = async (start, end) => {
-    var myTimestamp = app.firestore.Timestamp.fromDate(new Date());
-    // console.log(myTimestamp)
-
     let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
     let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
     var jsonvalue = [];
@@ -191,28 +190,53 @@ class Firebase {
         console.log(error);
       });
   };
-  // report 1,2,4
+  // report 1,2,4,12,13
   getAllFirebaseOrdersByDateAndStatus = async (start, end, status, orderType, location) => {
-    var myTimestamp = app.firestore.Timestamp.fromDate(new Date());
-
     let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
     let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
     var jsonvalue = [];
 
     let query = this.firestore.collection(this.orderDB);
-    if (orderType != "all") {
+    if (orderType !== "all") {
       query = query.where("type", "==", orderType);
     }
-    if (status != "Any") {
+    if (status !== "Any") {
       query = query.where("status", "==", status);
     }
-    if (location != "Any") {
+    if (location !== "Any") {
       query = query.where("shipmentTitle", "==", location);
     }
 
     return (query = query
       .where("startTime", ">=", start2)
       .where("startTime", "<=", end2)
+      .get()
+      .then((snapshot) => {
+        snapshot.forEach((docs) => {
+          jsonvalue.push(docs.data());
+        });
+        // console.log(jsonvalue);
+        return jsonvalue;
+      })
+      .catch((error) => {
+        console.log(error);
+      }));
+  };
+  // report 14
+  getAllMailOrdersByDateCreated = async (start, end, status, orderType) => {
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
+    var jsonvalue = [];
+
+    let query = this.firestore.collection(this.orderDB);
+    if (status !== "Any") {
+      query = query.where("status", "==", status);
+    }
+
+    return (query = query
+      .where("createdAt", ">=", start2)
+      .where("createdAt", "<=", end2)
+      .where("type", "==", orderType)
       .get()
       .then((snapshot) => {
         snapshot.forEach((docs) => {
@@ -232,7 +256,7 @@ class Firebase {
     var jsonvalue = [];
 
     let query = this.firestore.collection(this.orderDB);
-    if (status != "Any") {
+    if (status !== "Any") {
       query = query.where("status", "==", status);
     }
 
@@ -244,19 +268,10 @@ class Firebase {
       .get()
       .then((snapshot) => {
         snapshot.forEach((docs) => {
-          // let order = docs.data()
-          // if(category !== 'any'){
-          //   filteredProducts = order.products.filter(prod => /*prod.category !== undefined &&*/ prod.category == category)
-          //   order.products = filteredProducts;
-          //   if(order.products.length > 0){
-          //     jsonvalue.push(order)
-          //   }
-          // }
-
           let order = docs.data();
 
           if (category !== "Any") {
-            filteredProducts = order.products.filter((prod) => /*prod.category !== undefined &&*/ prod.category == category);
+            filteredProducts = order.products.filter((prod) => /*prod.category !== undefined &&*/ prod.category === category);
             // console.log(order.number, filteredProducts)
             order.products = filteredProducts;
             // console.log(order.number, order)
@@ -266,15 +281,6 @@ class Firebase {
           } else {
             jsonvalue.push(order);
           }
-
-          // docs.data().products.forEach((doc) => {
-          //   if(category == 'any'){
-          //     jsonvalue.push(doc);
-          //   }
-          //   else if(category != 'any' && doc.category !== undefined && doc.category == category){
-          //     jsonvalue.push(doc);
-          //   }
-          // })
         });
 
         // console.log(jsonvalue);
@@ -292,13 +298,13 @@ class Firebase {
     var jsonvalue = [];
 
     let query = this.firestore.collection(this.orderDB);
-    if (orderType != "all") {
+    if (orderType !== "all") {
       query = query.where("type", "==", orderType);
     }
-    if (status != "Any") {
+    if (status !== "Any") {
       query = query.where("status", "==", status);
     }
-    if (location != "Any") {
+    if (location !== "Any") {
       query = query.where("shipmentTitle", "==", location);
       // query = query.where("shipmentTitle", ">=", location).where("shipmentTitle", "<=", location + "\uf8ff"); // this line checks for substring of location. So if location is rive sud zone 2, searching only rive sud will match https://stackoverflow.com/questions/46568142/google-firestore-query-on-substring-of-a-property-value-text-search#comment80093410_46568525
     }
@@ -313,7 +319,7 @@ class Firebase {
           let order = docs.data();
 
           if (category !== "Any") {
-            filteredProducts = order.products.filter((prod) => /*prod.category !== undefined &&*/ prod.category == category);
+            filteredProducts = order.products.filter((prod) => /*prod.category !== undefined &&*/ prod.category === category);
             // console.log(order.number, filteredProducts)
             order.products = filteredProducts;
             // console.log(order.number, order)
@@ -338,17 +344,12 @@ class Firebase {
     var jsonvalue = [];
 
     let query = this.firestore.collection(this.orderDB);
-    if (carrier != "Any") {
+    if (carrier !== "Any") {
       query = query.where("type", "==", carrier);
     }
-    if (status != "Any") {
+    if (status !== "Any") {
       query = query.where("status", "==", status);
     }
-    // if(category != 'any'){
-    //   // query = query.where('category', '==', category);
-    //   query = query.where("products", "array-contains", { category: category });
-
-    // }
 
     let filteredProducts;
 
@@ -361,7 +362,7 @@ class Firebase {
           let order = docs.data();
 
           if (category !== "Any") {
-            filteredProducts = order.products.filter((prod) => /*prod.category !== undefined &&*/ prod.category == category);
+            filteredProducts = order.products.filter((prod) => /*prod.category !== undefined &&*/ prod.category === category);
             // console.log(order.number, filteredProducts)
             order.products = filteredProducts;
             // console.log(order.number, order)
@@ -371,15 +372,6 @@ class Firebase {
           } else {
             jsonvalue.push(order);
           }
-
-          // docs.data().products.forEach((doc) => {
-          //   if(category == 'any'){
-          //     jsonvalue.push(doc);
-          //   }
-          //   else if(category != 'any' && doc.category !== undefined && doc.category == category){
-          //     jsonvalue.push(doc);
-          //   }
-          // })
         });
 
         // console.log(jsonvalue);
@@ -390,20 +382,18 @@ class Firebase {
       }));
   };
   getAllFirebaseOrdersByDateAndStatusAndNumber = async (start, end, status, orderType, location) => {
-    var myTimestamp = app.firestore.Timestamp.fromDate(new Date());
-
     let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
     let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
     var jsonvalue = [];
 
     let query = this.firestore.collection(this.orderDB);
-    if (orderType != "all") {
+    if (orderType !== "all") {
       query = query.where("type", "==", orderType);
     }
-    if (status != "Any") {
+    if (status !== "Any") {
       query = query.where("status", "==", status);
     }
-    if (location != "Any") {
+    if (location !== "Any") {
       query = query.where("shipmentTitle", "==", location);
     }
 
@@ -434,30 +424,12 @@ class Firebase {
     };
   };
 
-  pushRoutificRoutes = async (date, routificData) => {
-    const propertiesKept = ["Visit Name", "Driver Name", "Stop Number"];
-    let trimmedArray = routificData.map(this.selectProps(...propertiesKept));
-    trimmedArray = trimmedArray.filter((item) => {
-      return item["Visit Name"] !== "" && item["Stop Number"] > 0 && item["Driver Name"] !== "";
-    });
-
-    console.log(trimmedArray);
-    let formattedDate = moment(date).format("YYYY-MM-DD");
-    console.log(formattedDate);
-    this.firestore
-      .collection(this.routificDB)
-      .doc(formattedDate)
-      .set({ ...trimmedArray })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
   pushRoutificRoutesToOrders = async (routificData) => {
-    const propertiesKept = ["Visit Name", "Driver Name", "Stop Number"];
+    console.log(routificData);
+    const propertiesKept = ['"ID"', "Driver Name", "Stop Number"]; // ID instead of visit name
     let trimmedArray = routificData.map(this.selectProps(...propertiesKept));
     trimmedArray = trimmedArray.filter((item) => {
-      return item["Visit Name"] !== "" && item["Stop Number"] > 0 && item["Driver Name"] !== "";
+      return item['"ID"'] !== "" && item["Stop Number"] > 0 && item["Driver Name"] !== "";
     });
     // need return false
     console.log(trimmedArray);
@@ -467,14 +439,14 @@ class Firebase {
       console.log("processing", item);
       await this.firestore
         .collection(this.orderDB)
-        .where("number", "==", item["Visit Name"])
+        .where("number", "==", item['"ID"'])
         .get()
         .then((snap) => {
           console.log(snap);
           if (snap.docs[0].exists) {
-            item.ID = snap.docs[0].id;
+            item.db_ID = snap.docs[0].id;
             foundAtLeastOne = true;
-            console.log(item.ID);
+            console.log(item.db_ID);
           }
         })
         .catch((err) => {
@@ -492,9 +464,9 @@ class Firebase {
     const batch = writeBatch(db);
 
     trimmedArray.forEach((entry) => {
-      let ref = doc(db, this.orderDB, String(entry.ID));
-      if (entry.ID) {
-        console.log("setting", entry.ID);
+      let ref = doc(db, this.orderDB, String(entry.db_ID));
+      if (entry.db_ID) {
+        console.log("setting", entry.db_ID);
         batch.set(ref, { driver: entry["Driver Name"], stopNumber: entry["Stop Number"] }, { merge: true });
       }
     });
@@ -504,17 +476,164 @@ class Firebase {
     return true;
   };
 
-  getRoutificRoutesByDate = async (date) => {
-    // return all routes
-    // split them by drivers
-    let formattedDate = moment(date).format("YYYY-MM-DD");
-    console.log(formattedDate, typeof formattedDate);
-    const doc = await this.firestore.collection(this.routificDB).doc(formattedDate).get();
-    if (!doc.exists) {
-      console.log("No such document!");
-    } else {
-      return doc.data();
-    }
+  uploadInitialDeliveryZones = async () => {
+    let deliveryZoneWithoutAny = [
+      {
+        text: "Zone 1: Montréal-Centre",
+        value: "Delivery at Home in Montréal-Centre Zone 1",
+        link: "https://calendly.com/au-pied-de-cochon/zone-1-montreal-centre",
+      },
+      {
+        text: "Zone 2: Rive-Sud",
+        value: "Delivery at Home in Rive-Sud Zone 2",
+        link: "https://calendly.com/au-pied-de-cochon/zone-2-rive-sud",
+      },
+      {
+        text: "Zone 3: Montréal Est",
+        value: "Delivery at Home in Montréal Est Zone 3",
+        link: "https://calendly.com/au-pied-de-cochon/zone-3-montreal-est",
+      },
+      {
+        text: "Zone 4: Couronne-Nord",
+        value: "Delivery at home in Couronne-Nord Zone 4",
+        link: "https://calendly.com/au-pied-de-cochon/zone-4-couronne-nord",
+      },
+      {
+        text: "Zone 5: Montréal Ouest",
+        value: "Delivery at home in Montreal Ouest Zone 5",
+        link: "https://calendly.com/au-pied-de-cochon/zone-5-montreal-ouest",
+      },
+    ];
+
+    await this.firestore
+      .collection(this.locationsDB)
+      .doc("Delivery")
+      .set({ ...deliveryZoneWithoutAny })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  uploadInitialPickupPoints = async () => {
+    let pickupPointWithoutAny = [
+      {
+        text: "Victoriaville",
+        value: "Pickup: Bistro Le Lux - Victoriaville",
+        link: "https://calendly.com/au-pied-de-cochon/victoriaville",
+      },
+      {
+        text: "Downtown Montreal",
+        value: "Pickup: Downtown Montreal - 540 avenue Duluth Est",
+        link: "https://calendly.com/au-pied-de-cochon/downtown-montreal-pickup-location",
+      },
+      {
+        text: "Mirabel",
+        value: "Pickup: Cabane à Sucre Au Pied de Cochon - Mirabel",
+        link: "https://calendly.com/au-pied-de-cochon/mirabel",
+      },
+      {
+        text: "Mont-Tremblant",
+        value: "Pickup: Café et Bistro La Sandwicherie - Mont-Tremblant",
+        link: "https://calendly.com/au-pied-de-cochon/mont-tremblant",
+      },
+      {
+        text: "Québec Grand Marché",
+        value: "Le Grand Marché de Québec - Québec City",
+        link: "https://calendly.com/au-pied-de-cochon/grand-marche-quebec",
+      },
+      {
+        text: "Lévis",
+        value: "Pickup: Centre des congrès de Lévis - Lévis",
+        link: "https://calendly.com/au-pied-de-cochon/levis",
+      },
+      {
+        text: "Drummondville",
+        value: "Pickup: Doyon Després - Drummondville",
+        link: "https://calendly.com/au-pied-de-cochon/drummondville",
+      },
+      { text: "Granby", value: "Pickup: Doyon Després - Granby", link: "https://calendly.com/au-pied-de-cochon/granby" },
+      {
+        text: "Buckingham",
+        value: "Pickup: Fine et Fûtés - Buckingham",
+        link: "https://calendly.com/au-pied-de-cochon/buckingham",
+      },
+      {
+        text: "Saint-Hull",
+        value: "Pickup: La Boîte à Grains - Hull",
+        link: "https://calendly.com/au-pied-de-cochon/hull",
+      },
+      {
+        text: "Québec Centre Commercial",
+        value: "Pickup: Centre commercial Fleur de Lys - Quebec City",
+        link: "https://calendly.com/au-pied-de-cochon/quebec-centre-commercial-fleur-de-lys",
+      },
+      { text: "Saint-Saveur", value: "Pickup: Saint-Sauveur", link: "https://calendly.com/au-pied-de-cochon/saint-sauveur" },
+      { text: "Shawinigan", value: "Pickup: Shawinigan", link: "https://calendly.com/au-pied-de-cochon/shawinigan" },
+      { text: "Sherbrooke", value: "Pickup: Sherbrooke", link: "https://calendly.com/au-pied-de-cochon/sherbrooke" },
+      { text: "Gatineau", value: "Pickup: Victoriaville", link: "https://calendly.com/au-pied-de-cochon/gatineau" },
+    ];
+
+    await this.firestore
+      .collection(this.locationsDB)
+      .doc("Pickup")
+      .set({ ...pickupPointWithoutAny })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  updateLocations = async (loc, type) => {
+    // remove keys from locations
+    loc = loc.map((loc) => {
+      return {
+        text: loc.text,
+        value: loc.value,
+        link: loc.link,
+      };
+    });
+    await this.firestore
+      .collection(this.locationsDB)
+      // .doc("Delivery")
+      // .set({ ...deliveryZoneWithoutAny })
+      .doc(type)
+      .set({ ...loc })
+      .catch((error) => {
+        console.log(error);
+      });
+    // console.log(locations);
+  };
+
+  getLocationsByType = async (type) => {
+    let res;
+    return this.firestore
+      .collection(this.locationsDB)
+      .get()
+      .then((snapshot) => {
+        snapshot.forEach((docs) => {
+          if (docs.id === type) {
+            res = docs.data();
+          }
+        });
+        // convert to array
+        return Object.keys(res).map((key) => res[key]);
+      });
+  };
+
+  getAllLocations = async () => {
+    let res = [];
+    return this.firestore
+      .collection(this.locationsDB)
+      .get()
+      .then((snapshot) => {
+        console.log(snapshot.docs);
+        snapshot.forEach((docs) => {
+          if (docs.id === "Delivery" || docs.id === "Pickup") {
+            res.push(docs.data());
+          }
+        });
+        // convert to array
+        return [...Object.keys(res[0]).map((key) => res[0][key]), ...Object.keys(res[1]).map((key) => res[1][key])];
+      });
   };
 }
 

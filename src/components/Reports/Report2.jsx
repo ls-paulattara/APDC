@@ -9,8 +9,8 @@ const { getInitialDate } = require("../../Util/HelperFunctions");
 const { getReport1or2File } = require("../../Util/CreateReportFile");
 
 function Report2(props) {
-  const { dark, language } = props;
-  const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
+  const { language } = props;
+  const { REPORTS } = TRANSLATIONS[`${language}`];
 
   const [report2Values, setreport2Values] = useState({
     pickupPoint: "",
@@ -86,14 +86,14 @@ function Report2(props) {
         label="Order Status"
         selection
         size="large"
-        options={REPORTS.orderStatus}
+        options={props.orderStatusOptions}
         // icon="clipboard outline"
         value={report2Values.orderStatus}
         onChange={onChange}
       />
 
       <Header as="h3">Pickup Point</Header>
-      <Dropdown placeholder="Pickup Point" name="pickupPoint" label="Pickup Point" selection size="large" options={REPORTS.pickupPointWithoutAny} value={report2Values.pickupPoint} onChange={onChange} />
+      <Dropdown placeholder="Pickup Point" name="pickupPoint" label="Pickup Point" selection size="large" options={props.pickupPointOptions.slice(1, props.pickupPointOptions.length)} value={report2Values.pickupPoint} onChange={onChange} />
       <Header as="h3">Date Range of Pickup</Header>
       <Grid style={{ marginTop: "0", marginBottom: "0" }}>
         <SemanticDatepicker showToday autoComplete="off" name="startDate" size="large" onChange={onChange} value={getInitialDate(report2Values.startDate)} />

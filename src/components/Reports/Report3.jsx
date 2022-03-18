@@ -1,23 +1,12 @@
 import React, { useState, useEffect } from "react";
-import TRANSLATIONS from "../../constants/translation";
 import SemanticDatepicker from "react-semantic-ui-datepickers";
 import "react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css";
-import {
-  Header,
-  Grid,
-  Divider,
-  Button,
-  Message,
-  Icon,
-} from "semantic-ui-react";
+import { Header, Grid, Divider, Button, Message, Icon } from "semantic-ui-react";
 
 const { getInitialDate } = require("../../Util/HelperFunctions");
 const { getReport3File } = require("../../Util/CreateReportFile");
 
 function Report3(props) {
-  const { dark, language } = props;
-  const { HOME } = TRANSLATIONS[`${language}`];
-
   const [report3Values, setreport3Values] = useState({
     startDate: null,
     endDate: null,
@@ -34,15 +23,14 @@ function Report3(props) {
   const onSubmit = async () => {
     console.log(report3Values);
     let orderData = [];
-    orderData = await props.firebase.getAllFirebaseOrdersByDate(
-      report3Values.startDate,
-      report3Values.endDate
-    );
+    orderData = await props.firebase.getAllFirebaseOrdersByDate(report3Values.startDate, report3Values.endDate);
     console.log(orderData);
     if (orderData.length) {
       setSuccess(true);
       setError(false);
-      const file = await getReport3File(orderData, report3Values);
+      let locations = await props.firebase.getAllLocations();
+      console.log(locations);
+      const file = await getReport3File(orderData, report3Values, locations);
       // const url = await props.firebase.saveReportToFirebase(file);
       props.setReportValues(file);
       props.nextStep();
@@ -62,16 +50,7 @@ function Report3(props) {
     localStorage.setItem("report3Values", JSON.stringify(report3Values));
   }, [report3Values]);
 
-  const getErrorMessage = () =>
-    error ? (
-      <Message
-        negative
-        header="No results"
-        content="No results were found. Try again"
-      />
-    ) : (
-      ""
-    );
+  const getErrorMessage = () => (error ? <Message negative header="No results" content="No results were found. Try again" /> : "");
   const getSuccessMessage = () =>
     success ? (
       <Message icon>
@@ -89,42 +68,12 @@ function Report3(props) {
     <>
       <Header as="h3">Date Range of Order</Header>
       <Grid style={{ marginTop: "0", marginBottom: "0" }}>
-        <SemanticDatepicker
-          showToday
-          autoComplete="off"
-          name="startDate"
-          size="large"
-          onChange={onChange}
-          value={getInitialDate(report3Values.startDate)}
-        />
-        <SemanticDatepicker
-          showToday
-          autoComplete="off"
-          name="endDate"
-          size="large"
-          onChange={onChange}
-          value={getInitialDate(report3Values.endDate)}
-        />
+        <SemanticDatepicker showToday autoComplete="off" name="startDate" size="large" onChange={onChange} value={getInitialDate(report3Values.startDate)} />
+        <SemanticDatepicker showToday autoComplete="off" name="endDate" size="large" onChange={onChange} value={getInitialDate(report3Values.endDate)} />
       </Grid>
       <Divider />
-      <Button
-        content="Back"
-        icon="left arrow"
-        size="large"
-        labelPosition="left"
-        onClick={() => props.prevStep()}
-      />
-      <Button
-        positive
-        content="Next"
-        icon="right arrow"
-        size="large"
-        labelPosition="right"
-        onClick={() => onSubmit()}
-        disabled={
-          report3Values.startDate == null || report3Values.endDate == null
-        }
-      />
+      <Button content="Back" icon="left arrow" size="large" labelPosition="left" onClick={() => props.prevStep()} />
+      <Button positive content="Next" icon="right arrow" size="large" labelPosition="right" onClick={() => onSubmit()} disabled={report3Values.startDate == null || report3Values.endDate == null} />
       {getErrorMessage()}
       {getSuccessMessage()}
     </>

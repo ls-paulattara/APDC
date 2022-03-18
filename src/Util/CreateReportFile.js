@@ -1,17 +1,13 @@
 import apdc_logo_banner from "../media/logo.png";
-import apdc_logo from "../media/apdc-font-logo.png";
 import qc_logo from "../media/qc-logo.png";
 import boutique_banner from "../media/boutique-banner-1.png";
-import cochon_cart from "../media/cochon-cart.jpeg";
 import TRANSLATIONS from "../constants/translation";
 import moment from "moment";
-import * as html2canvas from "html2canvas";
 
-// const { html2canvas } = require("html2canvas");
 const { jsPDF } = require("jspdf");
 const jspdfautotable = require("jspdf-autotable");
 const Papa = require("papaparse");
-const { REPORTS, HOME } = TRANSLATIONS[`EN`];
+const { HOME } = TRANSLATIONS[`EN`];
 
 // const setTableColor = (jspdf) => {
 jsPDF.autoTableSetDefaults({
@@ -29,9 +25,6 @@ export const getReport1or2File = async (data, reportNumber, reportValues) => {
   doc.setTextColor(85, 85, 85);
 
   doc.setFontSize(14);
-  // if (reportNumber == "1") {
-  //   doc.text("Pickup Point: " + data[0].shipmentTitle, 14, 29);
-  // }
   doc.text(data[0].shipmentTitle, 14, 29);
   doc.text("Date Range: " + moment(reportValues.startDate).format("YYYY-MM-DD") + " / " + moment(reportValues.endDate).format("YYYY-MM-DD"), 14, 35);
 
@@ -44,7 +37,7 @@ export const getReport1or2File = async (data, reportNumber, reportValues) => {
 
   data.forEach((item) => {
     let outerCurr;
-    let { id, number, createdAt, firstname, lastname, status, totalPrice, shipmentTitle, startTime } = item;
+    let { number, createdAt, firstname, lastname, status, totalPrice, startTime } = item;
     createdAt = createdAt.toDate().toLocaleDateString(); //+ '-' + createdAt.toDate().toLocaleTimeString()
     startTime = startTime.toDate().toLocaleDateString();
     let name = firstname + " " + lastname;
@@ -52,10 +45,8 @@ export const getReport1or2File = async (data, reportNumber, reportValues) => {
     outerCurr = [[number, createdAt, startTime, name, totalPrice, status]];
 
     doc.autoTable({
-      // head: !startFlag ? [["Number","Date Ordered","Delivery Date","Name","Total", "Status"]] : [],
       head: [["Number", "Date Ordered", "Delivery Date", "Name", "Total", "Status"]],
       body: outerCurr,
-      // theme: ''
       styles: {
         halign: "center",
       },
@@ -66,17 +57,6 @@ export const getReport1or2File = async (data, reportNumber, reportValues) => {
     item.products.forEach((subitem) => {
       inner.push([subitem.productTitle, subitem.quantityOrdered]);
     });
-    // doc.autoTable
-    // ({
-    //   styles : { halign : 'center'},
-    //   headStyles :
-    //     {fillColor : [124, 95, 240]},
-    //   alternateRowStyles:
-    //     {fillColor : [231, 215, 252]},
-    //   tableLineColor: [124, 95, 240],
-    //   tableLineWidth: 0.1,
-    // }); //use headStyles to bring styles to the table head, and alternateRowStyles to color the rows but one yes and one no
-
     doc.autoTable({
       head: [["Title", "Quantity"]],
       body: inner,
@@ -93,12 +73,6 @@ export const getReport1or2File = async (data, reportNumber, reportValues) => {
       },
       headStyles: { fillColor: false, textColor: [64, 64, 64] },
       startY: doc.lastAutoTable.finalY + 5,
-
-      // alternateRowStyles:
-      //   {fillColor : [232,232,232]},
-      // tableLineColor: [124, 95, 240],
-      // tableLineWidth: 0.1,
-      // startY: 30,
     });
   });
 
@@ -181,8 +155,6 @@ export const getReport1or2FileOLD = async (data, reportNumber) => {
   } else {
     const link = document.createElement("a");
     if (link.download !== undefined) {
-      // feature detection
-      // Browsers that support HTML5 download attribute
       const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
       link.setAttribute("download", exportedFilename);
@@ -199,67 +171,56 @@ const round = (num) => {
   return Math.round(num * 100) / 100;
 };
 
-export const getReport3File = async (data, reportValues) => {
-  var dict = {
-    Pickup: {
-      Sherbrooke: [],
-      "Downtown Montreal": [],
-      Buckingham: [],
-      Victoriaville: [],
-      Sherbrooke: [],
-    },
-    Delivery: {
-      Montreal: [],
-      "Montreal Ouest": [],
-      "Rive-Sud": [],
-    },
+export const getReport3File = async (orderData, reportValues, locations) => {
+  // initialize dictionary for all types
+
+  let dict = {
+    Pickup: {},
+    Delivery: {},
     Mail: [],
   };
-  // ["Total", totalPrice, count]
+
+  // populate the dictionary with all locations. Inialize empty arrays
+  locations.forEach((loc) => {
+    let title = loc.text;
+    if (loc.value.includes("Pickup")) {
+      dict["Pickup"][title] = [];
+    } else if (loc.value.includes("Delivery")) {
+      dict["Delivery"][title] = [];
+    }
+  });
+
+  console.log(dict);
+
   let deliveryTotal = ["Total", 0, 0];
   let pickupTotal = ["Total", 0, 0];
   let mailTotal = ["Total", 0, 0];
   let grandTotal = ["Grand Total", 0, 0];
 
-  data.forEach((item) => {
-    const { id, totalPrice, type, shipmentTitle } = item;
+  // create a mapping
+  let locationMap = {};
+
+  locations.forEach((loc) => {
+    locationMap[loc.value] = loc.text;
+  });
+
+  const getMapping = (k) => {
+    return locationMap[k];
+  };
+
+  // place all orders into the dictionary by order type and location
+  orderData.forEach((order) => {
+    const { type, shipmentTitle } = order;
+    // console.log(shipmentTitle, "->", get(shipmentTitle), order.id);
     switch (type) {
       case "pickup":
-        switch (shipmentTitle) {
-          case "Pickup: Fine et Fûtés - Buckingham":
-            dict["Pickup"]["Buckingham"].push(item);
-            break;
-          case "Pickup: Downtown Montreal - 540 avenue Duluth Est":
-            dict["Pickup"]["Downtown Montreal"].push(item);
-            break;
-          case "Pickup: Victoriaville":
-            dict["Pickup"]["Victoriaville"].push(item);
-            break;
-          case "Pickup: Sherbrooke":
-            dict["Pickup"]["Sherbrooke"].push(item);
-            break;
-          // case "Pickup: Downtown Montreal":
-          //   dict["Pickup"]["Sherbrooke"].push(item);
-          case "Pickup: Bistro Le Lux - Victoriaville":
-            dict["Pickup"]["Victoriaville"].push(item);
-            break;
-        }
+        dict["Pickup"][getMapping(shipmentTitle)].push(order);
         break;
       case "delivery":
-        switch (shipmentTitle) {
-          case "Delivery at Home in Montréal":
-            dict["Delivery"]["Montreal"].push(item);
-            break;
-          case "Delivery at Home in Rive-Sud":
-            dict["Delivery"]["Rive-Sud"].push(item);
-            break;
-          case "Delivery at home in Montreal Ouest":
-            dict["Delivery"]["Montreal Ouest"].push(item);
-            break;
-        }
+        dict["Delivery"][getMapping(shipmentTitle)].push(order);
         break;
       case "mail":
-        dict["Mail"].push(item);
+        dict["Mail"].push(order);
     }
   });
 
@@ -281,18 +242,13 @@ export const getReport3File = async (data, reportValues) => {
             pickupTotal[1] += totalPrice;
             pickupTotal[2] += 1;
             break;
-          // case "mail":
-          //   mailTotal[1] += totalPrice;
-          //   mailTotal[2] += 1;
-          //   break;
         }
       }
-      //  grandTotal[1] += prices;
-      //  grandTotal[2] += 1;
       value[key] = [round(prices), count];
     });
   };
 
+  // calcualte all prices by type
   for (const [key, value] of Object.entries(dict)) {
     switch (key) {
       case "Delivery":
@@ -307,8 +263,6 @@ export const getReport3File = async (data, reportValues) => {
           const price = round(item.totalPrice);
           mailTotal[1] += price;
           mailTotal[2] += 1;
-          // grandTotal[1] += prices;
-          // grandTotal[2] += 1;
         });
 
         break;
@@ -320,10 +274,6 @@ export const getReport3File = async (data, reportValues) => {
   const deliveryTable = Object.entries(dict["Delivery"]).map((item) => [item[0], round(item[1][0]), item[1][1]]);
   const pickupTable = Object.entries(dict["Pickup"]).map((item) => [item[0], item[1][0], item[1][1]]);
   const mailTable = [["Purolator", mailTotal[1], mailTotal[2]], mailTotal];
-
-  // deliveryTotal = deliveryTotal[1].toFixed(2);
-  // pickupTotal = pickupTotal[1].toFixed(2);
-  // mailTotal = mailTotal[1].toFixed(2);
 
   deliveryTable.push(deliveryTotal);
   pickupTable.push(pickupTotal);
@@ -342,11 +292,6 @@ export const getReport3File = async (data, reportValues) => {
   doc.text("Date Range: " + moment(reportValues.startDate).format("YYYY-MM-DD") + " / " + moment(reportValues.endDate).format("YYYY-MM-DD"), 14, 29);
 
   var width = doc.internal.pageSize.getWidth() - 28.0222222;
-  // let wantedTableWidth = 100;
-  // let pageWidth = doc.internal.pageSize.width;
-  // const width1 = 80;
-  // const width2 = 51;
-  // const width3 = 51;
 
   const width1 = (2 * width) / 4;
   const width2 = (1 * width) / 4;
@@ -438,11 +383,14 @@ export const getReport3File = async (data, reportValues) => {
   blob.name = fileName;
   return blob;
 };
+
 export const getReport4File = async (data) => {
   const finalResults = data.flat().map((item) => {
+    console.log(item);
     const entry = {
+      Name: item.firstname + " " + item.lastname,
       Number: item.number,
-      Address: item.address,
+      Address: item.shippingAddress.street + " " + item.shippingAddress.street2 + ", " + item.shippingAddress.zipcode + ", " + item.shippingAddress.region,
       Phone: item.phone,
       Email: item.email,
       Status: item.status,
@@ -474,8 +422,6 @@ export const getReport4File = async (data) => {
   } else {
     const link = document.createElement("a");
     if (link.download !== undefined) {
-      // feature detection
-      // Browsers that support HTML5 download attribute
       const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
       link.setAttribute("download", exportedFilename);
@@ -564,7 +510,7 @@ export const getReport6File = async (orderData, reportValues) => {
     const getCellCount = (i, j) => {
       let count = 0;
       dict[items[i]].forEach((item) => {
-        if (item.date == dates[j]) {
+        if (item.date === dates[j]) {
           count += item.qty;
         }
       });
@@ -577,7 +523,7 @@ export const getReport6File = async (orderData, reportValues) => {
     // populate the array with the counts for the items
     for (let i = 0; i < full.length; i++) {
       for (let j = 0; j < full[i].length; j++) {
-        if (j == 0) {
+        if (j === 0) {
           full[i][j] = items[i];
         } else {
           full[i][j] = getCellCount(i, j - 1);
@@ -700,7 +646,7 @@ export const getReport7or9or10File = async (data, reportNumber, reportValues) =>
   const getCellCount = (i, j) => {
     let count = 0;
     dict[items[i]].forEach((item) => {
-      if (item.date == dates[j]) {
+      if (item.date === dates[j]) {
         count += item.qty;
       }
     });
@@ -713,7 +659,7 @@ export const getReport7or9or10File = async (data, reportNumber, reportValues) =>
   // populate the array with the counts for the items
   for (let i = 0; i < full.length; i++) {
     for (let j = 0; j < full[i].length; j++) {
-      if (j == 0) {
+      if (j === 0) {
         full[i][j] = items[i];
       } else {
         full[i][j] = getCellCount(i, j - 1);
@@ -761,22 +707,18 @@ export const getReport7or9or10File = async (data, reportNumber, reportValues) =>
   // report 9
   let startYTable;
   // let startYLine;
-  if (reportNumber == "7") {
+  if (reportNumber === "7") {
     doc.line(14, 47, 200, 47);
     startYTable = 52;
-  } else if (reportNumber == "9") {
+  } else if (reportNumber === "9") {
     doc.text(reportValues.pickupPoint, 14, 47);
     doc.line(14, 52, 200, 52);
     startYTable = 57;
-  } else if (reportNumber == "10") {
+  } else if (reportNumber === "10") {
     doc.text(reportValues.deliveryZone, 14, 47);
     doc.line(14, 52, 200, 52);
     startYTable = 57;
   }
-
-  // doc.text("Global Production", 14, 10);
-
-  var width = doc.internal.pageSize.getWidth() - 28.0222222;
 
   doc.autoTable({
     head: [header],
@@ -804,10 +746,11 @@ export const getReport8or11File = async (data, reportNumber, reportValues) => {
   let outer = [];
   data.forEach((order) => {
     order.products.forEach((product) => {
-      const { quantityOrdered, productTitle } = product;
+      const { quantityOrdered, productTitle, basePriceIncl } = product;
       outer.push({
         title: productTitle,
         qty: quantityOrdered,
+        price: basePriceIncl,
       });
     });
   });
@@ -816,16 +759,11 @@ export const getReport8or11File = async (data, reportNumber, reportValues) => {
 
   let header = [];
   let dict = {};
+  let totalCount = 0;
+  let totalPrice = 0;
+  let count = 0;
 
-  let items = [];
-  let total = 0;
-
-  // outer.forEach((item) => {
-  //   items.push(item.title);
-  // })
-
-  // items = [...new Set(items)];
-  header.push("Product", "Total");
+  header.push("Product", "Total Qty", "Unit Price (Tax in)", "Total Price");
 
   outer.forEach((item) => {
     if (!dict[item.title]) {
@@ -833,14 +771,18 @@ export const getReport8or11File = async (data, reportNumber, reportValues) => {
     } else {
       dict[item.title] += item.qty;
     }
-    total += item.qty;
+    totalCount += item.qty;
+    totalPrice += item.price * item.qty;
   });
 
-  dict = Object.entries(dict);
+  dict = Object.entries(dict).map((dictItem) => {
+    let unitPrice = outer.find((item) => item.title === dictItem[0]).price;
+    return [...dictItem, unitPrice, round(unitPrice * dictItem[1])];
+  });
 
   console.log(dict);
 
-  dict.push(["Total", total]);
+  dict.push(["Total", totalCount, "-", totalPrice]);
 
   const doc = new jsPDF();
   doc.setFontSize(22);
@@ -858,10 +800,10 @@ export const getReport8or11File = async (data, reportNumber, reportValues) => {
 
   let startYTable;
 
-  if (reportNumber == "8") {
+  if (reportNumber === "8") {
     doc.line(14, 47, 200, 47);
     startYTable = 52;
-  } else if (reportNumber == "11") {
+  } else if (reportNumber === "11") {
     doc.text("Carrier: " + reportValues.carrier, 14, 47);
     doc.line(14, 52, 200, 52);
     startYTable = 57;
@@ -890,21 +832,16 @@ export const getReport8or11File = async (data, reportNumber, reportValues) => {
 };
 
 export const getReport12SingleOrder = (doc, order) => {
-  // const doc = new jsPDF({ orientation: "p", lineHeight: 1.5 });
-
   let pageWidth = doc.internal.pageSize.width;
   let img = new Image();
   img.src = apdc_logo_banner;
   doc.addImage(img, "png", 22, 16, pageWidth - 40, 15);
   let img0 = new Image();
   img0.src = boutique_banner;
-  // doc.addImage(img0, "png", 64, 27, 90, 15);
   doc.setFont("ArialMS");
   doc.setTextColor(64, 64, 64);
   doc.setFontSize(12);
-  let img2 = new Image();
-  img2.src = cochon_cart;
-  doc.addImage(img2, "png", 150, 45, 40, 40);
+
   let ship = order.shippingAddress;
   let bill = order.billingAddress;
   let wantedTableWidth = 130;
@@ -916,10 +853,7 @@ export const getReport12SingleOrder = (doc, order) => {
   let formattedRegionBill = `${bill.region}, ${bill.zipcode}, ${bill.country}`;
 
   outer.push([ship.name + "\n" + formattedStreetShip + "\n" + formattedRegionShip + "\n" + order.phone, bill.name + "\n" + formattedStreetBill + "\n" + formattedRegionBill + "\n" + order.phone]);
-  // outer.push([ship.name, bill.name]);
-  // outer.push([formattedStreetShip, formattedStreetBill]);
-  // outer.push([formattedRegionShip, formattedRegionBill]);
-  // outer.push([order.phone, order.phone]);
+
   doc.autoTable({
     head: [["Addresse de Livraison", "Addresse de Facturation"]],
     body: outer,
@@ -941,7 +875,7 @@ export const getReport12SingleOrder = (doc, order) => {
       type = "Pour Emporter/Pickup";
   }
   doc.line(20, doc.lastAutoTable.finalY + 8, 180, doc.lastAutoTable.finalY + 8);
-  var adjustedData = moment.unix(order.createdAt.seconds).format("MM/DD/YYYY");
+  var adjustedData = moment.unix(order.createdAt.seconds).format("DD/MM/YYYY");
   doc.autoTable({
     head: [["Référence de commande", "Date de commande", "Transporteur"]],
     body: [[order.number, adjustedData, type]],
@@ -978,17 +912,14 @@ export const getReport12SingleOrder = (doc, order) => {
   let last = doc.lastAutoTable.finalY;
 
   const checkLastLocation = () => {
-    // console.log("curr", last);
     if (last > 245) {
       console.log("in fun", last);
       doc.addPage();
       last = 20;
     }
   };
-  // console.log(last);
   last += 12;
   checkLastLocation();
-  // console.log("2", last);
 
   doc.rect(20, last, 110, 15, "S");
   last += 6;
@@ -1009,24 +940,26 @@ export const getReport12SingleOrder = (doc, order) => {
   doc.setFont(undefined, "bold").text("Votre date de livraison", 20, last).setFont(undefined, "normal");
   last += 5;
   doc.text(20, last, moment.unix(order.startTime.seconds).format("MM/DD/YYYY"));
+  if (order.hasOwnProperty("fullCustomerNote")) {
+    last += 7;
+    checkLastLocation();
+    doc.setFont(undefined, "bold").text("Note de client", 20, last).setFont(undefined, "normal");
+    last += 5;
+    doc.text(20, last, order.fullCustomerNote);
+  }
 };
 
 export const getReport13SingleOrder = (doc, order) => {
-  // const doc = new jsPDF({ orientation: "p", lineHeight: 1.5 });
-
   let pageWidth = doc.internal.pageSize.width;
   let img = new Image();
   img.src = apdc_logo_banner;
   doc.addImage(img, "png", 22, 16, pageWidth - 40, 15);
   let img0 = new Image();
   img0.src = boutique_banner;
-  // doc.addImage(img0, "png", 64, 27, 90, 15);
   doc.setFont("ArialMS");
   doc.setTextColor(64, 64, 64);
   doc.setFontSize(12);
-  let img2 = new Image();
-  img2.src = cochon_cart;
-  doc.addImage(img2, "png", 150, 45, 40, 40);
+
   let ship = order.shippingAddress;
   let bill = order.billingAddress;
   let wantedTableWidth = 130;
@@ -1038,10 +971,7 @@ export const getReport13SingleOrder = (doc, order) => {
   let formattedRegionBill = `${bill.region}, ${bill.zipcode}, ${bill.country}`;
 
   outer.push([ship.name + "\n" + formattedStreetShip + "\n" + formattedRegionShip + "\n" + order.phone, bill.name + "\n" + formattedStreetBill + "\n" + formattedRegionBill + "\n" + order.phone]);
-  // outer.push([ship.name, bill.name]);
-  // outer.push([formattedStreetShip, formattedStreetBill]);
-  // outer.push([formattedRegionShip, formattedRegionBill]);
-  // outer.push([order.phone, order.phone]);
+
   doc.autoTable({
     head: [["Addresse de Livraison", "Addresse de Facturation"]],
     body: outer,
@@ -1063,10 +993,117 @@ export const getReport13SingleOrder = (doc, order) => {
       type = "Pour Emporter/Pickup";
   }
   doc.line(20, doc.lastAutoTable.finalY + 8, 180, doc.lastAutoTable.finalY + 8);
-  var adjustedData = moment.unix(order.createdAt.seconds).format("MM/DD/YYYY");
+  var adjustedData = moment.unix(order.createdAt.seconds).format("DD/MM/YYYY");
   doc.autoTable({
     head: [["Référence de commande", "Date de commande", "Transporteur"]],
     body: [[order.number, adjustedData, type]],
+    startY: doc.lastAutoTable.finalY + 10,
+    theme: "plain",
+    margin: { left: margin - 20 },
+    styles: {
+      minCellHeight: 0,
+      rowHeight: 0,
+    },
+    headStyles: { fillColor: false, textColor: [64, 64, 64] },
+  });
+
+  doc.line(20, doc.lastAutoTable.finalY + 3, 180, doc.lastAutoTable.finalY + 3);
+
+  // get All products and quantities
+  let inner = [];
+  order.products.forEach((item) => {
+    inner.push([item.productTitle, item.quantityOrdered]);
+  });
+
+  doc.autoTable({
+    head: [["Produit", "Quantité"]],
+    body: inner,
+    startY: doc.lastAutoTable.finalY + 15,
+    // theme: "plain",
+    margin: { left: margin, right: margin },
+    styles: {
+      minCellHeight: 0,
+      rowHeight: 0,
+      halign: "center",
+    },
+  });
+  let last = doc.lastAutoTable.finalY;
+
+  const checkLastLocation = () => {
+    if (last > 245) {
+      console.log("in fun", last);
+      doc.addPage();
+      last = 20;
+    }
+  };
+  // console.log(last);
+  last += 12;
+  checkLastLocation();
+  // console.log("2", last);
+
+  doc.rect(20, last, 110, 15, "S");
+  last += 6;
+  doc.text(22, last, order.payment.title + "\n" + order.payment.data.method);
+  doc.text(95, last, "$" + order.totalPrice + " CAD");
+  last += 18;
+  checkLastLocation();
+  doc.setFont(undefined, "bold").text("Point de Chute", 20, last).setFont(undefined, "normal");
+  last += 5;
+  doc.text(20, last, order.shipmentTitle);
+  last += 7;
+  checkLastLocation();
+  doc.setFont(undefined, "bold").text("Votre date de récupération", 20, last).setFont(undefined, "normal");
+  last += 5;
+  doc.text(20, last, moment.unix(order.startTime.seconds).format("MM/DD/YYYY"));
+  if (order.hasOwnProperty("fullCustomerNote")) {
+    last += 7;
+    checkLastLocation();
+    doc.setFont(undefined, "bold").text("Note de client", 20, last).setFont(undefined, "normal");
+    last += 5;
+    doc.text(20, last, order.fullCustomerNote);
+  }
+};
+
+export const getReport14SingleOrder = (doc, order) => {
+  let pageWidth = doc.internal.pageSize.width;
+  let img = new Image();
+  img.src = apdc_logo_banner;
+  doc.addImage(img, "png", 22, 16, pageWidth - 40, 15);
+  let img0 = new Image();
+  img0.src = boutique_banner;
+  doc.setFont("ArialMS");
+  doc.setTextColor(64, 64, 64);
+  doc.setFontSize(12);
+
+  let ship = order.shippingAddress;
+  let bill = order.billingAddress;
+  let wantedTableWidth = 130;
+  let margin = (pageWidth - wantedTableWidth) / 2;
+  let outer = [];
+  let formattedStreetShip = ship.street + " " + ship.street2 + " " + ship.number;
+  let formattedStreetBill = bill.street + " " + bill.street2 + " " + ship.number;
+  let formattedRegionShip = `${ship.region}, ${ship.zipcode}, ${ship.country}`;
+  let formattedRegionBill = `${bill.region}, ${bill.zipcode}, ${bill.country}`;
+
+  outer.push([ship.name + "\n" + formattedStreetShip + "\n" + formattedRegionShip + "\n" + order.phone, bill.name + "\n" + formattedStreetBill + "\n" + formattedRegionBill + "\n" + order.phone]);
+  doc.autoTable({
+    head: [["Addresse de Livraison", "Addresse de Facturation"]],
+    body: outer,
+    startY: 50,
+    theme: "plain",
+    margin: { left: margin - 20, right: margin + 20 },
+    styles: {
+      minCellHeight: 0,
+      rowHeight: 0,
+    },
+    headStyles: { fillColor: false, textColor: [64, 64, 64] },
+  });
+
+  doc.line(20, doc.lastAutoTable.finalY + 8, 180, doc.lastAutoTable.finalY + 8);
+  var adjustedData = moment.unix(order.createdAt.seconds).format("DD/MM/YYYY");
+  doc.autoTable({
+    head: [["Référence de commande", "Date de commande", "Transporteur"]],
+    body: [[order.number, adjustedData, "Envoi Postal"]],
     startY: doc.lastAutoTable.finalY + 10,
     theme: "plain",
     margin: { left: margin - 20 },
@@ -1118,19 +1155,16 @@ export const getReport13SingleOrder = (doc, order) => {
   doc.text(95, last, "$" + order.totalPrice + " CAD");
   last += 18;
   checkLastLocation();
-  doc.setFont(undefined, "bold").text("Point de Chute", 20, last).setFont(undefined, "normal");
+  doc.setFont(undefined, "bold").text("Date de Commande", 20, last).setFont(undefined, "normal");
   last += 5;
-  doc.text(20, last, order.shipmentTitle);
-  // last += 7;
-  // checkLastLocation();
-  // doc.setFont(undefined, "bold").text("Livreur", 20, last).setFont(undefined, "normal");
-  // last += 5;
-  // doc.text(20, last, order.driver + " / #" + order.stopNumber);
-  last += 7;
-  checkLastLocation();
-  doc.setFont(undefined, "bold").text("Votre date de récupération", 20, last).setFont(undefined, "normal");
-  last += 5;
-  doc.text(20, last, moment.unix(order.startTime.seconds).format("MM/DD/YYYY"));
+  doc.text(20, last, moment.unix(order.createdAt.seconds).format("MM/DD/YYYY"));
+  if (order.hasOwnProperty("fullCustomerNote")) {
+    last += 7;
+    checkLastLocation();
+    doc.setFont(undefined, "bold").text("Note de client", 20, last).setFont(undefined, "normal");
+    last += 5;
+    doc.text(20, last, order.fullCustomerNote);
+  }
 };
 
 const getCenteredXCoordinate = (text, doc) => {
@@ -1141,11 +1175,7 @@ const getCenteredXCoordinate = (text, doc) => {
 const addFooter = (doc) => {
   // FOOTER START
   doc.autoTable({
-    // head: [["Au Pied De Cochon - Cabanne à sucre", "Au Pied De Cochon - Restaurant"]],
-    body: [
-      ["Au Pied De Cochon - Cabanne à sucre\n11382 Rang de la Fresnière, St-Benoît de Mirabel, QC J7N 2R9", "Au Pied De Cochon - Restaurant\n536 Av. Duluth Est, Montréal, QC, H2L 1A9"],
-      // ["11382 Rang de la Fresnière, St-Benoît de Mirabel, QC J7N 2R9", "536 Av. Duluth Est, Montréal, QC, H2L 1A9"],
-    ],
+    body: [["Au Pied De Cochon - Cabanne à sucre\n11382 Rang de la Fresnière, St-Benoît de Mirabel, QC J7N 2R9", "Au Pied De Cochon - Restaurant\n536 Av. Duluth Est, Montréal, QC, H2L 1A9"]],
     startY: 252, //last + 116,
     theme: "plain",
     styles: {
@@ -1170,7 +1200,9 @@ const addFooter = (doc) => {
 
 export const getReport12File = (orders) => {
   const doc = new jsPDF("portait", "mm", "letter");
-  // var doc = new jsPDF("p", "mm", "a4");
+
+  // sort orders by stop number
+  orders.sort((a, b) => parseFloat(a.stopNumber) - parseFloat(b.stopNumber));
 
   for (const [i, order] of orders.entries()) {
     if (i === orders.length - 1) {
@@ -1217,12 +1249,20 @@ export const getReport12File = (orders) => {
   doc.save(fileName);
   blob.name = fileName;
 
-  window.open(URL.createObjectURL(blob));
+  // window.open(URL.createObjectURL(blob));
 
   return true;
 };
+
 export const getReport13File = (orders) => {
   const doc = new jsPDF("portait", "mm", "letter");
+
+  // sort orders by lastname
+  orders.sort((a, b) => {
+    const textA = a.lastname.toUpperCase();
+    const textB = b.lastname.toUpperCase();
+    return textA < textB ? -1 : textA > textB ? 1 : 0;
+  });
 
   for (const [i, order] of orders.entries()) {
     if (i === orders.length - 1) {
@@ -1246,218 +1286,44 @@ export const getReport13File = (orders) => {
   doc.save(fileName);
   blob.name = fileName;
 
-  window.open(URL.createObjectURL(blob));
+  // window.open(URL.createObjectURL(blob));
 
   return true;
 };
 
-export const getReport12SinglePageOLDHTML = (orderDetails) => {
-  return (
-    <div
-      id={"rep" + orderDetails.id}
-      key={orderDetails.id}
-      style={{
-        height: 792,
-        width: 612,
-        padding: "none",
-        backgroundColor: "white",
-        boxShadow: "5px 5px 5px black",
-        margin: "auto",
-        overflowX: "hidden",
-        overflowY: "hidden",
-        position: "relative",
-        textAlign: "left",
-      }}
-    >
-      {/* <p style={{marginTop:'20px', textAlign:'center', fontFamily:"cursive", fontSize:'50px'}}>Au Pied De Cochon</p> */}
-      <img style={{ marginTop: "30px", width: "600px" }} src={apdc_logo_banner}></img>
-      {/* <img style={{marginTop:'20px'}} src={apdc_logo}></img> */}
-      {/* <hr style={{marginTop:'20px',height: '0.1px', marginLeft: "90px",width:'70%',textAlign:'left'}}></hr>
-    <h2 style={{marginTop:'-10px', textAlign: 'center'}}><pre>A U  P I E D  D E  C O C H O N</pre></h2>
-    <hr style={{marginTop:'-10px', marginLeft: "90px",width:'70%',textAlign:'left'}}></hr> */}
+export const getReport14File = (orders) => {
+  const doc = new jsPDF("portait", "mm", "letter");
 
-      <br></br>
-      <br></br>
-      <div style={{ marginLeft: "60px" }}>
-        <div
-          style={{
-            position: "static",
-            width: "80%",
-            padding: "0",
-            margin: "0",
-          }}
-        >
-          <div style={{ display: "block", float: "left" }}>
-            <p>
-              <b>Adresses de livraison et facturation</b>
-            </p>
-            <span>{orderDetails.firstname}</span>
-            {/* <span>First Last Name</span> */}
-            <div style={{ marginTop: "-4px" }}></div>
-            <span>address1</span>
-            <div style={{ marginTop: "-4px" }}></div>
-            <span>address2</span>
-            <div style={{ marginTop: "-4px" }}></div>
-            <span>city</span>
-            <div style={{ marginTop: "-4px" }}></div>
-            <span>country</span>
-            <div style={{ marginTop: "-4px" }}></div>
-            <span> phone number</span>
-          </div>
-          <div style={{ display: "block", float: "right" }}>
-            <img style={{ width: "130px", height: "130px" }} src={cochon_cart}></img>
-          </div>
-        </div>
-        <br></br>
-        <br></br>
-        <br></br>
-        <br></br>
-        <br></br>
-        <br></br>
-        <br></br>
-        <hr style={{ width: "88%", textAlign: "left", marginLeft: "0" }}></hr>
+  // sort orders by lastname
+  orders.sort((a, b) => {
+    const textA = a.lastname.toUpperCase();
+    const textB = b.lastname.toUpperCase();
+    return textA < textB ? -1 : textA > textB ? 1 : 0;
+  });
 
-        <div
-          style={{
-            content: "",
-            display: "table",
-            clear: "both",
-            width: "100%",
-          }}
-        >
-          <div style={{ float: "left", width: "33.33%" }}>
-            <b>Ref de commande</b>
-          </div>
-          <div style={{ float: "left", width: "33.33%" }}>
-            <b>Date de commande</b>
-          </div>
-          <div style={{ float: "left", width: "33.33%" }}>
-            <b>Transporteur</b>
-          </div>
-        </div>
+  for (const [i, order] of orders.entries()) {
+    if (i === orders.length - 1) {
+      getReport14SingleOrder(doc, order);
+    } else {
+      // only add a page if there are remaining orders
+      getReport14SingleOrder(doc, order);
+      doc.addPage();
+    }
+  }
 
-        <div
-          style={{
-            content: "",
-            display: "table",
-            clear: "both",
-            width: "100%",
-            marginLeft: "10px",
-          }}
-        >
-          <div style={{ float: "left", width: "33.33%" }}>commande #</div>
-          <div style={{ float: "left", width: "33.33%" }}>date commande</div>
-          <div style={{ float: "left", width: "33.33%" }}>Livraison/Delivery</div>
-        </div>
-        <hr style={{ width: "88%", textAlign: "left", marginLeft: "0" }}></hr>
+  const pageCount = doc.internal.getNumberOfPages();
 
-        {/* <br></br> */}
-        <hr
-          style={{
-            width: "88%",
-            textAlign: "left",
-            marginLeft: "0",
-            marginTop: "10px",
-          }}
-        ></hr>
+  for (var i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    addFooter(doc);
+  }
 
-        <div
-          style={{
-            content: "",
-            display: "table",
-            clear: "both",
-            width: "100%",
-          }}
-        >
-          <div style={{ float: "left", width: "50%" }}>
-            <b>Produit #</b>
-          </div>
-          <div style={{ float: "left", width: "50%" }}>
-            <b>Quantité</b>
-          </div>
-        </div>
+  var blob = doc.output("blob");
+  const fileName = getFilenameByDate("14", "pdf");
+  doc.save(fileName);
+  blob.name = fileName;
 
-        <div
-          style={{
-            content: "",
-            display: "table",
-            clear: "both",
-            width: "100%",
-            marginLeft: "10px",
-          }}
-        >
-          <div style={{ float: "left", width: "50%" }}>product description</div>
-          <div style={{ float: "left", width: "50%" }}>qty</div>
-        </div>
-        <hr style={{ width: "88%", textAlign: "left", marginLeft: "0" }}></hr>
-        {/* <br></br> */}
-        <div style={{ width: "400px", height: "60px", border: "1px solid #000" }}>
-          Payment type
-          <br></br>
-          Total CAD $
-        </div>
+  // window.open(URL.createObjectURL(blob));
 
-        <br></br>
-        <span style={{ fontSize: "12px" }}>
-          <b>ZONE DE LIVRAISON</b>
-        </span>
-        <div style={{ marginTop: "-6px" }}></div>
-        <span style={{ fontSize: "12px" }}>Zone: Zone #: Zone name</span>
-        <div style={{ marginTop: "2px" }}></div>
-        <span style={{ fontSize: "12px" }}>
-          <b>LIVREUR</b>
-        </span>
-        <div style={{ marginTop: "-6px" }}></div>
-        <span style={{ fontSize: "12px" }}>Livreur #/##</span>
-        <div style={{ marginTop: "2px" }}></div>
-        <span style={{ fontSize: "12px" }}>
-          <b>VOTRE DATE DE LIVRAISON</b>
-        </span>
-        <div style={{ marginTop: "-6px" }}></div>
-        <span style={{ fontSize: "12px" }}>YYYY-MM-DD</span>
-        <br></br>
-        <br></br>
-        <div style={{ position: "absolute", bottom: "20px", width: "100%" }}>
-          <div
-            style={{
-              content: "",
-              display: "table",
-              clear: "both",
-              width: "100%",
-            }}
-          >
-            <div style={{ float: "left", width: "50%" }}>
-              <span style={{ fontSize: "8px", marginLeft: "35px" }}>
-                <b>Au Pied De Cochon - Cabanne à sucre</b>
-              </span>
-              <div style={{ marginTop: "-10px" }}></div>
-              <span style={{ fontSize: "8px" }}>11382 Rang de la Fresnière, St-Benoît de Mirabel, QC J7N 2R9</span>
-            </div>
-            <div style={{ float: "left", width: "50%" }}>
-              <span style={{ fontSize: "8px", marginLeft: "15px" }}>
-                <b>Au Pied De Cochon - Restaurant</b>
-              </span>
-              <div style={{ marginTop: "-10px" }}></div>
-              <span style={{ fontSize: "8px" }}>536 Av. Duluth Est, Montréal, QC, H2L 1A9</span>
-            </div>
-          </div>
-          <div style={{ marginRight: "100px", textAlign: "center" }}>
-            <span style={{ width: "100%", fontSize: "6px", marginLeft: "0px" }}>
-              Ce projet a été financé par le ministère de l’Agriculture, des Pêcheries et de l’Alimentation, dans le cadre du programme Transformation alimentaire : robotisation et système de qualité.
-            </span>
-            <br></br>
-            <img
-              style={{
-                marginTop: "0px",
-                marginLeft: "-40px",
-                width: "100px",
-                height: "20px",
-              }}
-              src={qc_logo}
-            ></img>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return true;
 };

@@ -2,15 +2,15 @@ import React, { useState, useEffect } from "react";
 import TRANSLATIONS from "../../constants/translation";
 import SemanticDatepicker from "react-semantic-ui-datepickers";
 import "react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css";
-import * as XLSX from "xlsx";
-import { Header, Divider, Button, Dropdown, Message, Icon, Input } from "semantic-ui-react";
+import { Header, Divider, Button, Dropdown, Message, Icon } from "semantic-ui-react";
+import axios from "axios";
 
 const { getInitialDate } = require("../../Util/HelperFunctions");
 const { getReport6File } = require("../../Util/CreateReportFile");
 
 function Report6(props) {
-  const { dark, language } = props;
-  const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
+  const { language } = props;
+  const { REPORTS } = TRANSLATIONS[`${language}`];
 
   const [report6Values, setReport6Values] = useState({
     deliveryZone: "",
@@ -43,13 +43,6 @@ function Report6(props) {
       // await props.firebase.saveReportToFirebase(file);
       props.setReportValues(file);
       props.nextStep();
-
-      // var fileURL = window.URL.createObjectURL(file);
-      // let tab = window.open();
-      // tab.location.href = fileURL;
-      // tab.onload = function () {
-      //   this.document.title = "your new title";
-      // };
     } else {
       setError(true);
       setSuccess(false);
@@ -91,15 +84,15 @@ function Report6(props) {
         label="Order Status"
         selection
         size="large"
-        options={REPORTS.orderStatus}
+        options={props.orderStatusOptions}
         // icon="clipboard outline"
         value={report6Values.orderStatus}
         onChange={onChange}
       />
       <Header as="h3">Delivery Zone</Header>
-      <Dropdown placeholder="Delivery Zone" name="deliveryZone" label="Delivery Zone" selection size="large" options={REPORTS.deliveryZoneWithoutAny} value={report6Values.deliveryZone} onChange={onChange} />
+      <Dropdown placeholder="Delivery Zone" name="deliveryZone" label="Delivery Zone" selection size="large" options={props.deliveryZoneOptions} value={report6Values.deliveryZone} onChange={onChange} />
       <Header as="h3">Category</Header>
-      <Dropdown placeholder="Category" name="category" label="Category" selection size="large" options={REPORTS.category} value={report6Values.category} onChange={onChange} />
+      <Dropdown placeholder="Category" name="category" label="Category" selection size="large" options={props.categoryOptions} value={report6Values.category} onChange={onChange} />
       <Header as="h3">Date of Delivery</Header>
       <SemanticDatepicker showToday autoComplete="off" name="startDate" size="large" onChange={onChange} value={getInitialDate(report6Values.startDate)} />
       <Divider />

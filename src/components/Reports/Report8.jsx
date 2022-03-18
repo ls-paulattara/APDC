@@ -9,8 +9,8 @@ const { getInitialDate } = require("../../Util/HelperFunctions");
 const { getReport8or11File } = require("../../Util/CreateReportFile");
 
 function Report8(props) {
-  const { dark, language } = props;
-  const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
+  const { language } = props;
+  const { REPORTS } = TRANSLATIONS[`${language}`];
 
   const [report8Values, setreport8Values] = useState({
     orderStatus: "",
@@ -77,7 +77,7 @@ function Report8(props) {
         label="Order Status"
         selection
         size="large"
-        options={REPORTS.orderStatus}
+        options={props.orderStatusOptions}
         // icon="clipboard outline"
         value={report8Values.orderStatus}
         onChange={onChange}
@@ -89,7 +89,7 @@ function Report8(props) {
         label="Category"
         selection
         size="large"
-        options={REPORTS.category}
+        options={props.categoryOptions}
         // icon="clipboard outline"
         value={report8Values.category}
         onChange={onChange}

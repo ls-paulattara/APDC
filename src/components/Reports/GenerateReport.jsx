@@ -16,18 +16,24 @@ import Report10 from "./Report10";
 import Report11 from "./Report11";
 import Report12 from "./Report12";
 import Report13 from "./Report13";
+import Report14 from "./Report14";
 import ListOfReports from "./ListOfReports";
 import DisplayReport from "./DisplayReport";
 import { Segment, Container, Icon, Step, Header, Divider } from "semantic-ui-react";
+const { getDeliveryZonesWithAny, getPickupPointsWithAny, getCategories, getOrderStatus } = require("../../Util/HelperFunctions");
 
 function GenerateReport(props) {
   // const { HOME } = TRANSLATIONS[`${language}`];
   const { dark, language } = props;
-  const { REPORTS, HOME } = TRANSLATIONS[`${language}`];
+  const { HOME } = TRANSLATIONS[`${language}`];
 
   const [step, setStep] = useState(1);
   const [selectedReport, setSelectedReport] = useState(0);
   const [reportValues, setReportValues] = useState({});
+  const [deliveryZoneOptions, setDeliveryZoneOptions] = useState([]);
+  const [pickupPointOptions, setPickupPointOptions] = useState([]);
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [orderStatusOptions, setOrderStatusOptions] = useState([]);
 
   const nextStep = () => {
     setStep(step + 1);
@@ -38,17 +44,25 @@ function GenerateReport(props) {
     }
   };
 
+  useEffect(async () => {
+    // await props.firebase.getIsBooked(11515624);
+    setDeliveryZoneOptions(await getDeliveryZonesWithAny(props.firebase));
+    setPickupPointOptions(await getPickupPointsWithAny(props.firebase));
+    setCategoryOptions(await getCategories());
+    setOrderStatusOptions(await getOrderStatus());
+  }, []);
+
   useEffect(() => {
     const step = JSON.parse(localStorage.getItem("step"));
     const selectedReport = JSON.parse(localStorage.getItem("selectedReport"));
 
-    if (step) {
-      if (step == 3) {
-        setStep(2);
-      } else {
-        setStep(step);
-      }
-    }
+    // if (step) {
+    //   if (step === 3) {
+    //     setStep(2);
+    //   } else {
+    //     setStep(step);
+    //   }
+    // }
     if (selectedReport) {
       setSelectedReport(selectedReport);
     }
@@ -74,7 +88,7 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report1}</Header>
                 <Divider />
-                <Report1 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
+                <Report1 {...props} orderStatusOptions={orderStatusOptions} deliveryZoneOptions={deliveryZoneOptions} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
               </>
             );
           case 2:
@@ -82,7 +96,7 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report2}</Header>
                 <Divider />
-                <Report2 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
+                <Report2 {...props} orderStatusOptions={orderStatusOptions} pickupPointOptions={pickupPointOptions} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
               </>
             );
           case 3:
@@ -90,7 +104,7 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report3}</Header>
                 <Divider />
-                <Report3 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
+                <Report3 {...props} orderStatusOptions={orderStatusOptions} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
               </>
             );
           case 4:
@@ -98,7 +112,17 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report4}</Header>
                 <Divider />
-                <Report4 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
+                <Report4
+                  {...props}
+                  orderStatusOptions={orderStatusOptions}
+                  deliveryZoneOptions={deliveryZoneOptions}
+                  prevStep={prevStep}
+                  nextStep={nextStep}
+                  setSelectedReport={setSelectedReport}
+                  setReportValues={setReportValues}
+                  setStep={setStep}
+                  dark={dark}
+                />
               </>
             );
           case 5:
@@ -106,7 +130,7 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report5}</Header>
                 <Divider />
-                <Report5 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} setStep={setStep} dark={dark} />
+                <Report5 {...props} orderStatusOptions={orderStatusOptions} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} setStep={setStep} dark={dark} />
               </>
             );
           case 6:
@@ -114,7 +138,17 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report6}</Header>
                 <Divider />
-                <Report6 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
+                <Report6
+                  {...props}
+                  orderStatusOptions={orderStatusOptions}
+                  deliveryZoneOptions={deliveryZoneOptions}
+                  categoryOptions={categoryOptions}
+                  prevStep={prevStep}
+                  nextStep={nextStep}
+                  setSelectedReport={setSelectedReport}
+                  setReportValues={setReportValues}
+                  dark={dark}
+                />
               </>
             );
           case 7:
@@ -122,7 +156,7 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report7}</Header>
                 <Divider />
-                <Report7 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
+                <Report7 {...props} orderStatusOptions={orderStatusOptions} categoryOptions={categoryOptions} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
               </>
             );
           case 8:
@@ -130,7 +164,7 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report8}</Header>
                 <Divider />
-                <Report8 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
+                <Report8 {...props} orderStatusOptions={orderStatusOptions} categoryOptions={categoryOptions} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
               </>
             );
           case 9:
@@ -138,7 +172,17 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report9}</Header>
                 <Divider />
-                <Report9 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
+                <Report9
+                  {...props}
+                  orderStatusOptions={orderStatusOptions}
+                  pickupPointOptions={pickupPointOptions}
+                  categoryOptions={categoryOptions}
+                  prevStep={prevStep}
+                  nextStep={nextStep}
+                  setSelectedReport={setSelectedReport}
+                  setReportValues={setReportValues}
+                  dark={dark}
+                />
               </>
             );
           case 10:
@@ -146,7 +190,17 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report10}</Header>
                 <Divider />
-                <Report10 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
+                <Report10
+                  {...props}
+                  orderStatusOptions={orderStatusOptions}
+                  deliveryZoneOptions={deliveryZoneOptions}
+                  categoryOptions={categoryOptions}
+                  prevStep={prevStep}
+                  nextStep={nextStep}
+                  setSelectedReport={setSelectedReport}
+                  setReportValues={setReportValues}
+                  dark={dark}
+                />
               </>
             );
           case 11:
@@ -154,7 +208,7 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report11}</Header>
                 <Divider />
-                <Report11 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
+                <Report11 {...props} orderStatusOptions={orderStatusOptions} categoryOptions={categoryOptions} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
               </>
             );
           case 12:
@@ -162,7 +216,17 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report12}</Header>
                 <Divider />
-                <Report12 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} setStep={setStep} dark={dark} />
+                <Report12
+                  {...props}
+                  orderStatusOptions={orderStatusOptions}
+                  deliveryZoneOptions={deliveryZoneOptions}
+                  prevStep={prevStep}
+                  nextStep={nextStep}
+                  setSelectedReport={setSelectedReport}
+                  setReportValues={setReportValues}
+                  setStep={setStep}
+                  dark={dark}
+                />
               </>
             );
           case 13:
@@ -170,7 +234,25 @@ function GenerateReport(props) {
               <>
                 <Header as="h2">{HOME.report13}</Header>
                 <Divider />
-                <Report13 {...props} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} setStep={setStep} dark={dark} />
+                <Report13
+                  {...props}
+                  orderStatusOptions={orderStatusOptions}
+                  pickupPointOptions={pickupPointOptions}
+                  prevStep={prevStep}
+                  nextStep={nextStep}
+                  setSelectedReport={setSelectedReport}
+                  setReportValues={setReportValues}
+                  setStep={setStep}
+                  dark={dark}
+                />
+              </>
+            );
+          case 14:
+            return (
+              <>
+                <Header as="h2">{HOME.report14}</Header>
+                <Divider />
+                <Report14 {...props} orderStatusOptions={orderStatusOptions} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} setStep={setStep} dark={dark} />
               </>
             );
         }
@@ -212,7 +294,7 @@ function GenerateReport(props) {
               </Step.Content>
             </Step>
 
-            <Step active={step === 3} disabled={(selectedReport === 5 || selectedReport == 12 || selectedReport == 13) && step === 2}>
+            <Step active={step === 3} disabled={(selectedReport === 4 || selectedReport === 5 || selectedReport === 12 || selectedReport === 13) && step === 2}>
               <Icon name="numbered list" />
               <Step.Content>
                 <Step.Title>Step 3: View Report</Step.Title>

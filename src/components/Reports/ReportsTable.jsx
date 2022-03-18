@@ -1,21 +1,11 @@
 import React, { useState, useLayoutEffect, useEffect } from "react";
 import _ from "lodash";
-import {
-  Header,
-  Container,
-  Table,
-  Segment,
-  Divider,
-  Icon,
-  Button,
-  Message,
-  Card,
-} from "semantic-ui-react";
+import { Header, Container, Table, Segment, Divider, Icon, Button, Message, Card } from "semantic-ui-react";
 
 import { isMobileOnly } from "react-device-detect";
 
 function ReportsTable(props) {
-  const { dark, language } = props;
+  const { dark } = props;
 
   const [documents, setDocuments] = useState([]);
   const [error, setError] = useState(false);
@@ -134,29 +124,16 @@ function ReportsTable(props) {
         <Table.Header>
           <Table.Row>
             {!isMobileOnly && (
-              <Table.HeaderCell
-                sorted={column === "contentType" ? direction : null}
-                onClick={onSort}
-                data-name={"contentType"}
-              >
+              <Table.HeaderCell sorted={column === "contentType" ? direction : null} onClick={onSort} data-name={"contentType"}>
                 <Icon name="file outline" />
                 Type
               </Table.HeaderCell>
             )}
-            <Table.HeaderCell
-              sorted={column === "name" ? direction : null}
-              onClick={onSort}
-              data-name={"name"}
-            >
+            <Table.HeaderCell sorted={column === "name" ? direction : null} onClick={onSort} data-name={"name"}>
               <Icon name="tag" />
               File Name
             </Table.HeaderCell>
-            <Table.HeaderCell
-              sorted={column === "timeCreated" ? direction : null}
-              onClick={onSort}
-              data-name={"timeCreated"}
-              textAlign="center"
-            >
+            <Table.HeaderCell sorted={column === "timeCreated" ? direction : null} onClick={onSort} data-name={"timeCreated"} textAlign="center">
               <Icon name="calendar alternate outline" />
               Date
             </Table.HeaderCell>
@@ -172,29 +149,14 @@ function ReportsTable(props) {
               <Table.Row key={document.name}>
                 {!isMobileOnly && (
                   <Table.Cell>
-                    <Icon
-                      name={
-                        document.name.split(".").pop() === "pdf"
-                          ? "file pdf outline"
-                          : "file outline"
-                      }
-                    />
+                    <Icon name={document.name.split(".").pop() === "pdf" ? "file pdf outline" : "file outline"} />
                     {document.name.split(".").pop()}
                   </Table.Cell>
                 )}
-                <Table.Cell>
-                  {document.name.split(".").slice(0, -1).join(" ")}
-                </Table.Cell>
+                <Table.Cell>{document.name.split(".").slice(0, -1).join(" ")}</Table.Cell>
+                <Table.Cell textAlign="center">{new Date(document.timeCreated).toLocaleDateString()}</Table.Cell>
                 <Table.Cell textAlign="center">
-                  {new Date(document.timeCreated).toLocaleDateString()}
-                </Table.Cell>
-                <Table.Cell textAlign="center">
-                  <Button
-                    positive
-                    fileref={document.fullPath}
-                    filename={document.name}
-                    onClick={downloadFile}
-                  >
+                  <Button positive fileref={document.fullPath} filename={document.name} onClick={downloadFile}>
                     Download
                   </Button>
                 </Table.Cell>
@@ -214,35 +176,15 @@ function ReportsTable(props) {
           return (
             <Card key={document.name} raised inverted={dark ? "true" : "false"}>
               <div style={{ textAlign: "center" }}>
-                <Icon
-                  color="black"
-                  name={
-                    document.name.split(".").pop() === "pdf"
-                      ? "file pdf outline"
-                      : "file outline"
-                  }
-                  size="massive"
-                  style={{ marginBottom: "0.3em", marginTop: "0.3em" }}
-                />
+                <Icon color="black" name={document.name.split(".").pop() === "pdf" ? "file pdf outline" : "file outline"} size="massive" style={{ marginBottom: "0.3em", marginTop: "0.3em" }} />
               </div>
 
               <Card.Content>
-                <Card.Header>
-                  {document.name.split(".").slice(0, -1).join(" ")}
-                </Card.Header>
-                <Card.Meta>
-                  Date Added:{" "}
-                  {new Date(document.timeCreated).toLocaleDateString()}
-                </Card.Meta>
+                <Card.Header>{document.name.split(".").slice(0, -1).join(" ")}</Card.Header>
+                <Card.Meta>Date Added: {new Date(document.timeCreated).toLocaleDateString()}</Card.Meta>
               </Card.Content>
               <Card.Content extra>
-                <Button
-                  positive
-                  fluid
-                  fileref={document.fullPath}
-                  filename={document.name}
-                  onClick={downloadFile}
-                >
+                <Button positive fluid fileref={document.fullPath} filename={document.name} onClick={downloadFile}>
                   Download
                 </Button>
               </Card.Content>
@@ -261,30 +203,9 @@ function ReportsTable(props) {
         {error && <Message error content={error.message} />}
         {/* <Divider inverted={dark} /> */}
       </Segment>
-      <Segment
-        fluid="true"
-        basic
-        loading={loading}
-        inverted={dark}
-        style={{ minHeight: "50vh", margin: 0 }}
-      >
-        {!isMobileOnly && sorted && (
-          <DocumentTable
-            dark={dark}
-            sorted={sorted}
-            column={column}
-            direction={direction}
-            onSort={onSort}
-            downloadFile={downloadFile}
-          />
-        )}
-        {isMobileOnly && sorted && (
-          <DocumentCards
-            dark={dark}
-            sorted={sorted}
-            downloadFile={downloadFile}
-          />
-        )}
+      <Segment fluid="true" basic loading={loading} inverted={dark} style={{ minHeight: "50vh", margin: 0 }}>
+        {!isMobileOnly && sorted && <DocumentTable dark={dark} sorted={sorted} column={column} direction={direction} onSort={onSort} downloadFile={downloadFile} />}
+        {isMobileOnly && sorted && <DocumentCards dark={dark} sorted={sorted} downloadFile={downloadFile} />}
       </Segment>
       <Divider hidden />
     </Container>
