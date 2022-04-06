@@ -40,11 +40,11 @@ Front-End
 
 1. Navigate to the root of the project.
 2. ```npm run build```
-3. firebase deploy --only hosting:au-pied-de-cochon
+3. ```firebase deploy --only hosting:au-pied-de-cochon```
 
 Back-End
 
-1.  firebase deploy --only functions:apdc_api
+1.  ```firebase deploy --only functions:apdc_api```
 
 ### Objective
 
