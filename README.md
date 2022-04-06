@@ -32,9 +32,9 @@ To run the project locally, the following steps are needed:
 
 1. ```npm run start```
 2. Navigate to localhost:3000
-To deploy changes made, the following steps are needed:
 
 ### Deploy Changes
+To deploy changes made, the following steps are needed:
 
 Front-End
 
