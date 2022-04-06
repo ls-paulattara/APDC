@@ -1,16 +1,38 @@
 # Au Pied De Cochon Reporting Web App
 
-### Welcome
+### Project Resources
+
+This project is using Firebase for the following:
+- Users Database: Firebase Realtime DB
+- Orders Database: Firebase Firestore DB
+- Locations Database: Firebase Firestore DB
+- Backend: Firebase Functions
+- Reports Storage: Firebase Storage (working but not being used due to customer changing their mind)
+- Hosting: Firebase Hosting
+- This site was created using Firebase as a back-end for authentication, user db, cloud functions, and hosting. O the front-end, React, along with [Semantic UI for React](https://react.semantic-ui.com/)
+
+### Hosting
 
 The web app is deployed using Firebase hosting.
-The official reporting application for the live account (store ID: 648564) is available [here](https://au-pied-de-cochon.web.app/)
-The reporting application for the sandbox account (store ID: 649413) (lots of test data) is available [here](https://ls-strategic-apis.web.app/)
 
-This site was created using Firebase as a back-end for authentication, user db, cloud functions, and hosting. O the front-end, React, along with [Semantic UI for React](https://react.semantic-ui.com/)
+The official reporting application for the live account (store ID: 648564) is available [here](https://au-pied-de-cochon.web.app/).
 
-Public documentation that was shared with the customer can be found [here](https://docs.google.com/document/d/17zrPIYwdgGASc8qpmKXxsTRKmZQr5n6aQxYrBcooDxY/edit?usp=sharing)
+The reporting application for the sandbox account (store ID: 649413) (lots of test data) is available [here](https://ls-strategic-apis.web.app/).
 
+### Documentation
+
+Public documentation that was shared with the customer can be found [here](https://docs.google.com/document/d/17zrPIYwdgGASc8qpmKXxsTRKmZQr5n6aQxYrBcooDxY/edit?usp=sharing).
+
+Internal documentation can be found [here](https://docs.google.com/document/d/183P8aQX4IN49a6kn74GqT35Yyzi8bQklcTWX4UC9d2g/edit?usp=sharing).
+
+### Run Locally
+To run the project locally, the following steps are needed:
+
+1. npm run start
+2. Navigate to localhost:3000
 To deploy changes made, the following steps are needed:
+
+### Deploy Change
 
 Front-End
 
@@ -27,10 +49,6 @@ apdc_api: for the official live account
 apcd_api: for the sandbox account
 Each backend function is linked to its respective frontent (so the live account is using the apdc_api function and the sandbox account is using the apcd_api function)
 
-To run the project, the following steps are needed:
-
-1. npm run start
-2. Navigate to localhost:3000
 
 ### Objective
 
