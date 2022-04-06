@@ -9,6 +9,7 @@ This project is using Firebase for the following:
 - Backend: Firebase Functions
 - Reports Storage: Firebase Storage (working but not being used due to customer changing their mind)
 - Hosting: Firebase Hosting
+- User Authentication for Sign up/Sign in: Firebase Authentication
 
 This Web App was created using Firebase as a back-end for authentication, user db, orders db, cloud functions, and hosting. The front-end was made in [React](https://reactjs.org/), along with [Semantic UI for React](https://react.semantic-ui.com/)
 
@@ -29,7 +30,7 @@ Internal documentation can be found [here](https://docs.google.com/document/d/18
 ### Run Locally
 To run the project locally, the following steps are needed:
 
-1. npm run start
+1. ```npm run start```
 2. Navigate to localhost:3000
 To deploy changes made, the following steps are needed:
 
@@ -38,7 +39,7 @@ To deploy changes made, the following steps are needed:
 Front-End
 
 1. Navigate to the root of the project.
-2. npm run build
+2. ```npm run build```
 3. firebase deploy --only hosting:au-pied-de-cochon
 
 Back-End
