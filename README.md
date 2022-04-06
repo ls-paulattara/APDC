@@ -9,11 +9,12 @@ This project is using Firebase for the following:
 - Backend: Firebase Functions
 - Reports Storage: Firebase Storage (working but not being used due to customer changing their mind)
 - Hosting: Firebase Hosting
-- This site was created using Firebase as a back-end for authentication, user db, cloud functions, and hosting. O the front-end, React, along with [Semantic UI for React](https://react.semantic-ui.com/)
+
+This Web App was created using Firebase as a back-end for authentication, user db, orders db, cloud functions, and hosting. The front-end was made in [React](https://reactjs.org/), along with [Semantic UI for React](https://react.semantic-ui.com/)
 
 ### Hosting
 
-The web app is deployed using Firebase hosting.
+The web app was deployed using Firebase hosting.
 
 The official reporting application for the live account (store ID: 648564) is available [here](https://au-pied-de-cochon.web.app/).
 
@@ -32,7 +33,7 @@ To run the project locally, the following steps are needed:
 2. Navigate to localhost:3000
 To deploy changes made, the following steps are needed:
 
-### Deploy Change
+### Deploy Changes
 
 Front-End
 
@@ -43,12 +44,6 @@ Front-End
 Back-End
 
 1.  firebase deploy --only functions:apdc_api
-
-Deployed Google Cloud Functions for the backend
-apdc_api: for the official live account
-apcd_api: for the sandbox account
-Each backend function is linked to its respective frontent (so the live account is using the apdc_api function and the sandbox account is using the apcd_api function)
-
 
 ### Objective
 
