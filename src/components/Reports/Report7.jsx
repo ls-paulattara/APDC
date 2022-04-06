@@ -28,17 +28,20 @@ function Report7(props) {
   };
 
   const onSubmit = async () => {
-    console.log(report7Values);
-
+    //  console.log(report7Values);
     const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatus(report7Values.startDate, report7Values.endDate, report7Values.orderStatus, report7Values.category);
-    console.log(orderData);
+    //  console.log(orderData);
     if (orderData.length) {
-      setSuccess(true);
-      setError(false);
-      const file = await getReport7or9or10File(orderData, "7", report7Values);
-      // props.firebase.saveReportToFirebase(file);
-      props.setReportValues(file);
-      props.nextStep();
+      try {
+        setSuccess(true);
+        setError(false);
+        const file = await getReport7or9or10File(orderData, "7", report7Values);
+        // props.firebase.saveReportToFirebase(file);
+        props.setReportValues(file);
+        props.nextStep();
+      } catch (e) {
+        setError(true);
+      }
     } else {
       setError(true);
     }
@@ -53,7 +56,7 @@ function Report7(props) {
 
   useEffect(() => {
     localStorage.setItem("report7Values", JSON.stringify(report7Values));
-    console.log(report7Values);
+    //  console.log(report7Values);
   }, [report7Values]);
 
   const getErrorMessage = () => (error ? <Message negative header="No results" content="No results were found. Try again" /> : "");

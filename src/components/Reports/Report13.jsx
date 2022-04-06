@@ -29,43 +29,36 @@ function Report13(props) {
   };
 
   const onSubmit = async () => {
-    console.log(report13Values);
+    //  console.log(report13Values);
     setError(false);
     setSuccess(false);
     setLoading(true);
 
     let orderData = await props.firebase.getAllFirebaseOrdersByDateAndStatus(report13Values.startDate, report13Values.endDate, report13Values.orderStatus, "pickup", report13Values.pickupPoint);
-    console.log(orderData);
+    //  console.log(orderData);
 
-    // Keep only entries with Drivers
-    // orderData = orderData.filter((order) => order.hasOwnProperty("driver"));
-    // console.log("new order data", orderData);
-    // try {
     if (orderData.length) {
-      const res = getReport13File(orderData);
-      if (res) {
+      try {
+        const res = getReport13File(orderData);
+        if (res) {
+          setLoading(false);
+          setSuccess(true);
+          setError(false);
+        }
+      } catch (e) {
         setLoading(false);
-        setSuccess(true);
-        setError(false);
+        setError(true);
       }
-      // else {
-      //   setLoading(false);
-      //   setError(true);
-      // }
     } else {
+      setLoading(false);
       setError(true);
       setSuccess(false);
     }
-    // } catch (err) {
-    //   console.log(err);
-    //   setLoading(false);
-    //   setError(true);
-    // }
   };
 
   useEffect(() => {
     const report13Values = JSON.parse(localStorage.getItem("report13Values"));
-    console.log(report13Values);
+    //  console.log(report13Values);
     if (report13Values) {
       setReport13Values(report13Values);
     }
@@ -73,7 +66,7 @@ function Report13(props) {
 
   useEffect(() => {
     localStorage.setItem("report13Values", JSON.stringify(report13Values));
-    console.log(report13Values);
+    //  console.log(report13Values);
   }, [report13Values]);
 
   const getErrorMessage = () => (error ? <Message negative header="No results" content="No results were found. Try again" /> : "");

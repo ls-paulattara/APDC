@@ -2,9 +2,35 @@
 
 ### Welcome
 
-The web app is deployed using Firebase hosting [Navigate here](https://au-pied-de-cochon.web.app/).
+The web app is deployed using Firebase hosting.
+The official reporting application for the live account (store ID: 648564) is available [here](https://au-pied-de-cochon.web.app/)
+The reporting application for the sandbox account (store ID: 649413) (lots of test data) is available [here](https://ls-strategic-apis.web.app/)
 
 This site was created using Firebase as a back-end for authentication, user db, cloud functions, and hosting. O the front-end, React, along with [Semantic UI for React](https://react.semantic-ui.com/)
+
+Public documentation that was shared with the customer can be found [here](https://docs.google.com/document/d/17zrPIYwdgGASc8qpmKXxsTRKmZQr5n6aQxYrBcooDxY/edit?usp=sharing)
+
+To deploy changes made, the following steps are needed:
+
+Front-End
+
+1. Navigate to the root of the project.
+2. npm run build
+3. firebase deploy --only hosting:au-pied-de-cochon
+
+Back-End
+
+1.  firebase deploy --only functions:apdc_api
+
+Deployed Google Cloud Functions for the backend
+apdc_api: for the official live account
+apcd_api: for the sandbox account
+Each backend function is linked to its respective frontent (so the live account is using the apdc_api function and the sandbox account is using the apcd_api function)
+
+To run the project, the following steps are needed:
+
+1. npm run start
+2. Navigate to localhost:3000
 
 ### Objective
 

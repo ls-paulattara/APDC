@@ -6,7 +6,7 @@ import "firebase/compat/analytics";
 import "firebase/compat/performance";
 import "firebase/compat/firestore";
 import moment from "moment";
-import { writeBatch, doc, getDoc } from "firebase/firestore";
+import { writeBatch, doc } from "firebase/firestore";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -31,7 +31,8 @@ class Firebase {
     this.googleProvider = new app.auth.GoogleAuthProvider();
     this.analytics = app.analytics();
     this.performance = app.performance();
-    this.orderDB = "orders";
+    this.orderDB = "apdc_orders";
+    // this.orderDB = "orders";
     this.locationsDB = "apdc_locations";
   }
 
@@ -190,6 +191,29 @@ class Firebase {
         console.log(error);
       });
   };
+  // report 15
+  getAllFirebaseOrdersByDeliveryDate = async (start, end) => {
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
+    var jsonvalue = [];
+
+    return this.firestore
+      .collection(this.orderDB)
+      .where("startTime", ">=", start2)
+      .where("startTime", "<=", end2)
+      .get()
+      .then((snapshot) => {
+        snapshot.forEach((docs) => {
+          jsonvalue.push(docs.data());
+        });
+        // console.log(jsonvalue);
+        return jsonvalue;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   // report 1,2,4,12,13
   getAllFirebaseOrdersByDateAndStatus = async (start, end, status, orderType, location) => {
     let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
@@ -442,11 +466,11 @@ class Firebase {
         .where("number", "==", item['"ID"'])
         .get()
         .then((snap) => {
-          console.log(snap);
+          // console.log(snap);
           if (snap.docs[0].exists) {
             item.db_ID = snap.docs[0].id;
             foundAtLeastOne = true;
-            console.log(item.db_ID);
+            // console.log(item.db_ID);
           }
         })
         .catch((err) => {
@@ -517,8 +541,13 @@ class Firebase {
   uploadInitialPickupPoints = async () => {
     let pickupPointWithoutAny = [
       {
-        text: "Victoriaville",
+        text: "Bistro Victoriaville",
         value: "Pickup: Bistro Le Lux - Victoriaville",
+        link: "https://calendly.com/au-pied-de-cochon/victoriaville",
+      },
+      {
+        text: "Victoriaville",
+        value: "Pickup: Victoriaville",
         link: "https://calendly.com/au-pied-de-cochon/victoriaville",
       },
       {
@@ -570,7 +599,6 @@ class Firebase {
       { text: "Saint-Saveur", value: "Pickup: Saint-Sauveur", link: "https://calendly.com/au-pied-de-cochon/saint-sauveur" },
       { text: "Shawinigan", value: "Pickup: Shawinigan", link: "https://calendly.com/au-pied-de-cochon/shawinigan" },
       { text: "Sherbrooke", value: "Pickup: Sherbrooke", link: "https://calendly.com/au-pied-de-cochon/sherbrooke" },
-      { text: "Gatineau", value: "Pickup: Victoriaville", link: "https://calendly.com/au-pied-de-cochon/gatineau" },
     ];
 
     await this.firestore
@@ -625,7 +653,7 @@ class Firebase {
       .collection(this.locationsDB)
       .get()
       .then((snapshot) => {
-        console.log(snapshot.docs);
+        // console.log(snapshot.docs);
         snapshot.forEach((docs) => {
           if (docs.id === "Delivery" || docs.id === "Pickup") {
             res.push(docs.data());

@@ -27,17 +27,21 @@ function Report8(props) {
   };
 
   const onSubmit = async () => {
-    console.log(report8Values);
+    //  console.log(report8Values);
 
     const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatus(report8Values.startDate, report8Values.endDate, report8Values.orderStatus, report8Values.category);
-    console.log(orderData);
+    //  console.log(orderData);
     if (orderData.length) {
-      setSuccess(true);
-      setError(false);
-      const file = await getReport8or11File(orderData, "8", report8Values);
-      // props.firebase.saveReportToFirebase(file);
-      props.setReportValues(file);
-      props.nextStep();
+      try {
+        setSuccess(true);
+        setError(false);
+        const file = await getReport8or11File(orderData, "8", report8Values);
+        // props.firebase.saveReportToFirebase(file);
+        props.setReportValues(file);
+        props.nextStep();
+      } catch (e) {
+        setError(true);
+      }
     } else {
       setError(true);
     }

@@ -48,7 +48,7 @@ function DeliveryZoneTable(props) {
       let items = [...deliveryZones];
       items.splice(props.i, 1);
       setDeliveryZones(items);
-      console.log(deliveryZones);
+      // console.log(deliveryZones);
       firebase
         .updateLocations(items, "Delivery")
         .then(() => {
@@ -90,7 +90,7 @@ function DeliveryZoneTable(props) {
   const addDeliveryZone = () => {
     let items = [...deliveryZones];
     // get last key
-    const lastKey = items.length > 0 ? items.at(-1).key : 0;
+    const lastKey = items.length > 0 ? items.slice(-1)[0] : 0;
 
     items.push({ key: lastKey + 1, text: "", value: "", link: "" });
     setDeliveryZones(items);
@@ -99,8 +99,6 @@ function DeliveryZoneTable(props) {
   return (
     <>
       <Header>Delivery Zones</Header>
-      {Boolean(success.length) && <Message onDismiss={handleDismiss} floating success content={success} />}
-      {Boolean(error.length) && <Message onDismiss={handleDismissError} floating error content={error} />}
       <Table compact>
         <Table.Header fullWidth>
           <Table.Row>
@@ -141,6 +139,8 @@ function DeliveryZoneTable(props) {
           ))}
         </Table.Body>
       </Table>
+      {Boolean(success.length) && <Message onDismiss={handleDismiss} floating success content={success} />}
+      {Boolean(error.length) && <Message onDismiss={handleDismissError} floating error content={error} />}
       <Button content="Add Delivery Zone" icon="add" size="large" labelPosition="right" onClick={addDeliveryZone} />
       <Button content="Save Delivery Changes" icon="save" size="large" labelPosition="right" onClick={saveDeliveryChanges} />
     </>

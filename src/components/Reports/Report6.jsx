@@ -28,21 +28,25 @@ function Report6(props) {
   }
 
   const onSubmit = async () => {
-    console.log(report6Values);
+    //  console.log(report6Values);
     let orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatusAndLocation(report6Values.startDate, report6Values.startDate, report6Values.orderStatus, report6Values.category, "delivery", report6Values.deliveryZone);
-    console.log(orderData);
+    //  console.log(orderData);
 
     // Keep only entries with Drivers
     orderData = orderData.filter((order) => order.hasOwnProperty("driver"));
-    console.log("new order data", orderData);
+    //  console.log("new order data", orderData);
 
     if (orderData.length) {
-      setSuccess(true);
-      setError(false);
-      const file = await getReport6File(orderData, report6Values);
-      // await props.firebase.saveReportToFirebase(file);
-      props.setReportValues(file);
-      props.nextStep();
+      try {
+        setSuccess(true);
+        setError(false);
+        const file = await getReport6File(orderData, report6Values);
+        // await props.firebase.saveReportToFirebase(file);
+        props.setReportValues(file);
+        props.nextStep();
+      } catch (e) {
+        setError(true);
+      }
     } else {
       setError(true);
       setSuccess(false);
@@ -58,7 +62,7 @@ function Report6(props) {
 
   useEffect(() => {
     localStorage.setItem("report6Values", JSON.stringify(report6Values));
-    console.log(report6Values);
+    //  console.log(report6Values);
   }, [report6Values]);
 
   const getErrorMessage = () => (error ? <Message negative header="No results" content="No results were found. Try again" /> : "");

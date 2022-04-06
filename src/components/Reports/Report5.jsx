@@ -11,15 +11,18 @@ function Report5(props) {
   const fileInputRef = useRef(null);
 
   const onSubmit = async () => {
-    setError(false);
-    setSuccess(false);
-    const res = await props.firebase.pushRoutificRoutesToOrders(data);
-    console.log("from  report 5 res", res);
-    if (res) {
-      setSuccess(true);
-      return;
-    } else {
+    try {
+      setError(false);
       setSuccess(false);
+      const res = await props.firebase.pushRoutificRoutesToOrders(data);
+      if (res) {
+        setSuccess(true);
+        return;
+      } else {
+        setSuccess(false);
+        setError(true);
+      }
+    } catch (e) {
       setError(true);
     }
   };

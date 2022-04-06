@@ -1,10 +1,14 @@
 const axios = require("axios").default;
-const { getLSAPICredentials, getLiveLSAPICredentials, getCalendlyCredentials } = require("../SecretManager/index");
+const { getLSAPICredentials, getLiveLSAPICredentials } = require("../SecretManager/index");
 
 exports.getCategories = async (req, res) => {
   let LS_APDC_CREDENTIALS = await getLSAPICredentials();
+  let language = "en";
 
-  let categories_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/categories.json`;
+  // let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
+  // let language = "us";
+
+  let categories_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/categories.json`;
 
   axios({ method: "get", url: categories_endpoint })
     .then((response) => {
@@ -22,8 +26,12 @@ exports.getCategories = async (req, res) => {
 
 exports.getStatus = async (req, res) => {
   let LS_APDC_CREDENTIALS = await getLSAPICredentials();
+  let language = "en";
 
-  let getStatusEndpoints = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/orders/customstatuses.json`;
+  // let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
+  // let language = "us";
+
+  let getStatusEndpoints = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/orders/customstatuses.json`;
 
   axios({ method: "get", url: getStatusEndpoints })
     .then((response) => {

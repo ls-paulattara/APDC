@@ -35,12 +35,11 @@ const Home = (props) => {
 
       <Container>
         <Segment placeholder basic>
-          <Divider as="h1" className="header" horizontal style={{ margin: "3em 0em", textTransform: "uppercase" }} inverted={dark} content="List of Reports" />
-
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((index) => (
+          <Divider as="h1" className="header" horizontal style={{ marginBottom: "20px", textTransform: "uppercase" }} inverted={dark} content="List of Reports" />
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((index) => (
             <div key={index}>
-              <List divided size="huge" inverted={dark}>
-                <List.Item>
+              <List divided size="huge" celled inverted={dark}>
+                <List.Item style={{ marginTop: "5px", marginBottom: "5px" }}>
                   <List.Icon name="chart bar" />
                   <List.Content>
                     <List.Header>{`${HOME["report" + index]}`}</List.Header>

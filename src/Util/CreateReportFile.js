@@ -15,7 +15,7 @@ jsPDF.autoTableSetDefaults({
 });
 // };
 export const getReport1or2File = async (data, reportNumber, reportValues) => {
-  console.log("before", data);
+  //  console.log("before", data);
   const doc = new jsPDF();
 
   doc.setFontSize(22);
@@ -92,7 +92,7 @@ const formatter = new Intl.NumberFormat("en-US", {
 
 export const getReport1or2FileOLD = async (data, reportNumber) => {
   const outer = [];
-  console.log("before", data);
+  //  console.log("before", data);
 
   data.forEach((item) => {
     item.products.forEach((subitem) => {
@@ -112,7 +112,7 @@ export const getReport1or2FileOLD = async (data, reportNumber) => {
       });
     });
   });
-  console.log("after", outer);
+  //  console.log("after", outer);
 
   const finalResults = outer.flat().map((item) => {
     const entry = {
@@ -171,7 +171,7 @@ const round = (num) => {
   return Math.round(num * 100) / 100;
 };
 
-export const getReport3File = async (orderData, reportValues, locations) => {
+export const getReport3Or15File = async (orderData, reportValues, locations, reportNumber) => {
   // initialize dictionary for all types
 
   let dict = {
@@ -190,7 +190,7 @@ export const getReport3File = async (orderData, reportValues, locations) => {
     }
   });
 
-  console.log(dict);
+  // console.log(dict);
 
   let deliveryTotal = ["Total", 0, 0];
   let pickupTotal = ["Total", 0, 0];
@@ -208,10 +208,12 @@ export const getReport3File = async (orderData, reportValues, locations) => {
     return locationMap[k];
   };
 
+  console.log(dict);
+
   // place all orders into the dictionary by order type and location
   orderData.forEach((order) => {
     const { type, shipmentTitle } = order;
-    // console.log(shipmentTitle, "->", get(shipmentTitle), order.id);
+    console.log(shipmentTitle, "->", getMapping(shipmentTitle), order.id);
     switch (type) {
       case "pickup":
         dict["Pickup"][getMapping(shipmentTitle)].push(order);
@@ -269,7 +271,7 @@ export const getReport3File = async (orderData, reportValues, locations) => {
     }
   }
 
-  console.log("dict", dict);
+  // console.log("dict", dict);
 
   const deliveryTable = Object.entries(dict["Delivery"]).map((item) => [item[0], round(item[1][0]), item[1][1]]);
   const pickupTable = Object.entries(dict["Pickup"]).map((item) => [item[0], item[1][0], item[1][1]]);
@@ -280,7 +282,7 @@ export const getReport3File = async (orderData, reportValues, locations) => {
 
   grandTotal[1] = deliveryTotal[1] + pickupTotal[1] + mailTotal[1];
   grandTotal[2] = deliveryTotal[2] + pickupTotal[2] + mailTotal[2];
-  console.log(grandTotal);
+  // console.log(grandTotal);
 
   const doc = new jsPDF();
   doc.setFontSize(22);
@@ -378,7 +380,7 @@ export const getReport3File = async (orderData, reportValues, locations) => {
 
   var blob = doc.output("blob");
 
-  const fileName = getFilenameByDate("3", "pdf");
+  const fileName = getFilenameByDate(reportNumber, "pdf");
   doc.save(fileName);
   blob.name = fileName;
   return blob;
@@ -386,7 +388,7 @@ export const getReport3File = async (orderData, reportValues, locations) => {
 
 export const getReport4File = async (data) => {
   const finalResults = data.flat().map((item) => {
-    console.log(item);
+    // console.log(item);
     const entry = {
       Name: item.firstname + " " + item.lastname,
       Number: item.number,
@@ -436,7 +438,7 @@ export const getReport4File = async (data) => {
 };
 
 export const getReport6File = async (orderData, reportValues) => {
-  console.log(orderData);
+  //  console.log(orderData);
 
   const doc = new jsPDF();
   doc.setFontSize(22);
@@ -462,10 +464,10 @@ export const getReport6File = async (orderData, reportValues) => {
       drivers[order.driver] = [order];
     }
   });
-  console.log(drivers);
+  //  console.log(drivers);
 
   for (const [driver, orders] of Object.entries(drivers)) {
-    console.log(driver, orders);
+    //  console.log(driver, orders);
 
     let outer = [];
     orders.forEach((order) => {
@@ -479,7 +481,7 @@ export const getReport6File = async (orderData, reportValues) => {
       });
     });
 
-    console.log(outer);
+    //  console.log(outer);
 
     let header = [];
     let dict = {};
@@ -504,7 +506,7 @@ export const getReport6File = async (orderData, reportValues) => {
       }
     });
 
-    console.log(dict);
+    //  console.log(dict);
 
     // count the items for that day
     const getCellCount = (i, j) => {
@@ -541,7 +543,7 @@ export const getReport6File = async (orderData, reportValues) => {
     }
     let totalLastRow = ["Total"];
 
-    console.log(full);
+    //  console.log(full);
 
     // add totals per column
     for (let i = 1; i < full[0].length; i++) {
@@ -615,7 +617,7 @@ export const getReport7or9or10File = async (data, reportNumber, reportValues) =>
     });
   });
 
-  console.log(outer);
+  //  console.log(outer);
 
   let header = [];
   let dict = {};
@@ -640,7 +642,7 @@ export const getReport7or9or10File = async (data, reportNumber, reportValues) =>
     }
   });
 
-  console.log(dict);
+  //  console.log(dict);
 
   // count the items for that day
   const getCellCount = (i, j) => {
@@ -677,7 +679,7 @@ export const getReport7or9or10File = async (data, reportNumber, reportValues) =>
   }
   let totalLastRow = ["Total"];
 
-  console.log(full);
+  //  console.log(full);
 
   // add totals per column
   for (let i = 1; i < full[0].length; i++) {
@@ -755,7 +757,7 @@ export const getReport8or11File = async (data, reportNumber, reportValues) => {
     });
   });
 
-  console.log(outer);
+  //  console.log(outer);
 
   let header = [];
   let dict = {};
@@ -780,7 +782,7 @@ export const getReport8or11File = async (data, reportNumber, reportValues) => {
     return [...dictItem, unitPrice, round(unitPrice * dictItem[1])];
   });
 
-  console.log(dict);
+  //  console.log(dict);
 
   dict.push(["Total", totalCount, "-", totalPrice]);
 
@@ -913,7 +915,7 @@ export const getReport12SingleOrder = (doc, order) => {
 
   const checkLastLocation = () => {
     if (last > 245) {
-      console.log("in fun", last);
+      //  console.log("in fun", last);
       doc.addPage();
       last = 20;
     }
@@ -1031,7 +1033,7 @@ export const getReport13SingleOrder = (doc, order) => {
 
   const checkLastLocation = () => {
     if (last > 245) {
-      console.log("in fun", last);
+      //  console.log("in fun", last);
       doc.addPage();
       last = 20;
     }
@@ -1139,7 +1141,7 @@ export const getReport14SingleOrder = (doc, order) => {
   const checkLastLocation = () => {
     // console.log("curr", last);
     if (last > 245) {
-      console.log("in fun", last);
+      //  console.log("in fun", last);
       doc.addPage();
       last = 20;
     }

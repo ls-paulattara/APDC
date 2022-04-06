@@ -27,7 +27,7 @@ function Report2(props) {
   };
 
   const onSubmit = async () => {
-    console.log(report2Values);
+    //  console.log(report2Values);
 
     const orderData = await props.firebase.getAllFirebaseOrdersByDateAndStatus(
       report2Values.startDate,
@@ -37,14 +37,18 @@ function Report2(props) {
       // "Any"
       report2Values.pickupPoint
     );
-    console.log(orderData);
+    //  console.log(orderData);
     if (orderData.length) {
-      setSuccess(true);
-      setError(false);
-      const file = await getReport1or2File(orderData, "2", report2Values);
-      // props.firebase.saveReportToFirebase(file);
-      props.setReportValues(file);
-      props.nextStep();
+      try {
+        setSuccess(true);
+        setError(false);
+        const file = await getReport1or2File(orderData, "2", report2Values);
+        // props.firebase.saveReportToFirebase(file);
+        props.setReportValues(file);
+        props.nextStep();
+      } catch (e) {
+        setError(true);
+      }
     } else {
       setError(true);
     }
@@ -52,7 +56,7 @@ function Report2(props) {
 
   useEffect(() => {
     const report2Values = JSON.parse(localStorage.getItem("report2Values"));
-    console.log(report2Values);
+    //  console.log(report2Values);
     if (report2Values) {
       setreport2Values(report2Values);
     }
@@ -60,7 +64,7 @@ function Report2(props) {
 
   useEffect(() => {
     localStorage.setItem("report2Values", JSON.stringify(report2Values));
-    console.log(report2Values);
+    //  console.log(report2Values);
   }, [report2Values]);
 
   const getErrorMessage = () => (error ? <Message negative header="No results" content="No results were found. Try again" /> : "");

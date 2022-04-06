@@ -29,43 +29,40 @@ function Report12(props) {
   };
 
   const onSubmit = async () => {
-    console.log(report12Values);
+    //  console.log(report12Values);
     setError(false);
     setSuccess(false);
     setLoading(true);
 
     let orderData = await props.firebase.getAllFirebaseOrdersByDateAndStatus(report12Values.startDate, report12Values.endDate, report12Values.orderStatus, "delivery", report12Values.deliveryZone);
-    console.log(orderData);
+    //  console.log(orderData);
 
     // Keep only entries with Drivers
     orderData = orderData.filter((order) => order.hasOwnProperty("driver"));
-    console.log("new order data", orderData);
-    // try {
+
+    //  console.log("new order data", orderData);
     if (orderData.length) {
-      const res = getReport12File(orderData);
-      if (res) {
+      try {
+        const res = getReport12File(orderData);
+        if (res) {
+          setLoading(false);
+          setSuccess(true);
+          setError(false);
+        }
+      } catch (e) {
         setLoading(false);
-        setSuccess(true);
-        setError(false);
+        setError(true);
       }
-      // else {
-      //   setLoading(false);
-      //   setError(true);
-      // }
     } else {
+      setLoading(false);
       setError(true);
       setSuccess(false);
     }
-    // } catch (err) {
-    //   console.log(err);
-    //   setLoading(false);
-    //   setError(true);
-    // }
   };
 
   useEffect(() => {
     const report12Values = JSON.parse(localStorage.getItem("report12Values"));
-    console.log(report12Values);
+    //  console.log(report12Values);
     if (report12Values) {
       setReport12Values(report12Values);
     }
@@ -73,7 +70,7 @@ function Report12(props) {
 
   useEffect(() => {
     localStorage.setItem("report12Values", JSON.stringify(report12Values));
-    console.log(report12Values);
+    //  console.log(report12Values);
   }, [report12Values]);
 
   const getErrorMessage = () => (error ? <Message negative header="No results" content="No results were found. Try again" /> : "");

@@ -22,5 +22,10 @@ app.get("/isBooked/:orderID", isBooked);
 app.get("/categories", getCategories);
 app.get("/status", getStatus);
 
+// exports.deleteOrders = functions.pubsub.schedule("every 2 minutes").onRun((context) => {
+//   console.log("This will be run every 2 minutes!");
+//   return null;
+// });
+
 exports.apcd_api = functions.https.onRequest(app);
 // exports.apdc_api = functions.https.onRequest(app);

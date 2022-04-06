@@ -56,7 +56,7 @@ export const getPickupPointsWithAny = async (firebase) => {
 };
 
 export const getCategories = async () => {
-  let categoriesEndpoint = `https://us-central1-ls-strategic-apis.cloudfunctions.net/apcd_api/categories`;
+  let categoriesEndpoint = `https://us-central1-ls-strategic-apis.cloudfunctions.net/apdc_api/categories`;
   return axios({ method: "get", url: categoriesEndpoint })
     .then((response) => {
       let res = [];
@@ -77,7 +77,7 @@ export const getCategories = async () => {
 };
 
 export const getOrderStatus = async () => {
-  let statusEndpoint = `https://us-central1-ls-strategic-apis.cloudfunctions.net/apcd_api/status`;
+  let statusEndpoint = `https://us-central1-ls-strategic-apis.cloudfunctions.net/apdc_api/status`;
   return axios({ method: "get", url: statusEndpoint })
     .then((response) => {
       let customStatus = [];

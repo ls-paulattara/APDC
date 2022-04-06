@@ -1,7 +1,7 @@
 export const HOME = "/";
 export const SIGN_UP = "/signup";
 export const SIGN_IN = "/signin";
-export const REPORTS = "/reports";
+// export const REPORTS = "/reports";
 // export const SPECIFIC_REPORT = "/specific-report/:reportID";
 export const GENERATE_REPORT = "/generate-report/";
 export const DISPLAY_REPORT = "/display-report/";

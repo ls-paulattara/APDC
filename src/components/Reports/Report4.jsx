@@ -27,7 +27,7 @@ function Report4(props) {
   }
 
   const onSubmit = async () => {
-    console.log(report4Values);
+    //  console.log(report4Values);
 
     let orderData = [];
     orderData = await props.firebase.getAllFirebaseOrdersByDateAndStatus(
@@ -38,18 +38,20 @@ function Report4(props) {
       // "Any"
       report4Values.deliveryZone
     );
-    console.log(orderData);
+    //  console.log(orderData);
 
     if (orderData.length) {
-      const file = await getReport4File(orderData);
-      console.log(file);
-      if (file) {
-        setSuccess(true);
-        setError(false);
+      try {
+        const file = await getReport4File(orderData);
+        //  console.log(file);
+        if (file) {
+          setSuccess(true);
+          setError(false);
+        }
+      } catch (e) {
+        setError(true);
       }
       // await props.firebase.saveReportToFirebase(file);
-      // props.setReportValues(file);
-      // props.nextStep();
     } else {
       setError(true);
     }
@@ -64,7 +66,7 @@ function Report4(props) {
 
   useEffect(() => {
     localStorage.setItem("report4Values", JSON.stringify(report4Values));
-    console.log(report4Values);
+    //  console.log(report4Values);
   }, [report4Values]);
 
   const getErrorMessage = () => (error ? <Message negative header="No results" content="No results were found. Try again" /> : "");

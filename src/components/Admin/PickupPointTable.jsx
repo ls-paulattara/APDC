@@ -48,7 +48,7 @@ function PickupPointTable(props) {
       let items = [...pickupPoints];
       items.splice(props.i, 1);
       setPickupPoints(items);
-      console.log(pickupPoints);
+      // console.log(pickupPoints);
       firebase
         .updateLocations(items, "Pickup")
         .then(() => {
@@ -90,7 +90,7 @@ function PickupPointTable(props) {
   const addPickupPoint = () => {
     let items = [...pickupPoints];
     // get last key
-    const lastKey = items.length > 0 ? items.at(-1).key : 0;
+    const lastKey = items.length > 0 ? items.slice(-1)[0] : 0;
 
     items.push({ key: lastKey + 1, text: "", value: "", link: "" });
     setPickupPoints(items);
@@ -99,8 +99,6 @@ function PickupPointTable(props) {
   return (
     <>
       <Header>Pickup Points</Header>
-      {Boolean(success.length) && <Message onDismiss={handleDismiss} floating success content={success} />}
-      {Boolean(error.length) && <Message onDismiss={handleDismissError} floating error content={error} />}
       <Table compact>
         <Table.Header fullWidth>
           <Table.Row>
@@ -141,6 +139,8 @@ function PickupPointTable(props) {
           ))}
         </Table.Body>
       </Table>
+      {Boolean(success.length) && <Message onDismiss={handleDismiss} floating success content={success} />}
+      {Boolean(error.length) && <Message onDismiss={handleDismissError} floating error content={error} />}
       <Button content="Add Pickup Points" icon="add" size="large" labelPosition="right" onClick={addPickupPoint} />
       <Button style={{ marginBottom: "30px" }} content="Save Pickup Changes" icon="save" size="large" labelPosition="right" onClick={savePickupChanges} />
     </>

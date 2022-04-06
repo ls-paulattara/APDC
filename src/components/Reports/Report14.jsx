@@ -28,43 +28,36 @@ function Report14(props) {
   };
 
   const onSubmit = async () => {
-    console.log(report14Values);
+    //  console.log(report14Values);
     setError(false);
     setSuccess(false);
     setLoading(true);
 
     let orderData = await props.firebase.getAllMailOrdersByDateCreated(report14Values.startDate, report14Values.endDate, report14Values.orderStatus, "mail");
-    console.log(orderData);
+    //  console.log(orderData);
 
-    // Keep only entries with Drivers
-    // orderData = orderData.filter((order) => order.hasOwnProperty("driver"));
-    // console.log("new order data", orderData);
-    // try {
     if (orderData.length) {
-      const res = getReport14File(orderData);
-      if (res) {
+      try {
+        const res = getReport14File(orderData);
+        if (res) {
+          setLoading(false);
+          setSuccess(true);
+          setError(false);
+        }
+      } catch (e) {
         setLoading(false);
-        setSuccess(true);
-        setError(false);
+        setError(true);
       }
-      // else {
-      //   setLoading(false);
-      //   setError(true);
-      // }
     } else {
+      setLoading(false);
       setError(true);
       setSuccess(false);
     }
-    // } catch (err) {
-    //   console.log(err);
-    //   setLoading(false);
-    //   setError(true);
-    // }
   };
 
   useEffect(() => {
     const report14Values = JSON.parse(localStorage.getItem("report14Values"));
-    console.log(report14Values);
+    //  console.log(report14Values);
     if (report14Values) {
       setReport14Values(report14Values);
     }
@@ -72,7 +65,7 @@ function Report14(props) {
 
   useEffect(() => {
     localStorage.setItem("report14Values", JSON.stringify(report14Values));
-    console.log(report14Values);
+    //  console.log(report14Values);
   }, [report14Values]);
 
   const getErrorMessage = () => (error ? <Message negative header="No results" content="No results were found. Try again" /> : "");

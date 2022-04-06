@@ -1,9 +1,5 @@
 import React, { Component, lazy, Suspense } from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Switch,
-} from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Container, Header, Icon, Segment } from "semantic-ui-react";
 import * as ROUTES from "../../constants/routes";
 import { AuthUserContext, withAuthentication } from "../Session";
@@ -15,12 +11,12 @@ const PasswordForgetPage = lazy(() => import("../PasswordForget"));
 const AdminPage = lazy(() => import("../Admin"));
 const Unauthorized = lazy(() => import("../Unauthorized"));
 const NoMatch = lazy(() => import("../NoMatch"));
-const Home = lazy(()=> import("../Home"));
-const GenerateReport = lazy(()=> import("../Reports/GenerateReport"));
-const Reports = lazy(()=> import("../Reports"));
+const Home = lazy(() => import("../Home"));
+const GenerateReport = lazy(() => import("../Reports/GenerateReport"));
+// const Reports = lazy(()=> import("../Reports"));
 const AccountPage = lazy(() => import("../Account"));
 const SignUpPage = lazy(() => import("../SignUp"));
-const Footer = lazy(()=>import("../Footer"));
+const Footer = lazy(() => import("../Footer"));
 const renderLoader = () => {
   return (
     <Container fluid textAlign="center">
@@ -65,76 +61,38 @@ class Routes extends Component {
     return (
       <Suspense fallback={renderLoader()}>
         <Router>
-          <ResponsiveContainer
-            dark={dark}
-            toggleDark={this.toggleDark}
-            options={options}
-            language={language}
-            changeLanguage={this.changeLanguage}
-          >
+          <ResponsiveContainer dark={dark} toggleDark={this.toggleDark} options={options} language={language} changeLanguage={this.changeLanguage}>
             <Switch>
               <Route exact path={ROUTES.HOME}>
-                <Home
-                  dark={dark}
-                  toggleDark={this.toggleDark}
-                  language={language}
-                />
+                <Home dark={dark} toggleDark={this.toggleDark} language={language} />
               </Route>
-              <Route exact path={ROUTES.REPORTS}>
+              {/* <Route exact path={ROUTES.REPORTS}>
                 <Reports
                   dark={dark}
                   toggleDark={this.toggleDark}
                   language={language}
                 />
-              </Route>
+              </Route> */}
               <Route exact path={ROUTES.GENERATE_REPORT}>
-                <GenerateReport
-                  dark={dark}
-                  toggleDark={this.toggleDark}
-                  language={language}
-                />
+                <GenerateReport dark={dark} toggleDark={this.toggleDark} language={language} />
               </Route>
               <Route exact path={ROUTES.ADMIN}>
-                <AdminPage
-                  dark={dark}
-                  toggleDark={this.toggleDark}
-                  language={language}
-                />
+                <AdminPage dark={dark} toggleDark={this.toggleDark} language={language} />
               </Route>
               <Route exact path={ROUTES.ACCOUNT}>
-                <AccountPage
-                  dark={dark}
-                  toggleDark={this.toggleDark}
-                  language={language}
-                />
+                <AccountPage dark={dark} toggleDark={this.toggleDark} language={language} />
               </Route>
               <Route exact path={ROUTES.SIGN_UP}>
-                <SignUpPage
-                  dark={dark}
-                  toggleDark={this.toggleDark}
-                  language={language}
-                />
+                <SignUpPage dark={dark} toggleDark={this.toggleDark} language={language} />
               </Route>
               <Route exact path={ROUTES.SIGN_IN}>
-                <SignInPage
-                  dark={dark}
-                  toggleDark={this.toggleDark}
-                  language={language}
-                />
+                <SignInPage dark={dark} toggleDark={this.toggleDark} language={language} />
               </Route>
               <Route exact path={ROUTES.PASSWORD_FORGET}>
-                <PasswordForgetPage
-                  dark={dark}
-                  toggleDark={this.toggleDark}
-                  language={language}
-                />
+                <PasswordForgetPage dark={dark} toggleDark={this.toggleDark} language={language} />
               </Route>
               <Route exact path={ROUTES.UNAUTHORIZED}>
-                <Unauthorized
-                  dark={dark}
-                  toggleDark={this.toggleDark}
-                  language={language}
-                />
+                <Unauthorized dark={dark} toggleDark={this.toggleDark} language={language} />
               </Route>
               <Route>
                 <NoMatch />
@@ -142,9 +100,7 @@ class Routes extends Component {
             </Switch>
             <Footer language={language} dark={dark} />
           </ResponsiveContainer>
-          <AuthUserContext.Consumer>
-            {(authUser) => <PageView authUser={authUser} />}
-          </AuthUserContext.Consumer>
+          <AuthUserContext.Consumer>{(authUser) => <PageView authUser={authUser} />}</AuthUserContext.Consumer>
         </Router>
       </Suspense>
     );

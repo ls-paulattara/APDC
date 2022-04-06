@@ -66,7 +66,7 @@ function DisplayReport(props) {
   };
 
   const renderReport = () => {
-    if ([1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13].includes(props.selectedReport)) {
+    if ([1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 15].includes(props.selectedReport)) {
       return (
         <>
           <Doc file={props.reportValues} onLoadSuccess={({ numPages }) => setNumPages(numPages)}>

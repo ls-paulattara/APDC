@@ -17,6 +17,7 @@ import Report11 from "./Report11";
 import Report12 from "./Report12";
 import Report13 from "./Report13";
 import Report14 from "./Report14";
+import Report15 from "./Report15";
 import ListOfReports from "./ListOfReports";
 import DisplayReport from "./DisplayReport";
 import { Segment, Container, Icon, Step, Header, Divider } from "semantic-ui-react";
@@ -253,6 +254,14 @@ function GenerateReport(props) {
                 <Header as="h2">{HOME.report14}</Header>
                 <Divider />
                 <Report14 {...props} orderStatusOptions={orderStatusOptions} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} setStep={setStep} dark={dark} />
+              </>
+            );
+          case 15:
+            return (
+              <>
+                <Header as="h2">{HOME.report15}</Header>
+                <Divider />
+                <Report15 {...props} orderStatusOptions={orderStatusOptions} prevStep={prevStep} nextStep={nextStep} setSelectedReport={setSelectedReport} setReportValues={setReportValues} dark={dark} />
               </>
             );
         }

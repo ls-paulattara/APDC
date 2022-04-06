@@ -1,4 +1,5 @@
 const { firestore } = require("../admin");
+const functions = require("firebase-functions");
 const axios = require("axios").default;
 const { getLSAPICredentials, getLiveLSAPICredentials, getCalendlyCredentials } = require("../SecretManager/index");
 
@@ -53,11 +54,14 @@ exports.addOrder = async (req, res) => {
   //   type = "mail";
   // }
 
-  // let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
   let LS_APDC_CREDENTIALS = await getLSAPICredentials();
+  let language = "en";
 
-  let categories_products_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/categories/products.json`;
-  let categories_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/categories`;
+  // let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
+  // let language = "us";
+
+  let categories_products_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/categories/products.json`;
+  let categories_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/categories`;
   let category_product = [];
 
   await axios({ method: "get", url: categories_products_endpoint })
@@ -195,8 +199,14 @@ exports.addCalendlyInfo = async (req, res) => {
     });
 
   // write calendly booking details on Lightspeed order to be able to view the booking. To do this, first fetch current note and then send a post to append to the note
+
   let LS_APDC_CREDENTIALS = await getLSAPICredentials();
-  let getOrderEndpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/en/orders/${orderID}.json`;
+  let language = "en";
+
+  // let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
+  // let language = "us";
+
+  let getOrderEndpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/orders/${orderID}.json`;
   let initialCustomerComment = "";
   await axios({
     method: "get",

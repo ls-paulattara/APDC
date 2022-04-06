@@ -7,8 +7,7 @@ function ListOfReports(props) {
   const { dark, language } = props;
   const { HOME } = TRANSLATIONS[`${language}`];
   const ReportsIcon = "chart bar";
-  const reportsIndex = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-  // const reportsIndex = [1,2,3,4,5,6,7,8,9,10,11,12,13]
+  const reportsIndex = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
   const handleSelectedReport = (index) => {
     props.setSelectedReport(index);
