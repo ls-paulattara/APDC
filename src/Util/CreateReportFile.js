@@ -54,6 +54,7 @@ export const getReport1or2File = async (data, reportNumber, reportValues) => {
     });
     startFlag = true;
     let inner = [];
+    console.log(item);
     item.products.forEach((subitem) => {
       inner.push([subitem.productTitle, subitem.quantityOrdered]);
     });
@@ -273,14 +274,17 @@ export const getReport3Or15File = async (orderData, reportValues, locations, rep
 
   // console.log("dict", dict);
 
-  const deliveryTable = Object.entries(dict["Delivery"]).map((item) => [item[0], round(item[1][0]), item[1][1]]);
+  const deliveryTable = Object.entries(dict["Delivery"]).map((item) => [item[0], item[1][0], item[1][1]]);
   const pickupTable = Object.entries(dict["Pickup"]).map((item) => [item[0], item[1][0], item[1][1]]);
-  const mailTable = [["Purolator", mailTotal[1], mailTotal[2]], mailTotal];
+  const mailTable = [["Purolator", round(mailTotal[1]), round(mailTotal[2])]];
 
+  console.log(deliveryTotal);
+  deliveryTotal[1] = round(deliveryTotal[1]);
+  pickupTotal[1] = round(pickupTotal[1]);
   deliveryTable.push(deliveryTotal);
   pickupTable.push(pickupTotal);
 
-  grandTotal[1] = deliveryTotal[1] + pickupTotal[1] + mailTotal[1];
+  grandTotal[1] = round(deliveryTotal[1] + pickupTotal[1] + mailTotal[1]);
   grandTotal[2] = deliveryTotal[2] + pickupTotal[2] + mailTotal[2];
   // console.log(grandTotal);
 
@@ -450,7 +454,7 @@ export const getReport6File = async (orderData, reportValues) => {
   doc.text("Date: " + moment(reportValues.startDate).format("YYYY-MM-DD"), 14, 29);
   doc.text("Order Status: " + reportValues.orderStatus, 14, 35);
   doc.text("Category: " + reportValues.category, 14, 41);
-  doc.text(reportValues.deliveryZone, 14, 47);
+  doc.text("Delivery Zone: " + reportValues.deliveryZone, 14, 47);
   doc.line(14, 52, 200, 52);
   let startY = 62;
 
@@ -713,11 +717,11 @@ export const getReport7or9or10File = async (data, reportNumber, reportValues) =>
     doc.line(14, 47, 200, 47);
     startYTable = 52;
   } else if (reportNumber === "9") {
-    doc.text(reportValues.pickupPoint, 14, 47);
+    doc.text("Pickup Point: " + reportValues.pickupPoint, 14, 47);
     doc.line(14, 52, 200, 52);
     startYTable = 57;
   } else if (reportNumber === "10") {
-    doc.text(reportValues.deliveryZone, 14, 47);
+    doc.text("Delivery Zone: " + reportValues.deliveryZone, 14, 47);
     doc.line(14, 52, 200, 52);
     startYTable = 57;
   }
@@ -784,7 +788,7 @@ export const getReport8or11File = async (data, reportNumber, reportValues) => {
 
   //  console.log(dict);
 
-  dict.push(["Total", totalCount, "-", totalPrice]);
+  dict.push(["Total", totalCount, "-", round(totalPrice)]);
 
   const doc = new jsPDF();
   doc.setFontSize(22);

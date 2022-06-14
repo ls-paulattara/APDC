@@ -56,7 +56,6 @@ class Routes extends Component {
 
   render() {
     const { dark, language } = this.state;
-    const { firebase } = this.props;
 
     return (
       <Suspense fallback={renderLoader()}>

@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from "react";
-import TRANSLATIONS from "../../constants/translation";
 import SemanticDatepicker from "react-semantic-ui-datepickers";
 import "react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css";
 import { Header, Divider, Button, Dropdown, Message, Icon } from "semantic-ui-react";
-import axios from "axios";
 
-const { getInitialDate } = require("../../Util/HelperFunctions");
+const { getInitialDate, mergeProductsSameFormat } = require("../../Util/HelperFunctions");
 const { getReport6File } = require("../../Util/CreateReportFile");
 
 function Report6(props) {
-  const { language } = props;
-  const { REPORTS } = TRANSLATIONS[`${language}`];
-
   const [report6Values, setReport6Values] = useState({
     deliveryZone: "",
     orderStatus: "",
@@ -28,9 +23,15 @@ function Report6(props) {
   }
 
   const onSubmit = async () => {
+    setError(false);
+    setSuccess(true);
+
     //  console.log(report6Values);
+
     let orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatusAndLocation(report6Values.startDate, report6Values.startDate, report6Values.orderStatus, report6Values.category, "delivery", report6Values.deliveryZone);
-    //  console.log(orderData);
+    await mergeProductsSameFormat(orderData);
+
+    // console.log(orderData);
 
     // Keep only entries with Drivers
     orderData = orderData.filter((order) => order.hasOwnProperty("driver"));
@@ -45,11 +46,12 @@ function Report6(props) {
         props.setReportValues(file);
         props.nextStep();
       } catch (e) {
+        setSuccess(false);
         setError(true);
       }
     } else {
-      setError(true);
       setSuccess(false);
+      setError(true);
     }
   };
 

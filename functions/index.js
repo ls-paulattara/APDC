@@ -4,7 +4,7 @@ exports.roleUpdate = roleUpdate;
 exports.deleteUser = require("./Realtime/deleteUser");
 
 const { addOrder, addCalendlyInfo, getCalendlyLinks, isBooked } = require("./Firestore/order");
-const { getCategories, getStatus } = require("./Firestore/ecom");
+const { getCategories, getStatus, getProductsCategories, getCategoriesIDs } = require("./Firestore/ecom");
 const functions = require("firebase-functions");
 
 const app = require("express")();
@@ -20,12 +20,9 @@ app.get("/isBooked/:orderID", isBooked);
 
 // ecom
 app.get("/categories", getCategories);
+app.get("/categories-products", getProductsCategories);
+app.get("/categories-ids", getCategoriesIDs);
 app.get("/status", getStatus);
 
-// exports.deleteOrders = functions.pubsub.schedule("every 2 minutes").onRun((context) => {
-//   console.log("This will be run every 2 minutes!");
-//   return null;
-// });
-
-exports.apcd_api = functions.https.onRequest(app);
-// exports.apdc_api = functions.https.onRequest(app);
+// exports.apcd_api = functions.https.onRequest(app); /* sandbox */
+exports.apdc_api = functions.https.onRequest(app); /* live */

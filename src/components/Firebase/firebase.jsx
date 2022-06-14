@@ -5,6 +5,7 @@ import "firebase/compat/database";
 import "firebase/compat/analytics";
 import "firebase/compat/performance";
 import "firebase/compat/firestore";
+import { assignCategoriesToProducts, mergeProductsSameFormat } from "../../Util/HelperFunctions";
 import moment from "moment";
 import { writeBatch, doc } from "firebase/firestore";
 
@@ -13,7 +14,6 @@ const firebaseConfig = {
   apiKey: "AIzaSyDBjcCwGxtYKqX6Q0-Uffd5kk5MM8Jzq8s",
   authDomain: "ls-strategic-apis.firebaseapp.com",
   databaseURL: "https://ls-strategic-apis.firebaseio.com",
-  // databaseURL: 'http://localhost:9000/?ns=ls-strategic-apis',
   projectId: "ls-strategic-apis",
   storageBucket: "ls-strategic-apis.appspot.com",
   messagingSenderId: "929241011807",
@@ -31,8 +31,8 @@ class Firebase {
     this.googleProvider = new app.auth.GoogleAuthProvider();
     this.analytics = app.analytics();
     this.performance = app.performance();
-    this.orderDB = "apdc_orders";
-    // this.orderDB = "orders";
+    this.orderDB = "apdc_orders"; /* live */
+    // this.orderDB = "orders"; /* sandbox */
     this.locationsDB = "apdc_locations";
   }
 
@@ -239,7 +239,7 @@ class Firebase {
         snapshot.forEach((docs) => {
           jsonvalue.push(docs.data());
         });
-        // console.log(jsonvalue);
+        console.log(jsonvalue);
         return jsonvalue;
       })
       .catch((error) => {
@@ -274,47 +274,6 @@ class Firebase {
       }));
   };
 
-  getAllFirebaseOrdersByDateAndCategoryAndStatus = async (start, end, status, category) => {
-    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
-    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
-    var jsonvalue = [];
-
-    let query = this.firestore.collection(this.orderDB);
-    if (status !== "Any") {
-      query = query.where("status", "==", status);
-    }
-
-    let filteredProducts;
-
-    return (query = query
-      .where("startTime", ">=", start2)
-      .where("startTime", "<=", end2)
-      .get()
-      .then((snapshot) => {
-        snapshot.forEach((docs) => {
-          let order = docs.data();
-
-          if (category !== "Any") {
-            filteredProducts = order.products.filter((prod) => /*prod.category !== undefined &&*/ prod.category === category);
-            // console.log(order.number, filteredProducts)
-            order.products = filteredProducts;
-            // console.log(order.number, order)
-            if (order.products.length > 0) {
-              jsonvalue.push(order);
-            }
-          } else {
-            jsonvalue.push(order);
-          }
-        });
-
-        // console.log(jsonvalue);
-        return jsonvalue;
-      })
-      .catch((error) => {
-        console.log(error);
-      }));
-  };
-
   // report 6, 9 and 10
   getAllFirebaseOrdersByDateAndCategoryAndStatusAndLocation = async (start, end, status, category, orderType, location) => {
     let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
@@ -332,6 +291,145 @@ class Firebase {
       query = query.where("shipmentTitle", "==", location);
       // query = query.where("shipmentTitle", ">=", location).where("shipmentTitle", "<=", location + "\uf8ff"); // this line checks for substring of location. So if location is rive sud zone 2, searching only rive sud will match https://stackoverflow.com/questions/46568142/google-firestore-query-on-substring-of-a-property-value-text-search#comment80093410_46568525
     }
+
+    return (query = query
+      .where("startTime", ">=", start2)
+      .where("startTime", "<=", end2)
+      .get()
+      .then(async (snapshot) => {
+        snapshot.forEach((docs) => {
+          // console.log(docs.data())
+          jsonvalue.push(docs.data());
+        });
+        await mergeProductsSameFormat(jsonvalue);
+
+        await assignCategoriesToProducts(jsonvalue);
+        let filteredOrders = [];
+        let filteredProducts = [];
+        if (category !== "Any") {
+          for (const order of jsonvalue) {
+            filteredProducts = order.products.filter((prod) => prod.category === category);
+            // console.log(order.number, filteredProducts)
+            order.products = filteredProducts;
+            // console.log(order.number, order)
+            if (order.products.length > 0) {
+              filteredOrders.push(order);
+            }
+          }
+          return filteredOrders;
+        } else {
+          return jsonvalue;
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      }));
+  };
+
+  // report 7, 8
+  getAllFirebaseOrdersByDateAndCategoryAndStatus = async (start, end, status, category) => {
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
+    var jsonvalue = [];
+
+    let query = this.firestore.collection(this.orderDB);
+    if (status !== "Any") {
+      query = query.where("status", "==", status);
+    }
+
+    return (query = query
+      .where("startTime", ">=", start2)
+      .where("startTime", "<=", end2)
+      .get()
+      .then(async (snapshot) => {
+        snapshot.forEach((docs) => {
+          console.log(docs.data());
+          jsonvalue.push(docs.data());
+        });
+        await mergeProductsSameFormat(jsonvalue);
+
+        await assignCategoriesToProducts(jsonvalue);
+        let filteredOrders = [];
+        let filteredProducts = [];
+        if (category !== "Any") {
+          for (const order of jsonvalue) {
+            filteredProducts = order.products.filter((prod) => prod.category === category);
+            // console.log(order.number, filteredProducts)
+            order.products = filteredProducts;
+            // console.log(order.number, order)
+            if (order.products.length > 0) {
+              filteredOrders.push(order);
+            }
+          }
+          return filteredOrders;
+        } else {
+          return jsonvalue;
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      }));
+  };
+
+  // report 6, 9 and 10
+  OLDgetAllFirebaseOrdersByDateAndCategoryAndStatusAndLocation = async (start, end, status, category, orderType, location) => {
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
+    var jsonvalue = [];
+
+    let query = this.firestore.collection(this.orderDB);
+    if (orderType !== "all") {
+      query = query.where("type", "==", orderType);
+    }
+    if (status !== "Any") {
+      query = query.where("status", "==", status);
+    }
+    if (location !== "Any") {
+      query = query.where("shipmentTitle", "==", location);
+      // query = query.where("shipmentTitle", ">=", location).where("shipmentTitle", "<=", location + "\uf8ff"); // this line checks for substring of location. So if location is rive sud zone 2, searching only rive sud will match https://stackoverflow.com/questions/46568142/google-firestore-query-on-substring-of-a-property-value-text-search#comment80093410_46568525
+    }
+
+    let filteredProducts;
+
+    return (query = query
+      .where("startTime", ">=", start2)
+      .where("startTime", "<=", end2)
+      .get()
+      .then((snapshot) => {
+        snapshot.forEach(async (docs) => {
+          let order = docs.data();
+          // await linkCategoriesToProducts(order);
+
+          if (category !== "Any") {
+            filteredProducts = order.products.filter((prod) => /*prod.category !== undefined &&*/ prod.category === category);
+            // console.log(order.number, filteredProducts)
+            order.products = filteredProducts;
+            // console.log(order.number, order)
+            if (order.products.length > 0) {
+              jsonvalue.push(order);
+            }
+          } else {
+            jsonvalue.push(order);
+          }
+        });
+        return jsonvalue;
+      })
+      .catch((error) => {
+        console.log(error);
+      }));
+  };
+
+  // report 7, 8
+  OLDgetAllFirebaseOrdersByDateAndCategoryAndStatus = async (start, end, status, category) => {
+    let start2 = moment(start).utcOffset("2021-07-22T11:23:15-04:00").startOf("day").toDate();
+    let end2 = moment(end).utcOffset("2021-07-22T11:23:15-04:00").endOf("day").toDate();
+    var jsonvalue = [];
+
+    let query = this.firestore.collection(this.orderDB);
+    if (status !== "Any") {
+      query = query.where("status", "==", status);
+    }
+
     let filteredProducts;
 
     return (query = query
@@ -354,6 +452,8 @@ class Firebase {
             jsonvalue.push(order);
           }
         });
+
+        console.log(jsonvalue);
         return jsonvalue;
       })
       .catch((error) => {

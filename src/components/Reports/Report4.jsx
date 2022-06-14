@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from "react";
-import TRANSLATIONS from "../../constants/translation";
 import SemanticDatepicker from "react-semantic-ui-datepickers";
 import "react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css";
 
 import { Header, Divider, Button, Dropdown, Message, Icon } from "semantic-ui-react";
 
-const { getInitialDate } = require("../../Util/HelperFunctions");
+const { getInitialDate, mergeProductsSameFormat } = require("../../Util/HelperFunctions");
 const { getReport4File } = require("../../Util/CreateReportFile");
 
 function Report4(props) {
-  const { language } = props;
-  const { REPORTS } = TRANSLATIONS[`${language}`];
-
   const [report4Values, setreport4Values] = useState({
     deliveryZone: "",
     orderStatus: "",
@@ -38,6 +34,9 @@ function Report4(props) {
       // "Any"
       report4Values.deliveryZone
     );
+
+    await mergeProductsSameFormat(orderData);
+
     //  console.log(orderData);
 
     if (orderData.length) {

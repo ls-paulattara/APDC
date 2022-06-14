@@ -57,6 +57,7 @@ export const getPickupPointsWithAny = async (firebase) => {
 
 export const getCategories = async () => {
   let categoriesEndpoint = `https://us-central1-ls-strategic-apis.cloudfunctions.net/apdc_api/categories`;
+  // let categoriesEndpoint = `https://us-central1-ls-strategic-apis.cloudfunctions.net/apcd_api/categories`;
   return axios({ method: "get", url: categoriesEndpoint })
     .then((response) => {
       let res = [];
@@ -78,6 +79,7 @@ export const getCategories = async () => {
 
 export const getOrderStatus = async () => {
   let statusEndpoint = `https://us-central1-ls-strategic-apis.cloudfunctions.net/apdc_api/status`;
+  // let statusEndpoint = `https://us-central1-ls-strategic-apis.cloudfunctions.net/apcd_api/status`;
   return axios({ method: "get", url: statusEndpoint })
     .then((response) => {
       let customStatus = [];
@@ -96,4 +98,50 @@ export const getOrderStatus = async () => {
     .catch((err) => {
       console.log(err.message);
     });
+};
+
+export const assignCategoriesToProducts = async (orders) => {
+  let category_product = [];
+  let categories = [];
+  let categoriesProductsEndpoint = `https://us-central1-ls-strategic-apis.cloudfunctions.net/apdc_api/categories-products`;
+  await axios({ method: "get", url: categoriesProductsEndpoint })
+    .then((response) => {
+      category_product = response.data;
+    })
+    .catch((err) => {
+      console.log(err);
+      return;
+    });
+  let categoriesEndpoint = `https://us-central1-ls-strategic-apis.cloudfunctions.net/apdc_api/categories-ids`;
+  await axios({ method: "get", url: categoriesEndpoint })
+    .then((response) => {
+      categories = response.data;
+    })
+    .catch((err) => {
+      console.log(err);
+      return;
+    });
+  for (const order of orders) {
+    if (!Array.isArray(order.products)) {
+      order.products = [order.products];
+    }
+    for (const product of order.products) {
+      const found = category_product.find((element) => element.product.resource.id === product.product.resource.id);
+      if (found) {
+        const found2 = categories.find((element) => element.id === found.category.resource.id);
+        if (found2) {
+          product.category = found2.fulltitle;
+        }
+      }
+    }
+  }
+  return;
+};
+
+export const mergeProductsSameFormat = async (orderData) => {
+  orderData.forEach((order) => {
+    if (!Array.isArray(order.products)) {
+      order.products = order.products.resource.embedded;
+    }
+  });
 };

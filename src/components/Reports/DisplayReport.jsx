@@ -4,7 +4,6 @@ import * as XLSX from "xlsx";
 
 import { Document as Doc, pdfjs, Page as Pag } from "react-pdf";
 import "./display-report-styles.css";
-// import DataTable from "react-data-table-component";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -12,10 +11,6 @@ function DisplayReport(props) {
   const [numPages, setNumPages] = useState(null);
   const [pageNum, setPageNum] = useState(1);
   const [data, setData] = useState([]);
-
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
 
   // process CSV data
   const processData = (dataString) => {
@@ -46,23 +41,6 @@ function DisplayReport(props) {
     }
 
     setData(list);
-  };
-
-  // handle file upload
-  const readCSVFile = (file) => {
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      /* Parse data */
-      const bstr = evt.target.result;
-      const wb = XLSX.read(bstr, { type: "binary" });
-      /* Get first worksheet */
-      const wsname = wb.SheetNames[0];
-      const ws = wb.Sheets[wsname];
-      /* Convert array of arrays */
-      const data = XLSX.utils.sheet_to_csv(ws, { header: 1 });
-      processData(data);
-    };
-    reader.readAsBinaryString(file);
   };
 
   const renderReport = () => {

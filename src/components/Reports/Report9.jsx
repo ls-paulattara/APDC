@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from "react";
-import TRANSLATIONS from "../../constants/translation";
 import SemanticDatepicker from "react-semantic-ui-datepickers";
 import "react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css";
-
 import { Header, Grid, Divider, Button, Dropdown, Message, Icon } from "semantic-ui-react";
 
-const { getInitialDate } = require("../../Util/HelperFunctions");
+const { getInitialDate, mergeProductsSameFormat } = require("../../Util/HelperFunctions");
 const { getReport7or9or10File } = require("../../Util/CreateReportFile");
 
 function Report9(props) {
-  const { language } = props;
-  const { REPORTS } = TRANSLATIONS[`${language}`];
-
   const [report9Values, setreport9Values] = useState({
     orderStatus: "",
     pickupPoint: "",
@@ -28,22 +23,27 @@ function Report9(props) {
   };
 
   const onSubmit = async () => {
+    setError(false);
+    setSuccess(true);
+
     //  console.log(report9Values);
 
     const orderData = await props.firebase.getAllFirebaseOrdersByDateAndCategoryAndStatusAndLocation(report9Values.startDate, report9Values.endDate, report9Values.orderStatus, report9Values.category, "pickup", report9Values.pickupPoint);
+    await mergeProductsSameFormat(orderData);
+
     //  console.log(orderData);
     if (orderData.length) {
       try {
-        setSuccess(true);
-        setError(false);
         const file = await getReport7or9or10File(orderData, "9", report9Values);
         // props.firebase.saveReportToFirebase(file);
         props.setReportValues(file);
         props.nextStep();
       } catch (e) {
+        setSuccess(false);
         setError(true);
       }
     } else {
+      setSuccess(false);
       setError(true);
     }
   };

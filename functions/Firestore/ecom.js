@@ -2,13 +2,15 @@ const axios = require("axios").default;
 const { getLSAPICredentials, getLiveLSAPICredentials } = require("../SecretManager/index");
 
 exports.getCategories = async (req, res) => {
-  let LS_APDC_CREDENTIALS = await getLSAPICredentials();
-  let language = "en";
+  // SANDBOX
+  // const LS_APDC_CREDENTIALS = await getLSAPICredentials();
+  // const language = "en";
 
-  // let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
-  // let language = "us";
+  // LIVE
+  const LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
+  const language = "us";
 
-  let categories_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/categories.json`;
+  const categories_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/categories.json`;
 
   axios({ method: "get", url: categories_endpoint })
     .then((response) => {
@@ -17,21 +19,66 @@ exports.getCategories = async (req, res) => {
       categories.forEach((cat) => {
         allCat.push(cat.title);
       });
-      res.status(200).json(allCat);
+      return res.status(200).json(allCat);
     })
-    .catch((e) => {
-      res.send(e.message);
+    .catch((err) => {
+      console.log(err);
+      return res.send(e.message);
+    });
+};
+
+exports.getProductsCategories = async (req, res) => {
+  // SANDBOX
+  // const LS_APDC_CREDENTIALS = await getLSAPICredentials();
+  // const language = "en";
+
+  // LIVE
+  const LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
+  const language = "us";
+
+  const categories_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/categories/products.json`;
+
+  axios({ method: "get", url: categories_endpoint })
+    .then((response) => {
+      return res.status(200).json(response.data.categoriesProducts);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.send(e.message);
+    });
+};
+
+exports.getCategoriesIDs = async (req, res) => {
+  // SANDBOX
+  // const LS_APDC_CREDENTIALS = await getLSAPICredentials();
+  // const language = "en";
+
+  // LIVE
+  const LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
+  const language = "us";
+
+  const categories_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/categories.json`;
+
+  axios({ method: "get", url: categories_endpoint })
+    .then((response) => {
+      return res.status(200).json(response.data.categories);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.send(e.message);
     });
 };
 
 exports.getStatus = async (req, res) => {
-  let LS_APDC_CREDENTIALS = await getLSAPICredentials();
-  let language = "en";
+  // SANDBOX
+  // const LS_APDC_CREDENTIALS = await getLSAPICredentials();
+  // const language = "en";
 
-  // let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
-  // let language = "us";
+  // LIVE
+  const LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
+  const language = "us";
 
-  let getStatusEndpoints = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/orders/customstatuses.json`;
+  const getStatusEndpoints = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/orders/customstatuses.json`;
 
   axios({ method: "get", url: getStatusEndpoints })
     .then((response) => {
@@ -39,9 +86,10 @@ exports.getStatus = async (req, res) => {
       response.data.customStatuses.forEach((status) => {
         allStatutes.push(status.title);
       });
-      res.status(200).json(allStatutes);
+      return res.status(200).json(allStatutes);
     })
-    .catch((e) => {
-      res.send(e.message);
+    .catch((err) => {
+      console.log(err);
+      return res.send(e.message);
     });
 };

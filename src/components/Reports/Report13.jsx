@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from "react";
-
-import TRANSLATIONS from "../../constants/translation";
 import SemanticDatepicker from "react-semantic-ui-datepickers";
 import "react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css";
 import { Header, Grid, Divider, Button, Dropdown, Message, Icon } from "semantic-ui-react";
 
-const { getInitialDate } = require("../../Util/HelperFunctions");
+const { getInitialDate, mergeProductsSameFormat } = require("../../Util/HelperFunctions");
 const { getReport13File } = require("../../Util/CreateReportFile");
 
 function Report13(props) {
-  const { language } = props;
-  const { REPORTS } = TRANSLATIONS[`${language}`];
-
   const [report13Values, setReport13Values] = useState({
     pickupPoint: "",
     orderStatus: "",
@@ -35,6 +30,8 @@ function Report13(props) {
     setLoading(true);
 
     let orderData = await props.firebase.getAllFirebaseOrdersByDateAndStatus(report13Values.startDate, report13Values.endDate, report13Values.orderStatus, "pickup", report13Values.pickupPoint);
+    await mergeProductsSameFormat(orderData);
+
     //  console.log(orderData);
 
     if (orderData.length) {

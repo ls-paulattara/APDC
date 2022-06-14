@@ -8,29 +8,40 @@ The reporting application for the sandbox account (store ID: 649413) (lots of te
 
 This site was created using Firebase as a back-end for authentication, user db, cloud functions, and hosting. O the front-end, React, along with [Semantic UI for React](https://react.semantic-ui.com/)
 
-Public documentation that was shared with the customer can be found [here](https://docs.google.com/document/d/17zrPIYwdgGASc8qpmKXxsTRKmZQr5n6aQxYrBcooDxY/edit?usp=sharing)
+### Documentation
 
-To deploy changes made, the following steps are needed:
+- Public documentation that was shared with the customer can be found [here](https://docs.google.com/document/d/17zrPIYwdgGASc8qpmKXxsTRKmZQr5n6aQxYrBcooDxY/edit?usp=sharing)
+- Internal documentation within Lightspeed can be found [here](https://docs.google.com/document/d/183P8aQX4IN49a6kn74GqT35Yyzi8bQklcTWX4UC9d2g/edit?usp=sharing)
 
-Front-End
-
-1. Navigate to the root of the project.
-2. npm run build
-3. firebase deploy --only hosting:au-pied-de-cochon
-
-Back-End
-
-1.  firebase deploy --only functions:apdc_api
-
-Deployed Google Cloud Functions for the backend
-apdc_api: for the official live account
-apcd_api: for the sandbox account
-Each backend function is linked to its respective frontent (so the live account is using the apdc_api function and the sandbox account is using the apcd_api function)
+### Run Locally
 
 To run the project, the following steps are needed:
 
-1. npm run start
+1. `npm run start`
 2. Navigate to localhost:3000
+
+Note: You can sign up with a Lightspeed account and will automatically be given admin permissions.
+
+### Deploying Changes
+
+To deploy changes made, the following steps are needed:
+
+**Front-End**
+
+1. Navigate to the root of the project.
+2. `npm run build`
+3. `firebase deploy --only hosting:au-pied-de-cochon`
+
+**Back-End**
+
+1.  `firebase deploy --only functions:apdc_api`
+
+There are 2 Google Cloud Functions deployed for the backend:
+
+- apdc_api: for the official live account
+- apcd_api: for the sandbox account
+
+Both are deployed and used depending on whether the official web app is used for live data or the sandbox web app is used for test data.
 
 ### Objective
 

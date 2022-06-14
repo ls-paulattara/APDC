@@ -1,12 +1,12 @@
 const { firestore } = require("../admin");
-const functions = require("firebase-functions");
 const axios = require("axios").default;
 const { getLSAPICredentials, getLiveLSAPICredentials, getCalendlyCredentials } = require("../SecretManager/index");
 
-// let orderDB = "apdc_orders";
-const orderDB = "orders";
+let orderDB = "apdc_orders";
+// const orderDB = "orders";
 const locationsDB = "apdc_locations";
 
+// this function is triggered anytime an order is updated/created in eCom
 exports.addOrder = async (req, res) => {
   res.status(200).send();
 
@@ -49,46 +49,6 @@ exports.addOrder = async (req, res) => {
     type = "delivery";
   } else {
     type = "mail";
-  }
-  // else if (shipmentTitle.includes("Default Shipping")) {
-  //   type = "mail";
-  // }
-
-  let LS_APDC_CREDENTIALS = await getLSAPICredentials();
-  let language = "en";
-
-  // let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
-  // let language = "us";
-
-  let categories_products_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/categories/products.json`;
-  let categories_endpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/categories`;
-  let category_product = [];
-
-  await axios({ method: "get", url: categories_products_endpoint })
-    .then((response) => {
-      category_product = response.data.categoriesProducts;
-    })
-    .catch(() => {
-      return;
-    });
-
-  products = products.resource.embedded;
-
-  for (const product of products) {
-    const found = category_product.find((element) => element.product.resource.id == product.product.resource.id);
-    if (found) {
-      let categoryID = found.category.resource.id;
-      await axios({
-        method: "get",
-        url: `${categories_endpoint}/${categoryID}.json`,
-      })
-        .then((response) => {
-          product.category = response.data.category.fulltitle;
-        })
-        .catch(() => {
-          return;
-        });
-    }
   }
 
   const orderObject = {
@@ -136,15 +96,14 @@ exports.addOrder = async (req, res) => {
     .collection(orderDB)
     .doc(String(id))
     .set(orderObject, { merge: true })
-    // .then(() => {
-    //   return res.json(orderObject);
-    // })
     .catch((err) => {
       console.error(err);
       return res.status(500).json({ error: "Something went wrong" });
     });
+  return;
 };
 
+// once a calendly booking is made, a webhook triggers this function to update the order with the booking info
 exports.addCalendlyInfo = async (req, res) => {
   // acknowledge received webhook early to avoid getting client blocked
   res.status(200).send();
@@ -184,27 +143,24 @@ exports.addCalendlyInfo = async (req, res) => {
       return;
     });
 
-  // add a delay in the case where firestore takes time to save the document. Without this delay, it is possible that the update fails since the document was never uploaded to firestore
-
-  const delay = (ms) => new Promise((res) => setTimeout(res, ms));
-  await delay(2000);
-
   // update order object with calendly booking details
   firestore
     .collection(orderDB)
     .doc(String(orderID))
     .update({
       startTime: new Date(calendlyEventDetails.startTime),
-      calendlyBookinLocationName: calendlyEventDetails.locationName,
+      calendlyBookingLocationName: calendlyEventDetails.locationName,
     });
 
   // write calendly booking details on Lightspeed order to be able to view the booking. To do this, first fetch current note and then send a post to append to the note
 
-  let LS_APDC_CREDENTIALS = await getLSAPICredentials();
-  let language = "en";
+  // SANDBOX
+  // let LS_APDC_CREDENTIALS = await getLSAPICredentials();
+  // let language = "en";
 
-  // let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
-  // let language = "us";
+  // LIVE
+  let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
+  let language = "us";
 
   let getOrderEndpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/orders/${orderID}.json`;
   let initialCustomerComment = "";
@@ -250,8 +206,12 @@ exports.addCalendlyInfo = async (req, res) => {
         fullCustomerNote: initialCustomerComment + "\n" + addedCalendlyCustomerNote,
       });
   }
+  return;
 };
 
+// maybe if it fails, wait 1 minute then try again to wait for the order to be saved to db
+
+// get all calendly links
 exports.getCalendlyLinks = async (req, res) => {
   let allLinks = [];
   firestore
@@ -265,14 +225,15 @@ exports.getCalendlyLinks = async (req, res) => {
       });
       // convert to array
       allLinks = [...Object.keys(allLinks[0]).map((key) => allLinks[0][key]), ...Object.keys(allLinks[1]).map((key) => allLinks[1][key])];
-      res.status(200).send(allLinks);
+      return res.status(200).send(allLinks);
     })
     .catch((err) => {
-      res.send(err.message);
       console.log(err.message);
+      return res.send(err.message);
     });
 };
 
+// check if a timeslot on calendly was booked for an order
 exports.isBooked = async (req, res) => {
   const orderID = req.params.orderID;
   firestore
@@ -280,10 +241,29 @@ exports.isBooked = async (req, res) => {
     .doc(String(orderID))
     .get()
     .then((snapshot) => {
-      res.send(snapshot.data().hasOwnProperty("startTime"));
+      return res.status(200).send(snapshot.data().hasOwnProperty("startTime"));
     })
     .catch((err) => {
-      res.send(err.message);
       console.log(err.message);
+      return res.send(err.message);
+      // if error, then order was not yet added to the db//
+      //maybe get the id and trigger a manual api pull to redo it.
     });
 };
+
+// exports.dailyOrdersBackup = async (req, res) => {
+//   let LS_APDC_CREDENTIALS = await getLSAPICredentials();
+//   let language = "en";
+
+//   // let LS_APDC_CREDENTIALS = await getLiveLSAPICredentials();
+//   // let language = "us";
+
+//   let getOrderEndpoint = `https://${LS_APDC_CREDENTIALS}@api.shoplightspeed.com/${language}/orders.json`;
+//   let initialCustomerComment = "";
+//   await axios({
+//     method: "get",
+//     url: getOrderEndpoint,
+//   }).then(async (response) => {
+//     console.log(response.data.Orders);
+//   });
+// };

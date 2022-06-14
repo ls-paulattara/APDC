@@ -3,7 +3,7 @@ import SemanticDatepicker from "react-semantic-ui-datepickers";
 import "react-semantic-ui-datepickers/dist/react-semantic-ui-datepickers.css";
 import { Header, Grid, Divider, Button, Message, Icon } from "semantic-ui-react";
 
-const { getInitialDate } = require("../../Util/HelperFunctions");
+const { getInitialDate, mergeProductsSameFormat } = require("../../Util/HelperFunctions");
 const { getReport3Or15File } = require("../../Util/CreateReportFile");
 
 function Report3(props) {
@@ -21,10 +21,12 @@ function Report3(props) {
   };
 
   const onSubmit = async () => {
-    console.log(report3Values);
+    // console.log(report3Values);
     let orderData = [];
     orderData = await props.firebase.getAllFirebaseOrdersByDate(report3Values.startDate, report3Values.endDate);
-    console.log(orderData);
+    await mergeProductsSameFormat(orderData);
+
+    // console.log(orderData);
     if (orderData.length) {
       console.log("yes");
       setLoading(true);
@@ -58,7 +60,16 @@ function Report3(props) {
     localStorage.setItem("report3Values", JSON.stringify(report3Values));
   }, [report3Values]);
 
-  const getErrorMessage = () => (error ? <Message negative header="No results" content="No results were found. Try again" /> : "");
+  const getErrorMessage = () =>
+    error ? (
+      <Message
+        negative
+        header="Error"
+        content="No results were found. Or there are some locations in the Admin section that are either missing or not typed exactly the same way as in Liquid Delivery. Add additional locations to ensure that all locations are included. To view which locations are missing or not properly typed out, check the developer console in your browser. https://balsamiq.com/support/faqs/browserconsole/ Look at the last line of the console where it is written undefined to see which location is causing the issue."
+      />
+    ) : (
+      ""
+    );
   const getLoadingMessage = () =>
     loading ? (
       <Message icon>
